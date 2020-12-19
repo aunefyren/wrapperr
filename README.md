@@ -17,8 +17,8 @@ If you are lucky, it could be functional now.
 <br><br><br>
 If you want to change something:
 * The website is built in "get_stats_2020.js"
-* All values and processing is pulled in "/api/get_stats_2020.js"
-* The CSS is a mess and located in "/assets/css/main.css"
+* All values and processing is done in "/api/get_stats_2020.php"
+* The CSS is a mess, and located in "/assets/css/main.css"
 
 
 ## Need help?
