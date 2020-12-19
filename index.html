@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <title>Plex Wrapped 2020</title>
+
+        <!-- Bootstrap 4 CSS and custom CSS -->
+        <link rel="stylesheet" type="text/css" href="assets/css/main.css" />
+        <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+
+    </head>
+<body>
+
+<div class="content">
+
+  <div class="boks">
+
+      <div class="boks2" id="search_input">
+          <div class="stats_tekst" style="height: auto;">
+              <h2>Your year on Plex</h2>
+              <p>
+              Did you get that thing from Spotify and wondered what your Plex statistics for 2020 were?
+                  <br><br>Well, have a look...
+              </p>
+          </div>
+
+          <br>
+
+          <div class="status" id="stats" style="width:auto;">
+
+              <div class="search">
+
+                  <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
+
+                          <div class='form-group'>
+
+                              <label for="p_email" title="The email for the Plex account you want to check"><h4>Plex Email</h4></label>
+                              <input type="email" class='form_input' name="p_email" id="p_email" required/>
+
+
+                              <button type='submit' style='border: none; background: none; cursor: pointer; padding: 0;'>
+                                  <div id='search_get'>SEARCH</div>
+                              </button>
+
+                          </div>
+                  </form>
+
+              </div>
+
+              <div id="results">
+
+              </div>
+
+              <div id="results_error" style="padding:0.5em; bottom:0; color: #eb4034;"></div>
+
+          </div>
+
+      </div>
+
+  </div>
+</div>
+    <div class="content" id="search_results">
+    </div>
+
+
+
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+        $.getScript("index.js", function(){
+        });
+
+    });
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,346 @@
+
+body {
+  padding: 0;
+  margin: auto;
+  font-family: 'Roboto', serif;
+  font-weight: normal;
+}
+
+h1{
+  font-size: 3em;
+  color: #f9a825;
+  text-shadow: 1px 1px 2px #555;
+  line-height: 110%;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  text-overflow: clip;
+  overflow: hidden;
+}
+
+h2{
+  font-size: 2em;
+  color: black;
+  line-height: 110%;
+  text-align: center;
+  margin: 0;
+}
+
+h3{
+  color: white;
+  text-shadow: 1px 1px 2px #555;
+  line-height: 110%;
+  text-align: center;
+  font-family: 'Roboto', serif;
+  font-size: 1.5em;
+  text-overflow: clip;
+}
+
+h4{
+  margin: auto;
+  text-align: center;
+  text-shadow: 0;
+}
+
+p{
+  font-size: 1em;
+  color: black;
+  text-align: center;
+}
+
+a {
+  text-decoration: none !important;
+}
+
+.index {
+  background-image: url("../assets/banner.webp") !important;
+  background-repeat: no-repeat;
+  background-size: auto;
+  background-position: top;
+}
+
+.banner {
+  width: 100%;
+  height: 28em;
+  background-image: url("../img/backgrounds/interstellar.jpg") !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  padding: 0;
+  margin: auto;
+  display: inline-block;
+  text-align: center;
+  text-overflow: clip;
+}
+
+#movies {
+    display: inline-block;
+    margin: auto;
+}
+
+#shows {
+    display: inline-block;
+    margin: auto;
+}
+
+#artists {
+    display: inline-block;
+    margin: auto;
+}
+
+.tittel {
+  padding-top: 10em;
+  width: 100%;
+  margin: auto;
+  display: inline-block;
+  text-overflow: clip;
+}
+
+.knapp {
+  background-color: #f9a825;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+  align-self: center;
+  width: 10em;
+  margin: auto;
+  display: inline-block;
+}
+
+.knapptekst {
+  padding: 0.5em;
+  font-size: 1.25em;
+  color: white;
+  text-align: center;
+  font-family: 'Roboto', serif;
+  font-style: normal;
+}
+
+
+.content {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.boks {
+  margin: auto;
+  height: 100%;
+  width: 100%;
+  align-items: center;
+  text-align: center;
+}
+
+.boks2 {
+  width: 30em;
+  display: inline-block;
+  margin: auto;
+  max-width: 90%;
+  margin-bottom: 2.5em;
+  margin-top: 2.5em;
+  top: 0;
+  position: relative;
+  vertical-align: top;
+}
+
+.load_top_10 {
+    width: 30em;
+    display: inline-block;
+    margin: auto;
+    max-width: 90%;
+    margin-bottom: 2.5em;
+    margin-top: 2.5em;
+}
+
+.tekst {
+  padding: 1em;
+  height: 14em;
+  float: left;
+  display: inline-block;
+  top: 0;
+}
+
+.status_tekst {
+  padding: 1em;
+  height: 12em;
+  float: left;
+  display: inline-block;
+  top: 0;
+}
+
+.stats_tekst {
+  padding: 1em;
+  height: 10em;
+  float: left;
+  display: inline-block;
+  top: 0;
+}
+
+#stats {
+    width: 22em;
+}
+
+.boks-knapp {
+  height: 5em;
+  width: 100% !important;
+  display: inline-block;
+  float: left;
+}
+
+.server:hover {
+  background-color: white;
+  border-radius: 25px;
+}
+
+.status {
+  display: inline-block;
+  margin: auto;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.19);
+  background-color: #f2f2f2;
+  border-radius: 25px;
+  padding: 0.5em;
+  max-width: 25em;
+  top: 0;
+}
+
+#search_get {
+  padding: 0.25em;
+  font-family: 'Roboto', serif;
+  background-color: #f9a825;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+  align-self: center;
+  color: white;
+  padding: 1em;
+}
+
+.form {
+  font-family: 'Roboto', serif;
+  font-size: 1em;
+  margin: 0.5em;
+}
+
+.form_button {
+  font-family: 'Roboto', serif;
+  text-align: center;
+  background-color: #f9a825;
+  color: white;
+  border: 0;
+  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
+  padding: 0.5em;
+  font-size: 1em;
+  margin: 0.5em;
+}
+
+.form_input {
+  font-family: 'Roboto', serif;
+  font-size: 1em;
+  width: 90%;
+  margin: 0.5em;
+  text-align: center;
+}
+
+.item:hover {
+  background-color: white !important;
+  border-radius: 25px;
+}
+
+.item {
+  padding: 0.25em;
+}
+
+.list {
+  display: inline-block;
+  margin: 1em;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.19);
+  background-color: #f2f2f2;
+  border-radius: 25px;
+  padding: 0.5em;
+  text-align: left;
+  width: 10em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  top: 0;
+  margin-top: 0;
+}
+
+.number {
+  text-align: right;
+  margin: 0.1em;
+  display: inline-block;
+  width: 1em;
+  vertical-align: top;
+}
+
+.info {
+  text-align: left;
+  margin: 0.1em;
+  display: inline-block;
+  width: 6em;
+  vertical-align: top;
+}
+
+.name {
+  text-align: right;
+  margin: 0.1em;
+  display: inline-block;
+  width: 8em;
+  vertical: center;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
+.movie_name {
+  width: 90%;
+  text-align: right;
+  display: inline-block;
+  margin: 0.1em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.info_name {
+  width: 14em;
+  text-align: right;
+  display: inline-block;
+  margin: 0.1em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.server {
+  width: 10em !important;
+  display: inline-block;
+  margin: auto;
+  text-align: left;
+  padding: 0.5em;
+}
+
+.false {
+  background-color: red;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.19);
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0.25em;
+  float: right;
+}
+
+.false:hover {
+  background-color: red;
+}
+
+.true {
+  background-color: lightgreen;
+  box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.19);
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  display: inline-block;
+  margin: 0.25em;
+  float: right;
+}
+
+.true:hover {
+  background-color: lightgreen !important;
+}
