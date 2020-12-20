@@ -11,7 +11,7 @@ There are multiple settings you must configure!
 This file needs multiple values. Most importantly your Tautulli IP, port and API key. I made this using HTTP, if you use HTTPS you have to modify the API.
 
 <b>api/get_stats_2020.php</b><br>
-This file needs to know the ID of your movie and show library. It only supports two libraries. The ID can be found in your url when you open the library on the Tautulli website.
+This file needs to know the ID of your movie and show library. It only supports two libraries. The ID can be found in your url when you open the library on the Tautulli website. If your Tautulli API is rooted somewhere other than at `/plexpy` you can override that here as well.
 
 If you are lucky, it could be functional now.
 <br><br><br>
