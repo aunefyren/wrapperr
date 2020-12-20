@@ -2,16 +2,13 @@
 $data = json_decode(file_get_contents("php://input"));
 $config = json_decode(file_get_contents("../config.json"));
 
-//CONFIGURE THESE!
-$library_id_movies = 1;
-$library_id_shows = 2;
-//
+$url_base = '' !== $config->url_base ? $config->url_base : '/';
 
 $p_email = $data->p_email;
 $p_email = htmlspecialchars($p_email);
 $id = "fail";
 
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_users";
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_users";
 $response = json_decode(file_get_contents($url));
 
 for ($i = 0; $i < count($response->response->data); $i++) {
@@ -27,7 +24,7 @@ if ($id == "fail") {
 }
 
 // Name
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_user_ips&user_id=" . $id;
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_user_ips&user_id=" . $id;
 $response = json_decode(file_get_contents($url));
 $name = $response->response->data->data[0]->friendly_name;
 
@@ -37,7 +34,7 @@ $logg = "\n" . $date . " - " . $name . " (" . $p_email . ")";
 file_put_contents("log.txt", $logg, FILE_APPEND);
 
 //MOVIES
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $library_id_movies . "&order_column=full_title&order_dir=asc&length=10000";
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $config->library_id_movies . "&order_column=full_title&order_dir=asc&length=10000";
 $response = json_decode(file_get_contents($url));
 $array = $response->response->data->data;
 $movies = array();
@@ -99,7 +96,7 @@ $movie_percent_average = 0;
 }
 
 //SHOWS
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $library_id_shows . "&order_column=full_title&order_dir=asc&length=10000";
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $config->library_id_shows . "&order_column=full_title&order_dir=asc&length=10000";
 $response = json_decode(file_get_contents($url));
 $array = $response->response->data->data;
 $shows = array();
@@ -134,7 +131,7 @@ array_multisort($duration, SORT_DESC, $shows);
 
 //SHOW BUDDIES
 if(count($shows) > 0){
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&section_id=" . $library_id_shows . "&order_column=full_title&order_dir=asc&length=10000&search=" . urlencode($shows[0]["title"]);
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_history&section_id=" . $library_id_shows . "&order_column=full_title&order_dir=asc&length=10000&search=" . urlencode($shows[0]["title"]);
 $response = json_decode(file_get_contents($url));
 $array = $response->response->data->data;
 $top_show_users = array();
@@ -190,12 +187,12 @@ if(count($top_show_users) > 1) {
 }
 
 //GET USERS LAST 365
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_plays_by_top_10_users&time_range=365&y_axis=duration";
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_plays_by_top_10_users&time_range=365&y_axis=duration";
 $response = json_decode(file_get_contents($url));
 $top_users = $response->response->data->categories;
 
 //GET TOP MOVIES AND SHOWS
-$url = "http://" . $config->ip . ":" . $config->plexpy_port . "/plexpy/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_home_stats&time_range=365&stats_type=duration&grouping=1&stats_count=10";
+$url = "http://" . $config->ip . ":" . $config->plexpy_port . $url_base . "/api/v2?apikey=" . $config->plexpy_apikey . "&cmd=get_home_stats&time_range=365&stats_type=duration&grouping=1&stats_count=10";
 $response = json_decode(file_get_contents($url));
 $top_10_movies = array();
 $top_10_shows = array();

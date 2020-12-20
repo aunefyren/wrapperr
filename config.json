@@ -1,6 +1,0 @@
-{ "plexpy_apikey"  :    "TAUTULLI APIKEY",
-  "ip"             :    "TAUTILLI IP",
-  "plexpy_port"    :    "TAUTULLI PORT",
-  "http"           :    "80",
-  "https"          :    "443"
-}

@@ -8,10 +8,7 @@ I made this for fun, in a very limited timeframe. This was not intended to be a 
 There are multiple settings you must configure!
 
 <b>config.json</b><br>
-This file needs multiple values. Most importantly your Tautulli IP, port and API key. I made this using HTTP, if you use HTTPS you have to modify the API.
-
-<b>api/get_stats_2020.php</b><br>
-This file needs to know the ID of your movie and show library. It only supports two libraries. The ID can be found in your url when you open the library on the Tautulli website.
+Copy the file config.json.sample to config.json and edit that. This file needs multiple values. Most importantly your Tautulli IP, port and API key. I made this using HTTP, if you use HTTPS you have to modify the API. If you are using a reverse proxy, you can set the url base here as well (e.g. "/plexpy" or "/tautulli"). Also set the ID of your movie and show library. It only supports two libraries. The ID can be found in your url when you open the library on the Tautulli website.
 
 If you are lucky, it could be functional now.
 <br><br><br>

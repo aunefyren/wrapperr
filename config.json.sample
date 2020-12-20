@@ -1,0 +1,10 @@
+{ 
+  "plexpy_apikey"     :   "TAUTULLI APIKEY",
+  "ip"                :   "TAUTILLI IP",
+  "plexpy_port"       :   "TAUTULLI PORT",
+  "http"              :   "80",
+  "https"             :   "443",
+  "url_base"          :   "",
+  "library_id_movies" :   "1",
+  "library_id_shows"  :   "2"
+}
