@@ -5,10 +5,10 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <title>Plex Wrapped 2020</title>
+        <title>Plex Wrapped</title>
 
         <!-- Bootstrap 4 CSS and custom CSS -->
-        <link rel="stylesheet" type="text/css" href="assets/css/main.css" />
+        <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
         <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
@@ -18,53 +18,56 @@
 
 <div class="content">
 
-  <div class="boks">
+    <div class="boks">
 
-      <div class="boks2" id="search_input">
-          <div class="stats_tekst" style="height: auto;">
-              <h2>Your year on Plex</h2>
-              <p>
-              Did you get that thing from Spotify and wondered what your Plex statistics for 2020 were?
-                  <br><br>Well, have a look...
-              </p>
-          </div>
+        <div class="boks3" id="search_input" style="padding: 0 !important;">
+            <div class="boks2" style="float: none !important; display: inline-block;">
+                <div class="stats_tekst" style="height: auto;">
+                  <h2>Your year on Plex</h2>
+                  <p>
+                  Did you get that thing from Spotify and wondered what your Plex statistics were?
+                      <br><br>Well, have a look...
+                  </p>
+                </div>
 
-          <br>
+                <br>
 
-          <div class="status" id="stats" style="width:auto;">
+                <div class="status" id="stats" style="width:auto;">
 
-              <div class="search">
+                    <div class="search">
 
-                  <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
+                        <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
 
-                          <div class='form-group'>
+                            <div class='form-group'>
 
-                              <label for="p_email" title="The email for the Plex account you want to check"><h4>Plex Email</h4></label>
-                              <input type="email" class='form_input' name="p_email" id="p_email" required/>
+                                <label for="p_email" title="The email for the Plex account you want to check"><h4>Plex Email</h4></label>
+                                <input type="email" class='form_input' name="p_email" id="p_email" required/>
 
 
-                              <button type='submit' style='border: none; background: none; cursor: pointer; padding: 0;'>
-                                  <div id='search_get'>SEARCH</div>
-                              </button>
+                                <button type='submit' style='border: none; background: none; cursor: pointer; padding: 0;'>
+                                    <div id='search_get'>SEARCH</div>
+                                </button>
 
-                          </div>
-                  </form>
+                            </div>
 
-              </div>
+                        </form>
 
-              <img id="loading_icon" src="assets/loading.gif" style="width: 2em; height: 2em; display:none;">
+                    </div>
 
-              <div id="results">
+                    <img id="loading_icon" src="assets/loading.gif" style="padding: 1em;width: 2em; height: 2em; display:none;">
 
-              </div>
+                    <div id="results">
 
-              <div id="results_error" style="padding:0.5em; bottom:0; color: #eb4034;"></div>
+                    </div>
 
-          </div>
+                <div id="results_error" style="padding:0.5em; bottom:0; color: #eb4034;"></div>
 
-      </div>
+                </div>
 
-  </div>
+            </div>
+        </div>
+
+    </div>
 </div>
     <div class="content" id="search_results">
     </div>

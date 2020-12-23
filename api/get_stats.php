@@ -10,8 +10,11 @@ $library_id_shows = $config->library_id_shows;
 $connection = create_url();
 
 //Declare given email
-$p_email = $data->p_email;
-$p_email = htmlspecialchars($p_email);
+if($data){
+	$p_email = htmlspecialchars($data->p_email);
+} else {
+	$p_email = htmlspecialchars($_GET["email"]);
+}
 
 // Get user ID
 $id = tautulli_get_user($p_email);
@@ -140,13 +143,14 @@ function tautulli_get_user_movies($id) {
         }
 
         $title = $array[$i]->full_title;
+        $year = $array[$i]->year;
         $percent_complete = $array[$i]->percent_complete;
         $paused_counter = $array[$i]->paused_counter;
 
         $found = False;
 
         for ($j = 0; $j < count($movies); $j++) {
-            if($movies[$j]["title"] == $title) {
+            if($movies[$j]["title"] == $title && $movies[$j]["year"] == $year ) {
                 $movies[$j]["plays"] = intval($movies[$j]["plays"]) + 1;
                 $movies[$j]["duration"] = intval($movies[$j]["duration"]) + intval($duration);
                 $found = True;
@@ -156,7 +160,7 @@ function tautulli_get_user_movies($id) {
         }
 
         if(!$found) {
-            array_push($movies, array("title" => $title, "plays" => 1, "duration" => $duration, "paused_counter" => $paused_counter));
+            array_push($movies, array("title" => $title, "year" => $year, "plays" => 1, "duration" => $duration, "paused_counter" => $paused_counter));
         }
     }
 
@@ -164,9 +168,18 @@ function tautulli_get_user_movies($id) {
     $paused_counter = array_column($movies, 'paused_counter');
     array_multisort($paused_counter, SORT_DESC, $movies);
     if(count($movies) > 0) {
-        $movie_most_paused = array("title" => $movies[0]["title"], "paused_counter" => $movies[0]["paused_counter"]);
+        $movie_most_paused = array("title" => $movies[0]["title"], "year" => $movies[0]["year"], "plays" => $movies[0]["plays"], "duration" => $movies[0]["duration"], "paused_counter" => $movies[0]["paused_counter"]);
     } else {
-        $movie_most_paused = array("title" => "No movies watched", "paused_counter" => 0);
+        $movie_most_paused = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0);
+    }
+
+    // Sort $movies for oldest movie
+    $year = array_column($movies, 'year');
+    array_multisort($year, SORT_ASC, $movies);
+    if(count($movies) > 0) {
+        $movie_oldest = array("title" => $movies[0]["title"], "year" => $movies[0]["year"], "plays" => $movies[0]["plays"], "duration" => $movies[0]["duration"], "paused_counter" => $movies[0]["paused_counter"]);
+    } else {
+        $movie_oldest = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0);
     }
 
     // Sort $movies by longest duration
@@ -185,7 +198,7 @@ function tautulli_get_user_movies($id) {
         $movie_percent_average = 0;
     }
 
-    return array("movies" => $movies, "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average);
+    return array("movies" => $movies, "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
 }
 
 function tautulli_get_user_shows($id) {
@@ -211,6 +224,7 @@ function tautulli_get_user_shows($id) {
         for ($j = 0; $j < count($shows); $j++) {
             if($shows[$j]["title"] == $title) {
                 $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
+                $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
                 $found = True;
 
                 break;
@@ -218,7 +232,7 @@ function tautulli_get_user_shows($id) {
         }
 
         if(!$found) {
-            array_push($shows, array("title" => $title, "duration" => $duration));
+            array_push($shows, array("title" => $title, "duration" => $duration, "plays" => 1));
         }
     }
 
@@ -322,25 +336,27 @@ function tautulli_get_year_stats($id) {
             if($users[$j]["id"] == $user_id) {
                 $users[$j]["duration_movies"] = intval($users[$j]["duration_movies"]) + intval($duration);
                 $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
+                $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
                 $user_found = True;
                 break;
             }
         }
 
         if(!$user_found) {
-            array_push($users, array("user" => $user, "id" => $user_id,"duration_movies" => $duration, "duration" => $duration, "duration_shows" => 0));
+            array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => $duration, "duration_shows" => 0, "plays" => 1));
         }
 
         for ($j = 0; $j < count($movies); $j++) {
             if($movies[$j]["title"] == $title && $movies[$j]["year"] == $year) {
                 $movies[$j]["duration"] = intval($movies[$j]["duration"]) + intval($duration);
+                $movies[$j]["plays"] = intval($movies[$j]["plays"]) + 1;
                 $movie_found = True;
                 break;
             }
         }
 
         if(!$movie_found) {
-            array_push($movies, array("title" => $title, "duration" => $duration, "year" => $year));
+            array_push($movies, array("title" => $title, "year" => $year, "duration" => $duration, "plays" => 1));
         }
     }
 
@@ -368,25 +384,27 @@ function tautulli_get_year_stats($id) {
             if($users[$j]["id"] == $user_id) {
                 $users[$j]["duration_shows"] = intval($users[$j]["duration_shows"]) + intval($duration);
                 $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
+                $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
                 $user_found = True;
                 break;
             }
         }
 
         if(!$user_found) {
-            array_push($users, array("user" => $user, "id" => $user_id,"duration_shows" => $duration, "duration" => $duration, "duration_movies" => 0));
+            array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => 0, "duration_shows" => $duration, "plays" => 1));
         }
 
         for ($j = 0; $j < count($shows); $j++) {
             if($shows[$j]["title"] == $title) {
                 $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
+                $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
                 $show_found = True;
                 break;
             }
         }
 
         if(!$show_found) {
-            array_push($shows, array("title" => $title, "duration" => $duration));
+            array_push($shows, array("title" => $title, "duration" => $duration, "plays" => 1));
         }
     }
 
@@ -404,3 +422,4 @@ function tautulli_get_year_stats($id) {
 
     return array("top_movies" => $movies, "users" => $users, "top_shows" => $shows);
 }
+?>
