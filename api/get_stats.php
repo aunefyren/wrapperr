@@ -1,6 +1,18 @@
 <?php
 $data = json_decode(file_get_contents("php://input"));
-$config = json_decode(file_get_contents("../config.json"));
+$config = json_decode(file_get_contents("../config/config.json"));
+
+$arrContextOptions= [
+    'ssl' => [
+        'verify_peer'=> false,
+        'verify_peer_name'=> false,
+    ],
+];
+
+if (empty($config)) {
+    echo json_encode(array("message" => "Config not configured.", "error" => true));
+    exit(0);
+}
 
 // Libraries for movies and shows
 $library_id_movies = $config->library_id_movies;
@@ -10,17 +22,34 @@ $library_id_shows = $config->library_id_shows;
 $connection = create_url();
 
 //Declare given email
-if($data){
-	$p_email = htmlspecialchars($data->p_email);
+if(!empty($data)){
+	$p_identity = htmlspecialchars($data->p_identity);
+} else if(isset($_GET["p_identity"])) {
+	$p_identity = htmlspecialchars($_GET["p_identity"]);
 } else {
-	$p_email = htmlspecialchars($_GET["email"]);
+    echo json_encode(array("message" => "No input provided.", "error" => true));
+    exit(0);
 }
 
 // Get user ID
-$id = tautulli_get_user($p_email);
+$id = tautulli_get_user($p_identity);
 if (!$id) {
-    echo json_encode(array("message" => "No user found with that email.", "error" => "true"));
+    echo json_encode(array("message" => "No user found with that email.", "error" => true));
     exit(0);
+}
+
+// Use cache
+if($config->use_cache) {
+    if($cache = check_cache()) {
+        $now = new DateTime('NOW');
+        $then = new DateTime($cache->date);
+        $diff = $now->diff($then);
+
+        if($diff->format('%D') < $config->cache_age_limit) {
+            echo json_encode($cache);
+            exit(0);
+        }
+    }
 }
 
 // Get user name
@@ -42,7 +71,7 @@ if($config->get_user_show_stats) {
     $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
 }
 
-if($config->get_user_show_buddy && $config->get_user_show_stats) {
+if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_shows["data"])) {
     $user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("user" => tautulli_get_user_show_buddy($id, $user_shows["data"]["shows"]), "error" => False, "Message" => "Buddy is loaded."));
 } else {
     $user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
@@ -54,16 +83,26 @@ if($config->get_year_stats) {
     $year_stats = array("data" => array(), "message" => "Disabled in config.", "error" => True);
 }
 
+$now = new DateTime('NOW');
+
 // Print results
-echo json_encode(array( "error" => False,
-                        "message" => "Data processed.",
-                        "user" => array("name" => $name,
-                                        "id" => $id,
-                                        "user_movies" => $user_movies,
-                                        "user_shows" => $user_shows
-                                        ),
-                        "year_stats" => $year_stats,
-                        ));
+$result = json_encode(array("error" => False,
+                            "date" => $now->format('Y-m-d'),
+                            "message" => "Data processed.",
+                            "user" => array("name" => $name,
+                                            "id" => $id,
+                                            "user_movies" => $user_movies,
+                                            "user_shows" => $user_shows
+                                            ),
+                            "year_stats" => $year_stats,
+                            ));
+
+if($config->use_cache) {
+    update_cache($result);
+}
+
+echo $result;
+exit(0);
 
 function create_url() {
     global $config;
@@ -92,14 +131,20 @@ function create_url() {
     return $base . $ip . $port . $root;
 }
 
-function tautulli_get_user($email) {
+function tautulli_get_user($input) {
     global $connection;
     global $config;
+    global $arrContextOptions;
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_users";
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
 
     for ($i = 0; $i < count($response->response->data); $i++) {
-        if ($response->response->data[$i]->email == $email) {
+        if ($response->response->data[$i]->email == $input || $response->response->data[$i]->username == $input) {
             return $response->response->data[$i]->user_id;
         }
     }
@@ -109,8 +154,15 @@ function tautulli_get_user($email) {
 function tautulli_get_name($id) {
     global $connection;
     global $config;
+    global $arrContextOptions;
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_user_ips&user_id=" . $id;
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $name = $response->response->data->data[0]->friendly_name;
     if($name != "" && $name != Null) {
         return $name;
@@ -119,12 +171,63 @@ function tautulli_get_name($id) {
     }
 }
 
+function check_cache() {
+    global $config;
+    global $id;
+    $cache = json_decode(file_get_contents("../config/cache.json"));
+
+    if(!empty($cache)) {
+        for($i = 0; $i < count($cache); $i++) {
+            if($cache[$i]->user->id == $id) {
+                return $cache[$i];
+            }
+        }
+    }
+
+    return False;
+}
+
+function update_cache($result) {
+    global $config;
+    $cache = json_decode(file_get_contents("../config/cache.json"));
+    $decode_result = json_decode($result);
+    $found = False;
+
+    if(!empty($cache)) {
+        for($i = 0; $i < count($cache); $i++) {
+            if($cache[$i]->user->id == $decode_result->user->id && !$found) {
+                $cache[$i] = $decode_result;
+                $found = True;
+                break;
+            }
+        }
+    } else {
+        $cache = array();
+    }
+
+    if(!$found) {
+        array_push($cache, $decode_result);
+    }
+
+    $save = json_encode($cache);
+    file_put_contents("../config/cache.json", $save);
+    return True;
+}
+
 function tautulli_get_user_movies($id) {
     global $connection;
     global $config;
     global $library_id_movies;
+    global $arrContextOptions;
+
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $library_id_movies . "&order_column=date&order_dir=desc&include_activity=0&length=" . $config->tautulli_length . "";
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $array = $response->response->data->data;
     $movies = array();
     $movies_percent_complete = array();
@@ -205,8 +308,16 @@ function tautulli_get_user_shows($id) {
     global $connection;
     global $config;
     global $library_id_shows;
+    global $arrContextOptions;
+
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&user_id=" . $id . "&section_id=" . $library_id_shows . "&order_column=date&order_dir=desc&include_activity=0&length=" . $config->tautulli_length . "";
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $array = $response->response->data->data;
     $shows = array();
 
@@ -248,9 +359,20 @@ function tautulli_get_user_show_buddy($id, $shows) {
     global $config;
     global $library_id_shows;
     global $name;
+    global $arrContextOptions;
+
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&section_id=" . $library_id_shows . "&order_column=date&include_activity=0&media_type=episode&order_dir=desc&length=" . $config->tautulli_length . "&search=" . urlencode($shows[0]["title"]);
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $array = $response->response->data->data;
+    if(empty($array)) {
+        $array = array();
+    }
     $top_show_users = array();
 
     for ($i = 0; $i < count($array); $i++) {
@@ -298,7 +420,7 @@ function tautulli_get_user_show_buddy($id, $shows) {
         }
 
     } else {
-        $buddy = array("user" => False, "duration" => 0, found => False, "watched_relative_to_you" => False);
+        $buddy = array("user" => False, "duration" => 0, "found" => False, "watched_relative_to_you" => False);
     }
 
     return $buddy;
@@ -309,8 +431,16 @@ function tautulli_get_year_stats($id) {
     global $config;
     global $library_id_shows;
     global $name;
+    global $arrContextOptions;
+
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&media_type=movie&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $array = $response->response->data->data;
     $users = array();
     $movies = array();
@@ -361,7 +491,13 @@ function tautulli_get_year_stats($id) {
     }
 
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&media_type=episode&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
-    $response = json_decode(file_get_contents($url));
+
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
     $array = $response->response->data->data;
 
     for ($i = 0; $i < count($array); $i++) {

@@ -4,48 +4,58 @@ body {
   margin: auto;
   font-family: 'Roboto', serif;
   font-weight: normal;
+  background: #a2d1d0;
+  box-sizing: border-box;
 }
 
 h1{
-  font-size: 3em;
-  color: #f9a825;
-  text-shadow: 1px 1px 2px #555;
-  line-height: 110%;
-  text-align: center;
-  padding: 0;
-  margin: 0;
-  text-overflow: clip;
-  overflow: hidden;
+    font-size: 3em;
+    color: white;
+    text-shadow: 1px 1px 2px #555;
+    line-height: 110%;
+    text-align: center;
+    padding: 0;
+    margin: 0;
 }
 
 h2{
-  font-size: 2em;
-  color: black;
-  line-height: 110%;
-  text-align: center;
-  margin: 0;
+    text-shadow: 1px 1px 2px #555;
+    font-size: 2em;
+    color: white;
+    line-height: 110%;
+    text-align: center;
+    margin: 0;
+    font-weight: normal;
 }
 
 h3{
-  color: white;
-  text-shadow: 1px 1px 2px #555;
-  line-height: 110%;
-  text-align: center;
-  font-family: 'Roboto', serif;
-  font-size: 1.5em;
-  text-overflow: clip;
+    text-shadow: 1px 1px 2px #555;
+    color: white;
+    text-shadow: 1px 1px 2px #555;
+    line-height: 110%;
+    text-align: center;
+    font-family: 'Roboto', serif;
+    font-size: 1.5em;
+    text-overflow: clip;
 }
 
 h4{
-  margin: auto;
-  text-align: center;
-  text-shadow: 0;
+    font-size: 1.5em;
+    margin: auto;
+    text-align: center;
+    font-weight: normal;
+    color: white;
 }
 
 p{
-  font-size: 1em;
-  color: black;
-  text-align: center;
+    text-shadow: 1px 1px 2px #555;
+    font-size: 1.25em;
+    color: #ffffff;
+    text-align: center;
+}
+
+img {
+    max-width: 100%;
 }
 
 .tittel {
@@ -60,14 +70,16 @@ p{
   width: 100%;
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 
 .boks {
   margin: auto;
-  height: 100%;
+  min-height: 50em;
   width: 100%;
   align-items: center;
   text-align: center;
+  box-sizing: border-box;
 }
 
 .boks2 {
@@ -75,18 +87,21 @@ p{
     max-width: 100%;
     float: left;
     margin: auto;
-    margin-bottom: 2.5em;
-    margin-top: 2.5em;
     position: relative;
     vertical-align: top;
+    box-sizing: border-box;
+    padding: 2em;
+    display: inline-block;
 }
 
 .boks3 {
-    width: 60em;
+    width: 70em;
+    box-sizing: border-box;
     max-width: 100%;
     display: inline-block;
     margin: auto;
     position: relative;
+    display: inline-block;
     vertical-align: top;
 }
 
@@ -143,16 +158,34 @@ p{
   display: inline-block;
   margin: auto;
   box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.19);
-  background-color: #f2f2f2;
+  background-color: lightslategrey;
   border-radius: 25px;
   padding: 0.5em;
-  max-width: 25em;
+  width: 100%;
   top: 0;
+  color: white;
+  font-size: 1.25em;
+  box-sizing: border-box;
+  max-width: 100%;
 }
 
-#search_get {
-  padding: 0.25em;
+.stats-list {
+    max-height: 55em;
+    overflow-x: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.status-title {
+    font-size: 1.25em;
+    padding: 0.5em;
+}
+
+.button {
+  padding: 0.5em;
+  margin: 0.5em;
   font-family: 'Roboto', serif;
+  font-size: 1.25em;
   background-color: #f9a825;
   box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);
   align-self: center;
@@ -184,15 +217,34 @@ p{
   width: 90%;
   margin: 0.5em;
   text-align: center;
+  border-radius: 25px;
+  border: none;
+  height: 2em;
 }
 
 .item:hover {
-  background-color: white !important;
+  background-color: #54606d !important;
   border-radius: 25px;
 }
 
 .item {
-  padding: 0.25em;
+  padding: 0.5em;
+  display: flex;
+}
+
+.gold {
+    background-color: #d4af37;
+    border-radius: 25px;
+}
+
+.silver {
+    background-color: #C0C0C0	;
+    border-radius: 25px;
+}
+
+.bronze {
+    background-color: #cd7f32;
+    border-radius: 25px;
 }
 
 .list {
@@ -214,8 +266,9 @@ p{
   text-align: right;
   margin: 0.1em;
   display: inline-block;
-  width: 1em;
+  width: 10%;
   vertical-align: top;
+  float: left;
 }
 
 .info {
@@ -230,10 +283,14 @@ p{
   text-align: right;
   margin: 0.1em;
   display: inline-block;
-  width: 8em;
+  width: 90%;
   vertical: center;
   text-overflow: ellipsis;
   vertical-align: top;
+}
+
+.you {
+    text-decoration: underline;
 }
 
 .movie_name {
@@ -262,4 +319,37 @@ p{
   margin: auto;
   text-align: left;
   padding: 0.5em;
+}
+
+form {
+    padding: 0;
+}
+
+.form-control {
+    font-size: 1em;
+    padding: 0.5em;
+    margin: auto;
+    width: 100%;
+    display: inline-block;
+    box-sizing: border-box;
+    text-align: center;
+    border-radius: 0.25em;
+    border: none;
+}
+
+.form-group {
+    display: inline-block;
+    margin: auto;
+    float: left;
+    padding: 1em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.btn {
+    background-color: #ffbd55;
+    border: none;
+}
+input[type="checkbox" i] {
+    transform: scale(1.5);
 }

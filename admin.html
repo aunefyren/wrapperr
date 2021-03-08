@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <title>Plex Wrapped</title>
+
+        <!-- Bootstrap 4 CSS and custom CSS -->
+        <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
+        <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="./admin.js"></script>
+        <script src="./get_config.js"></script>
+        <script src="./set_config.js"></script>
+
+    </head>
+<body>
+
+<div class="content" id="login_content" style="">
+
+    <div class="boks">
+
+        <div class="boks3" id="search_input" style="padding: 0 !important;">
+
+            <div class="boks2" style="float: none !important; display: block; padding: 0; margin-top: 0em;">
+                <img src="assets/img/gift.svg" onclick="window.location.href = './';" style="width: 15em; cursor: pointer;">
+            </div>
+
+            <div class="boks2" style="float: none !important; display: block; margin-top: 0em; padding-top: 0;">
+
+                <div class="status" style="max-width: 100%;">
+
+                    <h1>Wrapped Setup</h1>
+
+                    <div id="setup">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+</div>
+    <div class="content" id="search_results">
+    </div>
+
+
+<script type="text/javascript">
+var first_time = false;
+
+var tautulli_apikey = "";
+var tautulli_ip = "";
+var tautulli_port = "";
+var tautulli_length = 50000;
+var tautulli_root = "";
+
+var ssl = false;
+
+var password = "";
+
+var library_id_movies = "";
+var library_id_shows = "";
+
+var wrapped_start = new Date(0);
+wrapped_start.setUTCSeconds(1609455600);
+
+var wrapped_end = new Date(0);
+wrapped_end.setUTCSeconds(1640991540);
+
+var get_user_movie_stats = true;
+var get_user_show_stats = true;
+var get_user_show_buddy = true;
+var get_year_stats = true;
+
+var use_cache = true;
+var cache_age_limit = 7;
+
+var current_password = "";
+
+$(document).ready(function() {
+
+    get_config_initial();
+
+});
+</script>
+
+</body>
+</html>

@@ -69,7 +69,6 @@ $(document).on('submit', '#stats_form', function(){
 
     search_button("SEARCHING...");
 
-    $.getScript("get_stats.js", function(){
-    });
+    get_functions();
 
 });

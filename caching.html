@@ -12,9 +12,7 @@
         <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-        <script src="./index.js"></script>
-        <script src="./get_stats.js"></script>
-        <script src="./get_functions.js"></script>
+        <script src="./caching.js"></script>
 
     </head>
 <body>
@@ -33,8 +31,8 @@
 
                 <div class="stats_tekst" style="height: auto;">
                     <p>
-                    Did you get that thing from Spotify and wondered what your Plex statistics looked like?
-                    <br><br>Well, have a look...
+                    If you want to decrease loadtime for your users you can pre-cache their results.
+                    <br><br>Remember to configure the system first.
                     </p>
                 </div>
 
@@ -42,36 +40,10 @@
 
                 <div class="status" id="stats" style="">
 
-                    <h1>Plex Wrapped</h1>
+                    <h1>Wrapped Caching</h1>
 
-                    <div class="search">
+                    <div class="search" id="cache">
 
-                        <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
-
-                            <div class='form-group'>
-
-                                <label for="p_identity" title="The email or username for the Plex account you want to check">Plex email or username</label>
-                                <input type="text" class='form-control' name="p_identity" id="p_identity" autocomplete="off" required/>
-
-                            </div>
-
-                            <div class='form-group'>
-
-                                <input type="submit" class='form-control btn' value="Search" name="p_email" id="p_email" required/>
-
-                            </div>
-
-                        </form>
-
-                    </div>
-
-                    <img id="loading_icon" src="assets/loading.gif" style="padding: 1em;width: 2em; height: 2em; display:none;">
-
-                    <div id="results">
-
-                    </div>
-
-                <div id="results_error" style="padding:0.5em; bottom:0; color: #ffbd55 !important;"></div>
 
                 </div>
 
@@ -88,7 +60,7 @@
 
     $(document).ready(function() {
 
-
+        get_config_cache();
 
     });
 
