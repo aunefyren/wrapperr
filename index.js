@@ -68,7 +68,7 @@ function makeRequest (method, url, data) {
 $(document).on('submit', '#stats_form', function(){
 
     search_button("SEARCHING...");
-
+    document.getElementById('results_error').innerHTML = "";
     get_functions();
 
 });
