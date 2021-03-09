@@ -329,7 +329,7 @@ function load_shows() {
                     text += "</div>";
                 text += "</div>";
 
-                if(results.user.user_shows.data.shows.length > 0 && !results.year_stats.error && functions.get_user_show_buddy) {
+                if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
                     text += "<div class='boks2'>";
                         text += load_showbuddy();
                     text += "</div>";
@@ -384,7 +384,7 @@ function load_shows() {
                     text += "</div>";
                 text += "</div>";
 
-                if(results.user.user_shows.data.shows.length > 0) {
+                if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
                     text += "<div class='boks2'>";
 
                     text += load_showbuddy();
