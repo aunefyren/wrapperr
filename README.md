@@ -11,6 +11,8 @@ In your php.ini file you may have to change:
 - memory_limit=<b>enough M for the script to handle JSON data</b>
 - max_input_time=<b>enough seconds for the script to parse JSON data</b>
 
+You need to give PHP permission to edit files in the directory called <b>config</b>
+
 The cache is stored at config/cache.json, but can be cleared using the admin menu.
 
 If you visit <b>you-domain-or-ip.com/caching</b> you can do a pre-caching of a set of users. This is very useful if you want to prepare for a lot of traffic.

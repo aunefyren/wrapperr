@@ -95,10 +95,8 @@ img {
 }
 
 .boks3 {
-    width: 70em;
     box-sizing: border-box;
     max-width: 100%;
-    display: inline-block;
     margin: auto;
     position: relative;
     display: inline-block;
