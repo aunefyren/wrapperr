@@ -2,8 +2,9 @@
 ## Introduction
 A website and API for collecting Plex user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). Yes, you need Tautulli to have been running beforehand and currently for this to work.
 ## Instructions
-There are multiple settings you must configure! They will be stored in config/config.json, but can be configured easily at <b>you-domain-or-ip.com/admin</b>.
+This is a web-based platform. Place it in a webserver like Apache or Nginx and make sure it processes PHP content.
 
+There are multiple settings you must configure! They will be stored in config/config.json, but can be configured easily at <b>you-domain-or-ip.com/admin</b>.
 
 PHP will have issues with this API based on the results you want. If you have a large time frame for your wrapped period and there is a huge amount of Tautulli entries you can have multiple issues.
 In your php.ini file you may have to change:

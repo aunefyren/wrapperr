@@ -85,7 +85,6 @@ img {
 .boks2 {
     width: 30em;
     max-width: 100%;
-    float: left;
     margin: auto;
     position: relative;
     vertical-align: top;
@@ -96,7 +95,7 @@ img {
 
 .boks3 {
     box-sizing: border-box;
-    max-width: 100%;
+    width: 100%;
     margin: auto;
     position: relative;
     display: inline-block;
