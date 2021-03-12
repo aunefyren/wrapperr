@@ -1,11 +1,17 @@
+html {
+    height: 100%;
+    margin: 0;
+}
 
 body {
   padding: 0;
-  margin: auto;
+  margin: 0;
+  height: 100%;
   font-family: 'Roboto', serif;
   font-weight: normal;
   background: #a2d1d0;
   box-sizing: border-box;
+  padding-bottom:2em;
 }
 
 h1{
@@ -52,6 +58,7 @@ p{
     font-size: 1.25em;
     color: #ffffff;
     text-align: center;
+    margin: 0;
 }
 
 img {
@@ -75,7 +82,6 @@ img {
 
 .boks {
   margin: auto;
-  min-height: 50em;
   width: 100%;
   align-items: center;
   text-align: center;
@@ -349,4 +355,13 @@ form {
 }
 input[type="checkbox" i] {
     transform: scale(1.5);
+}
+
+.footer {
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  height: 2em;
+  color: white;
+  text-align: center;
 }

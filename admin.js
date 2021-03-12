@@ -167,6 +167,10 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<input style="background-color: lightgrey;" type="button" class="form-control btn" id="test_connection" onclick="test_tautulli_connection()" value="Test Tautulli connection" />';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<input type="submit" class="form-control btn" id="form_button" value="Save" required />';
     html += '</div>';
 
@@ -288,6 +292,55 @@ function set_tautulli_details(back) {
 
     html += '</form>';
     document.getElementById("setup").innerHTML = html;
+}
+
+function test_tautulli_connection() {
+    var button = document.getElementById('test_connection');
+    button.style.backgroundColor = 'lightgrey';
+
+    ssl_temp = document.getElementById('ssl').checked;
+    ip_temp = document.getElementById('tautulli_ip').value;
+    root_temp = document.getElementById('tautulli_root').value;
+    port_temp = document.getElementById('tautulli_port').value;
+    api_temp = document.getElementById('tautulli_apikey').value;
+
+    if(ssl_temp) {
+        var prefix = 'https://';
+    } else {
+        var prefix = 'http://';
+    }
+
+    if(root_temp == "") {
+        var suffix = '';
+    } else {
+        var suffix = '/' + root_temp + '/';
+    }
+
+    if(port_temp == "") {
+        url = prefix + ip_temp + suffix + '/api/v2';
+    } else {
+        url = prefix + ip_temp + ':' + port_temp + suffix + '/api/v2';
+    }
+
+    config_form = {"url" : url, "ssl" : ssl_temp, "apikey" : api_temp};
+
+    var config_data = JSON.stringify(config_form);
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            var result = JSON.parse(this.responseText);
+            if(!result.error) {
+                button.style.backgroundColor = '#79A04F';
+            } else {
+                button.style.backgroundColor = '#F1909C';
+            }
+        }
+    };
+    xhttp.withCredentials = true;
+    console.log(url);
+    xhttp.open("post", 'api/get_connection.php');
+    xhttp.send(config_data);
 }
 
 function set_tautulli_last(back) {

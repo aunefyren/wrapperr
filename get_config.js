@@ -40,6 +40,7 @@ function get_config() {
             var result = JSON.parse(this.responseText);
             if(result.error) {
                 alert(result.message);
+                document.getElementById('password').value = '';
             } else {
                 tautulli_apikey = result.data.tautulli_apikey;
                 tautulli_ip = result.data.tautulli_ip;

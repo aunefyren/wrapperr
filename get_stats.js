@@ -46,8 +46,11 @@ function load_page(data){
 
     var search_box = document.getElementById("search_input");
     var login_content = document.getElementById("login_content");
+    var footer = document.getElementById("footer");
     search_box.style.display = "none";
     login_content.style.display = "none";
+    footer.style.display = "none";
+
 
     load_introduction();
 

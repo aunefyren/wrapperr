@@ -34,7 +34,7 @@ if(!empty($data)){
 // Get user ID
 $id = tautulli_get_user($p_identity);
 if (!$id) {
-    echo json_encode(array("message" => "No user found with that email.", "error" => true));
+    echo json_encode(array("message" => "No user found.", "error" => true));
     exit(0);
 }
 
@@ -55,7 +55,7 @@ if($config->use_cache) {
 // Get user name
 $name = tautulli_get_name($id);
 if(!$name) {
-    echo json_encode(array("message" => "Could not find username.", "error" => "true"));
+    echo json_encode(array("message" => "Could not find username.", "error" => true));
     exit(0);
 }
 
@@ -137,10 +137,19 @@ function tautulli_get_user($input) {
     global $arrContextOptions;
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_users";
 
-    if($config->ssl) {
-        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
-    } else {
-        $response = json_decode(file_get_contents($url));
+    try {
+        if($config->ssl) {
+            @$response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+        } else {
+            @$response = json_decode(file_get_contents($url));
+        }
+
+        if(!isset($response)) {
+            throw new Exception('Could not reach Tautulli.');
+        }
+    } catch (Exception $e) {
+        echo json_encode(array("message" => $e->getMessage(), "error" => true));
+        exit(0);
     }
 
     for ($i = 0; $i < count($response->response->data); $i++) {
