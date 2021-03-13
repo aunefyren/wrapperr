@@ -106,6 +106,10 @@ function set_password(back) {
 }
 
 function set_tautulli(back) {
+
+    var footer = document.getElementById("footer");
+    footer.style.display = "none";
+
     topFunction();
     if(!back) {
         if(document.getElementById('password').value == document.getElementById('password_2').value) {
