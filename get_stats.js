@@ -41,7 +41,7 @@ function load_page(data){
         $('#results_error').html(results.message);
         loading_icon.style.display = "none";
         search_button("SEARCH");
-        exit(1);
+        return
     }
 
     var search_box = document.getElementById("search_input");
@@ -50,7 +50,6 @@ function load_page(data){
     search_box.style.display = "none";
     login_content.style.display = "none";
     footer.style.display = "none";
-
 
     load_introduction();
 
@@ -64,7 +63,6 @@ function load_page(data){
     if(!results.year_stats.error && functions.get_year_stats) {
         load_users();
     }
-
 
     load_outro();
 }
@@ -110,99 +108,32 @@ function load_movies() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<div class='boks2'>";
-                    text += "<div class='status' id='list3'>";
-                        text += "<div class='stats'>";
-                            text += "<div class='status-title'>Your top movies</div>";
-                            text += "<div class='stats-list'>";
-                                for(i = 0; (i < results.user.user_movies.data.movies.length && i < 10); i++) {
-                                    text += "<div class='item'>";
-                                        text += "<div class='number'>";
-                                            text += i+1 + ". ";
-                                        text += "</div>";
 
-                                        text += "<div class='movie_name'><b>";
-                                            text += results.user.user_movies.data.movies[i].title;
-                                            var movie_hour = time_hours(results.user.user_movies.data.movies[i].duration)
-                                            text += "</b> (" + results.user.user_movies.data.movies[i].year + ")<br>" + movie_hour[0] + " hours, " + movie_hour[1] + " minutes<br>" + results.user.user_movies.data.movies[i].plays + " plays";
-                                        text += "</div>";
-                                    text += "</div>";
-                                }
-                            text += "</div>";
-                        text += "</div>";
-                    text += "</div>";
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_movies.data.movies, "Your top movies");
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
 
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                            text += "<div class='stats'>";
-                                var str = JSON.stringify(results.user.user_movies.data.user_movie_finishing_percent);
-                                var percent = str.split('.');
-                                text += "<b>Your average movie finishing percentage was " + percent[0] + "%</b>";
-                                if(percent[0] > 89) {
-                                    text += '<br><br><img src="assets/img/champion.svg" style="margin: auto; display: block; width: 15em;">';
-                                }
-                                text += "<br><br>You're not watching the credits like a nerd, are you?";
-                            text += "</div>";
-                        text += "</div>";
+                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, false);
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-
-                            var str = JSON.stringify(results.user.user_movies.data.user_movie_most_paused.paused_counter / 60);
-                            var minutes = str.split('.');
-
-                            if(minutes[0] > 0) {
-                            text += "<div class='stats'>";
-                                text += "Your longest movie pause was watching <br><b>" + results.user.user_movies.data.user_movie_most_paused.title + " (" + results.user.user_movies.data.user_movie_most_paused.year + ")</b>";
-
-                                text += "<br><br>It was paused for " + minutes[0] + " minutes...";
-                            text += "</div>";
-                            } else {
-                                text += "<div class='stats'>";
-                                    text += "<b>Bladder of steel</b>";
-                                    text += '<br><br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
-                                    text += "<br>You never paused a single movie.";
-                                text += "</div>";
-                            }
-                        text += "</div>";
+                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, false);
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                            text += "<div class='stats'>";
-                                text += "The oldest movie you watched was <br><b>" + results.user.user_movies.data.user_movie_oldest.title + " (" + results.user.user_movies.data.user_movie_oldest.year + ")</b><br>";
-                                if(results.user.user_movies.data.user_movie_oldest.year < 1950) {
-                                    text += "<br>I didn't even know they made movies back then.";
-                                    text += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
-                                } else if(results.user.user_movies.data.user_movie_oldest.year < 1975) {
-                                    text += "<br>Did it even have color?";
-                                    text += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
-                                } else if(results.user.user_movies.data.user_movie_oldest.year < 2000) {
-                                    text += "<br>Was it a 4K, UHD, 3D, Dolby Atmos remaster?";
-                                } else {
-                                    text += "<br>Enjoying the classics, huh?";
-                                }
-                            text += "</div>";
-                        text += "</div>";
+                        text += oldest_movie(results.user.user_movies.data.user_movie_oldest);
                     text += "</div>";
 
                     var sum = 0;
                     for(i = 0; (i < results.user.user_movies.data.movies.length); i++) {
                         sum += results.user.user_movies.data.movies[i].duration;
                     }
-                    var sum_split = time_hours(sum);
+
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                            text += "<div class='stats'>";
-                                text += "You spent <b>" + sum_split[0] + " hours and " + sum_split[1] + " minutes</b>";
-                                text += " watching movies";
-                                text += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
-                            text += "</div>";
-                        text += "</div>";
+                        text += you_spent(sum, 'movies');
                     text += "</div>";
 
                 text += "</div>";
@@ -222,65 +153,19 @@ function load_movies() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<div class='boks2'>";
-                    text += "<div class='status' id='list3'>";
-                        text += "<div class='stats'>";
-                            text += "<div class='status-title'>Your movie</div>";
-                            text += "<div class='stats-list'>";
-                                for(i = 0; (i < results.user.user_movies.data.movies.length && i < 10); i++) {
-                                    text += "<div class='item'>";
-                                        text += "<div class='number'>";
-                                            text += i+1 + ". ";
-                                        text += "</div>";
 
-                                        text += "<div class='movie_name'><b>";
-                                            text += results.user.user_movies.data.movies[i].title;
-                                            var movie_hour = time_hours(results.user.user_movies.data.movies[i].duration)
-                                            text += "</b> (" + results.user.user_movies.data.movies[i].year + ")<br>" + movie_hour[0] + " hours, " + movie_hour[1] + " minutes<br>" + results.user.user_movies.data.movies[i].plays + " plays";
-                                        text += "</div>";
-                                    text += "</div>";
-                                }
-                            text += "</div>";
-                        text += "</div>";
-                    text += "</div>";
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_movies.data.movies, "Your movie");
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
 
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                            text += "<div class='stats'>";
-                                var str = JSON.stringify(results.user.user_movies.data.user_movie_finishing_percent);
-                                var percent = str.split('.');
-                                text += "<b>Your saw " + percent[0] + "%</b>";
-                                if(percent[0] > 89) {
-                                    text += '<br><br><img src="assets/img/champion.svg" style="margin: auto; display: block; width: 15em;">';
-                                }
-                                text += "<br><br>You're not watching the credits like a nerd, are you?";
-                            text += "</div>";
-                        text += "</div>";
+                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, true);
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-
-                            var str = JSON.stringify(results.user.user_movies.data.user_movie_most_paused.paused_counter / 60);
-                            var minutes = str.split('.');
-
-                            if(minutes[0] > 0) {
-                            text += "<div class='stats'>";
-                                text += "Your longest movie pause was watching <br><b>" + results.user.user_movies.data.user_movie_most_paused.title + " (" + results.user.user_movies.data.user_movie_most_paused.year + ")</b>";
-
-                                text += "<br><br>It was paused for " + minutes[0] + " minutes...";
-                            text += "</div>";
-                            } else {
-                                text += "<div class='stats'>";
-                                    text += "<b>Bladder of steel</b>";
-                                    text += '<br><br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
-                                    text += "<br>You never paused the movie.";
-                                text += "</div>";
-                            }
-                        text += "</div>";
+                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true);
                     text += "</div>";
 
                 text += "</div>";
@@ -319,27 +204,9 @@ function load_shows() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<div class='boks2'>";
-                    text += "<div class='status' id='list3' style=''>";
-                        text += "<div class='stats'>";
-                            text += "<div class='status-title'>Your top shows</div>";
-                            text += "<div class='stats-list'>";
-                            for(i = 0; (i < results.user.user_shows.data.shows.length && i < 10); i++) {
-                                text += "<div class='item'>";
-                                    text += "<div class='number'>";
-                                        text += i+1 + ". ";
-                                    text += "</div>";
 
-                                    text += "<div class='movie_name'><b>";
-                                        text += results.user.user_shows.data.shows[i].title;
-                                        var show_hour = time_hours(results.user.user_shows.data.shows[i].duration)
-                                        text += "</b><br>" + show_hour[0] + " hours, " + show_hour[1] + " minutes<br>" + results.user.user_shows.data.shows[i].plays + " plays";
-                                    text += "</div>";
-                                text += "</div>";
-                            }
-                            text += "</div>";
-                        text += "</div>";
-                    text += "</div>";
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_shows.data.shows, "Your top shows");
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -354,15 +221,9 @@ function load_shows() {
                     for(i = 0; (i < results.user.user_shows.data.shows.length); i++) {
                         sum += results.user.user_shows.data.shows[i].duration;
                     }
-                    var sum_split = time_hours(sum);
+
                     text += "<div class='boks2'>";
-                        text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                            text += "<div class='stats'>";
-                                text += "You spent <b>" + sum_split[0] + " hours and " + sum_split[1] + " minutes</b>";
-                                text += " watching shows";
-                                text += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
-                            text += "</div>";
-                        text += "</div>";
+                        text += you_spent(sum, 'shows');
                     text += "</div>";
 
                 text += "</div>";
@@ -380,34 +241,14 @@ function load_shows() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<div class='boks2'>";
-                    text += "<div class='status' id='list3' style=''>";
-                        text += "<div class='stats'>";
-                            text += "<div class='status-title'>Your show</div>";
-                            text += "<div class='stats-list'>";
-                            for(i = 0; (i < results.user.user_shows.data.shows.length && i < 10); i++) {
-                                text += "<div class='item'>";
-                                    text += "<div class='number'>";
-                                        text += i+1 + ". ";
-                                    text += "</div>";
 
-                                    text += "<div class='movie_name'><b>";
-                                        text += results.user.user_shows.data.shows[i].title;
-                                        var show_hour = time_hours(results.user.user_shows.data.shows[i].duration)
-                                        text += "</b><br>" + show_hour[0] + " hours, " + show_hour[1] + " minutes<br>" + results.user.user_shows.data.shows[i].plays + " plays";
-                                    text += "</div>";
-                                text += "</div>";
-                            }
-                            text += "</div>";
-                        text += "</div>";
-                    text += "</div>";
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_shows.data.shows, "Your show");
                 text += "</div>";
 
                 if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
                     text += "<div class='boks2'>";
-
-                    text += load_showbuddy();
-
+                        text += load_showbuddy();
                     text += "</div>";
                 }
 
@@ -433,8 +274,82 @@ function load_shows() {
     document.getElementById("search_results").innerHTML += text;
 }
 
+function oldest_movie(array) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+            html += "The oldest movie you watched was <br><b>" + array.title + " (" + array.year + ")</b><br>";
+            if(array.year < 1950) {
+                html += "<br>I didn't even know they made movies back then.";
+                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            } else if(array.year < 1975) {
+                html += "<br>Did it even have color?";
+                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            } else if(array.year < 2000) {
+                html += "<br>Was it a 4K, UHD, 3D, Dolby Atmos remaster?";
+            } else {
+                html += "<br>Enjoying the classics, huh?";
+            }
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function completion_movie(user_movie_finishing_percent, single) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+            var str = JSON.stringify(user_movie_finishing_percent);
+            var percent = str.split('.');
+            if(!single) {
+                html += "<b>Your average movie finishing percentage was " + percent[0] + "%</b>";
+            } else {
+                html += "<b>Your saw " + percent[0] + "%</b>";
+            }
+            if(percent[0] > 89) {
+                html += '<br><br><img src="assets/img/champion.svg" style="margin: auto; display: block; width: 15em;">';
+            }
+            html += "<br><br>You're not watching the credits like a nerd, are you?";
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function paused_movie(array, single) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        if(array.paused_counter > 0) {
+            var pause_time = seconds_to_time(array.paused_counter, false);
+            if(!single) {
+                html += "<div class='stats'>";
+                    html += "Your longest movie pause was watching <br><b>" + array.title + " (" + array.year + ")</b>";
+                    html += "<br><br>It was paused for " + pause_time + "...";
+                html += "</div>";
+            } else {
+                html += "<div class='stats'>";
+                    html += "One movie, but you still paused it<br>";
+                    html += "<br><br>It was paused for " + pause_time + "...";
+                html += "</div>";
+            }
+        } else {
+            html += "<div class='stats'>";
+                html += "<b>Bladder of steel</b>";
+                html += '<br><br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
+                html += "<br>You never paused a single movie.";
+            html += "</div>";
+        }
+    html += "</div>";
+
+    return html;
+}
 function load_showbuddy() {
     var html = "";
+
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
             html += "<b>Your show was " + results.user.user_shows.data.shows[0].title + "</b><br>";
@@ -446,13 +361,102 @@ function load_showbuddy() {
                     html += "And you're not alone! Your " + results.user.user_shows.data.shows[0].title + "-buddy is ";
                     html += "<b>" + results.user.user_shows.data.show_buddy.user.user + "!</b><br><br>";
                     var combined = results.user.user_shows.data.show_buddy.user.duration + parseInt(results.user.user_shows.data.shows[0].duration);
-                    var combined_2 = time_hours(combined);
+                    var combined_2 = seconds_to_time(combined);
                     html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
-                    html += "<br>Your combined efforts resulted in <b>" + combined_2[0] + " hours and " + combined_2[1] + " minutes</b> of " + results.user.user_shows.data.shows[0].title + "!</b>";
+                    html += "<br>Your combined efforts resulted in <b>" + combined_2 + "</b> of " + results.user.user_shows.data.shows[0].title + "!</b>";
                 }
             }
         html += "</div>";
     html += "</div>";
+
+    return html;
+}
+
+function you_spent(time, category) {
+    var html = "";
+
+    var time = seconds_to_time(time, false);
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+            html += "You spent <b>" + time + "</b>";
+            html += " watching " + category;
+            html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function top_list(array, title) {
+    var html = "";
+
+    html += "<div class='status' id='list3'>";
+        html += "<div class='stats'>";
+            html += "<div class='status-title'>" + title + "</div>";
+            html += "<div class='stats-list'>";
+                for(i = 0; (i < array.length && i < 10); i++) {
+                    html += "<div class='item'>";
+                        html += "<div class='number'>";
+                            html += i+1 + ". ";
+                        html += "</div>";
+
+                        html += "<div class='movie_name'><b>";
+                            html += array[i].title;
+                            html += "</b>";
+                            var movie_hour = seconds_to_time(array[i].duration, true);
+
+                            if(typeof(array[i].year) != "undefined") {
+                                html += " (" + array[i].year + ")";
+                            }
+
+                            html += "<br>" + movie_hour + "<br>" + play_plays(array[i].plays);
+                        html += "</div>";
+                    html += "</div>";
+                }
+            html += "</div>";
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function top_list_names(array, title) {
+    var html = "";
+
+    html += "<div class='status' id='list3'>";
+        html += "<div class='stats'>";
+            html += "<div class='status-title'>" + title + "</div>";
+            html += "<div class='stats-list'>";
+            for(i = 0; i < 10 && i < array.length; i++) {
+                if(i == 0) {
+                    html += "<div class='item gold'>";
+                } else if(i == 1) {
+                    html += "<div class='item silver'>";
+                } else if(i == 2) {
+                    html += "<div class='item bronze'>";
+                } else {
+                    html += "<div class='item'>";
+                }
+                    html += "<div class='number'>";
+                        html += i+1 + ". ";
+                    html += "</div>";
+
+                    if(array[i].user == results.user.name) {
+                        html += "<div class='name you'>";
+                            html += array[i].user;
+                        html += "</div>";
+                    }else {
+                        html += "<div class='name'>";
+                            html += array[i].user;
+                        html += "</div>";
+                    }
+                html += "</div>";
+            }
+            html += "</div>";
+        html += "</div>";
+    html += "</div>";
+
     return html;
 }
 
@@ -468,59 +472,31 @@ function load_users() {
         text += "<div class='boks3'>";
 
             text += "<div class='boks2'>";
-                text += "<div class='status' id='list3'>";
-                    text += "<div class='stats'>";
-                        text += "<div class='status-title'>Top users</div>";
-                        text += "<div class='stats-list'>";
-                        for(i = 0; i < 10 && i < results.year_stats.data.users.length; i++) {
-                            if(i == 0) {
-                                text += "<div class='item gold'>";
-                            } else if(i == 1) {
-                                text += "<div class='item silver'>";
-                            } else if(i == 2) {
-                                text += "<div class='item bronze'>";
-                            } else {
-                                text += "<div class='item'>";
-                            }
-                                text += "<div class='number'>";
-                                    text += i+1 + ". ";
-                                text += "</div>";
-
-                                if(results.year_stats.data.users[i].user == results.user.name) {
-                                    text += "<div class='name you'>";
-                                        text += results.year_stats.data.users[i].user;
-                                    text += "</div>";
-                                }else {
-                                    text += "<div class='name'>";
-                                        text += results.year_stats.data.users[i].user;
-                                    text += "</div>";
-                                }
-                            text += "</div>";
-                        }
-                        text += "</div>";
-                    text += "</div>";
-                text += "</div>";
+                text += top_list_names(results.year_stats.data.users, 'Top users');
             text += "</div>";
 
             var sum_movies = 0;
             for(i = 0; (i < results.year_stats.data.top_movies.length); i++) {
                 sum_movies += results.year_stats.data.top_movies[i].duration;
             }
-            var sum_movies_split = time_days(sum_movies);
 
             var sum_shows = 0;
             for(i = 0; (i < results.year_stats.data.top_shows.length); i++) {
                 sum_shows += results.year_stats.data.top_shows[i].duration;
             }
-            var sum_shows_split = time_days(sum_shows);
+
+            var time_movies = seconds_to_time(sum_movies, false);
+            var time_shows = seconds_to_time(sum_shows, false);
+            var time_all = seconds_to_time(Math.floor(sum_movies + sum_shows), false);
+
             text += "<div class='boks2'>";
                 text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
                     text += "<div class='stats'>";
-                        text += "All the different users combined spent <b>" + sum_movies_split[0] + " days and " + sum_movies_split[1] + " hours</b>";
+                        text += "All the different users combined spent <b>" + time_movies + "</b>";
                         text += " watching movies.";
-                        text += "<br><br>And, the users spent <b>" + sum_shows_split[0] + " days and " + sum_shows_split[1] + " hours</b>";
+                        text += "<br><br>And, the users spent <b>" + time_shows + "</b>";
                         text += " watching shows.";
-                        text += "<br><br>That is <b>" + Number(sum_shows_split[0] + sum_movies_split[0]) + " days and " + Number(sum_shows_split[1] + sum_movies_split[1]) + " hours </b><br>of content!";
+                        text += "<br><br>That is <b>" + time_all + "</b><br>of content!";
                         text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
                     text += "</div>";
                 text += "</div>";
@@ -530,49 +506,11 @@ function load_users() {
         text += "<div class='boks3'>";
 
             text += "<div class='boks2'>";
-                text += "<div class='status' id='list3' style=''>";
-                    text += "<div class='stats'>";
-                        text += "<div class='status-title'>Top movies</div>";
-                        text += "<div class='stats-list'>";
-                        for(i = 0; i < 10 && i < results.year_stats.data.top_movies.length; i++) {
-                            text += "<div class='item'>";
-                                text += "<div class='number'>";
-                                    text += i+1 + ". ";
-                                text += "</div>";
-
-                                text += "<div class='movie_name'><b>";
-                                    text += results.year_stats.data.top_movies[i].title;
-                                    var movie_hour = time_hours(results.year_stats.data.top_movies[i].duration)
-                                    text += "</b><br>" + movie_hour[0] + " hours and " + movie_hour[1] + " minutes<br>" + results.year_stats.data.top_movies[i].plays + " plays";
-                                text += "</div>";
-                            text += "</div>";
-                        }
-                        text += '</div>';
-                    text += "</div>";
-                text += "</div>";
+                text += top_list(results.year_stats.data.top_movies, "Top movies");
             text += "</div>";
 
             text += "<div class='boks2'>";
-                text += "<div class='status' id='list3' style=''>";
-                    text += "<div class='stats'>";
-                        text += "<div class='status-title'>Top shows</div>";
-                        text += "<div class='stats-list'>";
-                        for(i = 0; i < 10 && i < results.year_stats.data.top_shows.length; i++) {
-                            text += "<div class='item'>";
-                                text += "<div class='number'>";
-                                    text += i+1 + ". ";
-                                text += "</div>";
-
-                                text += "<div class='movie_name'><b>";
-                                    text += results.year_stats.data.top_shows[i].title;
-                                    var show_hour = time_hours(results.year_stats.data.top_shows[i].duration)
-                                    text += "</b><br>" + show_hour[0] + " hours and " + show_hour[1] + " minutes<br>" + results.year_stats.data.top_shows[i].plays + " plays";
-                                text += "</div>";
-                            text += "</div>";
-                        }
-                        text += '</div>';
-                    text += "</div>";
-                text += "</div>";
+                text += top_list(results.year_stats.data.top_shows, "Top shows");
             text += "</div>";
 
         text += "</div>";
@@ -597,4 +535,165 @@ function load_outro() {
     text += "</div>";
 
     document.getElementById("search_results").innerHTML += text;
+}
+
+function play_plays(plays) {
+    plays = parseInt(plays);
+
+    if(plays == 1) {
+        var play_string = plays + ' play';
+    } else {
+        var play_string = plays + ' plays';
+    }
+
+    return play_string;
+}
+
+//Converting seconds to time in string
+var seconds_in_day = 86400;
+var seconds_in_hour = 3600;
+var seconds_in_minute = 60;
+
+function seconds_to_time(seconds, comma) {
+
+    if(seconds >= seconds_in_day) {
+        var time = seconds_to_days(seconds, comma);
+    } else if(seconds >= seconds_in_hour) {
+        var time = seconds_to_hours(seconds, comma);
+    } else if(seconds >= seconds_in_minute) {
+        var time = seconds_to_minutes(seconds, comma);
+    } else {
+        var time = seconds_to_seconds(seconds);
+    }
+
+    return time;
+}
+
+function seconds_to_days(seconds, comma) {
+    var day = Math.floor(seconds / seconds_in_day);
+    var rest = Math.floor(seconds % seconds_in_day);
+
+    var hour = Math.floor(rest / seconds_in_hour);
+    rest = Math.floor(rest % seconds_in_hour);
+
+    var minute = Math.floor(rest / seconds_in_minute);
+    rest = Math.floor(rest % seconds_in_minute);
+
+    var day_string = '';
+    var hour_string = '';
+    var minute_string = '';
+
+    if(day < 2) {
+        day_string += day + ' day';
+    } else {
+        day_string += day + ' days';
+    }
+
+    if(hour < 2) {
+        hour_string += hour + ' hour';
+    } else {
+        hour_string += hour + ' hours';
+    }
+
+    if(minute < 2) {
+        minute_string += minute + ' minute';
+    } else {
+        minute_string += minute + ' minutes';
+    }
+
+    if(!hour == 0) {
+        if(!minute == 0) {
+            if(comma) {
+                return day_string + ', ' + hour_string + ', ' + minute_string;
+            } else {
+                return day_string + ', ' + hour_string + ' and ' + minute_string;
+            }
+        } else {
+            if(comma) {
+                return day_string + ', ' + hour_string;
+            } else {
+                return day_string + ' and ' + hour_string;
+            }
+        }
+    } else {
+        return day_string;
+    }
+}
+
+function seconds_to_hours(seconds, comma) {
+    var hour = Math.floor(seconds / seconds_in_hour);
+    var rest = Math.floor(seconds % seconds_in_hour);
+
+    var minute = Math.floor(rest / seconds_in_minute);
+    rest = Math.floor(rest % seconds_in_minute);
+
+    var hour_string = '';
+    var minute_string = '';
+
+    if(hour < 2) {
+        hour_string += hour + ' hour';
+    } else {
+        hour_string += hour + ' hours';
+    }
+
+    if(minute < 2) {
+        minute_string += minute + ' minute';
+    } else {
+        minute_string += minute + ' minutes';
+    }
+
+    if(!minute == 0) {
+        if(comma) {
+            return hour_string + ', ' + minute_string;
+        } else {
+            return hour_string + ' and ' + minute_string;
+        }
+    } else {
+        return hour_string;
+    }
+}
+
+function seconds_to_minutes(seconds, comma) {
+    seconds = parseInt(seconds);
+
+    var minute = Math.floor(seconds / seconds_in_minute);
+    var rest = Math.floor(seconds % seconds_in_minute);
+
+    var minute_string = '';
+    var second_string = '';
+
+
+    if(minute < 2) {
+        minute_string += minute + ' minute';
+    } else {
+        minute_string += minute + ' minutes';
+    }
+
+    if(seconds < 2) {
+        second_string += rest + ' second';
+    } else {
+        second_string += rest + ' seconds';
+    }
+
+    if(!seconds == 0) {
+        if(comma) {
+            return minute_string + ', ' + second_string;
+        } else {
+            return minute_string + ' and ' + second_string;
+        }
+    } else {
+        return minute_string;
+    }
+}
+
+function seconds_to_seconds(seconds) {
+    var second_string = '';
+
+    if(seconds == 1) {
+        second_string += seconds + ' second';
+    } else {
+        second_string += seconds + ' seconds';
+    }
+
+    return second_string;
 }

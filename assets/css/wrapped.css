@@ -1,17 +1,19 @@
 html {
     height: 100%;
+    width: 100%;
     margin: 0;
+    box-sizing: border-box;
 }
 
 body {
   padding: 0;
   margin: 0;
   height: 100%;
+  width: 100%;
   font-family: 'Roboto', serif;
   font-weight: normal;
   background: #a2d1d0;
   box-sizing: border-box;
-  padding-bottom:2em;
 }
 
 h1{
@@ -78,6 +80,13 @@ img {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+.content_landing {
+    width: 100%;
+    margin: 0;
+    height: 95%;
+    box-sizing: border-box;
 }
 
 .boks {

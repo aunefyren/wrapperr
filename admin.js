@@ -338,7 +338,6 @@ function test_tautulli_connection() {
         }
     };
     xhttp.withCredentials = true;
-    console.log(url);
     xhttp.open("post", 'api/get_connection.php');
     xhttp.send(config_data);
 }

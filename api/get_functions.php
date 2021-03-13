@@ -3,7 +3,7 @@ $data = json_decode(file_get_contents("php://input"));
 $config = json_decode(file_get_contents("../config/config.json"));
 
 if (empty($config)) {
-    echo json_encode(array("message" => "Config not configured.", "error" => true));
+    echo json_encode(array("message" => "Plex Wrapped is not configured.", "error" => true));
     exit(0);
 }
 

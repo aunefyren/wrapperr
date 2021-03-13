@@ -10,7 +10,7 @@ $arrContextOptions= [
 ];
 
 if (empty($config)) {
-    echo json_encode(array("message" => "Config not configured.", "error" => true));
+    echo json_encode(array("message" => "Plex Wrapped is not configured.", "error" => true));
     exit(0);
 }
 
@@ -71,7 +71,7 @@ if($config->get_user_show_stats) {
     $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
 }
 
-if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_shows["data"])) {
+if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_shows["data"]["shows"])) {
     $user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("user" => tautulli_get_user_show_buddy($id, $user_shows["data"]["shows"]), "error" => False, "Message" => "Buddy is loaded."));
 } else {
     $user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
@@ -157,7 +157,8 @@ function tautulli_get_user($input) {
             return $response->response->data[$i]->user_id;
         }
     }
-    return False;
+
+    return false;
 }
 
 function tautulli_get_name($id) {
@@ -172,11 +173,14 @@ function tautulli_get_name($id) {
         $response = json_decode(file_get_contents($url));
     }
 
-    $name = $response->response->data->data[0]->friendly_name;
-    if($name != "" && $name != Null) {
-        return $name;
+    if(!empty($response->response->data->data[0]->friendly_name)) {
+        return $response->response->data->data[0]->friendly_name;
+    } else if(!empty($response->response->data->data[0]->username)) {
+        return $response->response->data->data[0]->username;
+    } else if(!empty($response->response->data->data[0]->email)) {
+        return $response->response->data->data[0]->email;
     } else {
-        return False;
+        return false;
     }
 }
 
