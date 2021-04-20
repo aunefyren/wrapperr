@@ -8,7 +8,7 @@ function get_stats() {
     //var p_identity = p_identity.replace(/[&\/\\#,+()$~%:*?<>{}]/g, '');
 
     stats_form = {
-                        "p_identity" : p_identity
+                        "p_identity" : p_identity.trim()
                    };
 
     var stats_data = JSON.stringify(stats_form);

@@ -78,7 +78,11 @@ if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_
 }
 
 if($config->get_year_stats) {
-    $year_stats = array("data" => tautulli_get_year_stats($id), "error" => False, "Message" => "Year stats are loaded.");
+    if($config->use_cache) {
+        $year_stats = array("data" => tautulli_get_year_stats_cache($id), "error" => False, "Message" => "Year stats are loaded.");
+    } else {
+        $year_stats = array("data" => tautulli_get_year_stats($id), "error" => False, "Message" => "Year stats are loaded.");
+    }
 } else {
     $year_stats = array("data" => array(), "message" => "Disabled in config.", "error" => True);
 }
@@ -437,6 +441,25 @@ function tautulli_get_user_show_buddy($id, $shows) {
     }
 
     return $buddy;
+}
+
+function tautulli_get_year_stats_cache($id) {
+    $cache = json_decode(file_get_contents("../config/cache.json"));
+    global $config;
+
+    if(!empty($cache)) {
+        for($i = 0; $i < count($cache); $i++) {
+            $now = new DateTime('NOW');
+            $then = new DateTime($cache[$i]->date);
+            $diff = $now->diff($then);
+
+            if($diff->format('%D') < $config->cache_age_limit) {
+                return $cache[$i]->year_stats->data;
+            }
+        }
+    }
+
+    return tautulli_get_year_stats($id);
 }
 
 function tautulli_get_year_stats($id) {

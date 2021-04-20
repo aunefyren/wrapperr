@@ -85,7 +85,7 @@ img {
 .content_landing {
     width: 100%;
     margin: 0;
-    height: 95%;
+    height: auto;
     box-sizing: border-box;
 }
 
