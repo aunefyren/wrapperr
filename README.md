@@ -1,6 +1,26 @@
 # Plex Wrapped
 ## Introduction
-A website and API for collecting Plex user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). Yes, you need Tautulli to have been running beforehand and currently for this to work.
+
+A website-based platform and API for collecting Plex user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed a stat-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
+
+![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_01.PNG?raw=true)
+
+### Features
+- Custom timeframes
+- Caching of results
+- Friendly, dynamic display for statistics with nice illustrations
+- Email and username search
+- Admin page with authentication for settings
+- Pre-caching of results
+
+![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_02.PNG?raw=true)
+
+### Credit
+- Beautiful illustrations downloaded from https://freewebillustrations.com/
+- Amazing statistics gathered using [Tautulli](https://github.com/Tautulli/Tautulli)
+
+![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_03.PNG?raw=true)
+
 ## Instructions
 This is a web-based platform. Place it in a webserver like Apache or Nginx and make sure it processes PHP content.
 
