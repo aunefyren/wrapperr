@@ -5,7 +5,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_01.PNG?raw=true)
 
-###Features
+### Features
 - Custom timeframes
 - Caching of results
 - Friendly, dynamic display for statistics with nice illustrations
