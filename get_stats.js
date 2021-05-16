@@ -73,11 +73,11 @@ function load_introduction() {
 
         text += "<div class='boks3'>";
 
-            text += "<div class='boks2' style='vertical-align: middle;'>";
+            text += "<div class='boks2'>";
                 text += '<img src="assets/img/finished-illustration.svg" style="width:100%; ">';
             text += "</div>";
 
-            text += "<div class='boks2' style='vertical-align: middle;'>";
+            text += "<div class='boks2'>";
                 text += "<br>";
                 text += "<h1 style='font-size:3em; display: block;'>Hey there, " + results.user.name + "!</h1>";
                 text += "<br><br><br><br>";
@@ -100,7 +100,7 @@ function load_movies() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Movies!</h1>";
+                text += "<h1>Let's look at some movies.</h1>";
                 text += "<br><br><br>";
                 text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's a lot of movies!</h2><p>(or not, I am pre-programmed to say that)</p>"
 
@@ -146,7 +146,7 @@ function load_movies() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Movies!</h1>";
+                text += "<h1>Let's look at some movies.</h1>";
                 text += "<br><br><br>";
                 text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movie. You know what you like!</h2><p>(at least you tried it out)</p>";
                 text += "<br><br>";
@@ -179,7 +179,7 @@ function load_movies() {
 
             text += "<div class='boks3'>";
                 text += "<div class='status'>";
-                    text += "<h1>Movies!</h1>";
+                    text += "<h1>Let's look at some movies.</h1>";
                     text += "<br><br><br>";
                     text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it out)</p>"
                     text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
@@ -199,7 +199,7 @@ function load_shows() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Shows!</h1>";
+                text += "<h1>Now, let's have a look at some shows!</h1>";
                 text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " different shows.</h2><p>(No, watching The Office twice in a year doesn't count as two shows)</p>"
             text += "</div>";
 
@@ -236,7 +236,7 @@ function load_shows() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Shows!</h1>";
+                text += "<h1>Now, let's have a look at some shows!</h1>";
                 text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " show.</h2><p>(Better not be that same one again...)</p>"
             text += "</div>";
 
@@ -261,7 +261,7 @@ function load_shows() {
 
             text += "<div class='boks3'>";
                 text += "<div class='status'>";
-                    text += "<h1>Shows!</h1>";
+                    text += "<h1>Now, let's have a look at some shows!</h1>";
                     text += "<br><br><br>";
                     text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it out)</p>"
                     text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
@@ -465,7 +465,7 @@ function load_users() {
     var text = "";
 
     text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:	#a2d1d0;'>";
-        text += "<h1>Top contenders!</h1>";
+        text += "<h1>Finally, let's look at the top users, movies and shows!</h1>";
         text += "<br><br><br><br><h2>It's okay to feel shame if you are on the list.</h2><p>(or missing from it...)</p>"
         text += "<br><br>";
 
@@ -525,11 +525,10 @@ function load_outro() {
 
     text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 15em; padding-top: 15em; height:10em; background-color:#39393A;'>";
         text += "<div class='boks3'>";
-            text += "<div class='boks2' style='vertical-align: middle;'>";
+            text += "<div class='boks2'>";
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
-
-            text += "<div class='boks2' style='vertical-align: middle;'>";
+            text += "<div class='boks2' style='margin-top:5em;'>";
                 text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodybye.</h4>";
             text += "</div>";
         text += "</div>";

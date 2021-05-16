@@ -178,7 +178,7 @@ img {
   color: white;
   font-size: 1.25em;
   box-sizing: border-box;
-  max-width: 40em;
+  max-width: 100%;
 }
 
 .stats-list {
