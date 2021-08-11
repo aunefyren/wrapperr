@@ -46,7 +46,7 @@ function cache() {
         <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
 
             <div class='form-group'>
-                <img id="loading_icon" src="assets/loading.gif" style="padding: 1em;width: 2em; height: 2em; display:inline-block;">
+                <img id="loading_icon" src="assets/loading.gif" style="padding: 1em;width: 4em; height: 4em; display:inline-block;">
             </div>
 
             <h3>Caching results</h3>
