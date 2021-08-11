@@ -45,7 +45,7 @@ if($config->use_cache) {
         $then = new DateTime($cache->date);
         $diff = $now->diff($then);
 
-        if($diff->format('%D') < $config->cache_age_limit) {
+        if($diff->format('%a') < $config->cache_age_limit) {
             echo json_encode($cache);
             exit(0);
         }
@@ -79,9 +79,9 @@ if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_
 
 if($config->get_year_stats) {
     if($config->use_cache) {
-        $year_stats = array("data" => tautulli_get_year_stats_cache($id), "error" => False, "Message" => "Year stats are loaded.");
+        $year_stats = array("data" => tautulli_get_year_stats_cache($id), "error" => False, "message" => "Year stats are loaded.");
     } else {
-        $year_stats = array("data" => tautulli_get_year_stats($id), "error" => False, "Message" => "Year stats are loaded.");
+        $year_stats = array("data" => tautulli_get_year_stats($id), "error" => False, "message" => "Year stats are loaded.");
     }
 } else {
     $year_stats = array("data" => array(), "message" => "Disabled in config.", "error" => True);
@@ -450,10 +450,10 @@ function tautulli_get_year_stats_cache($id) {
     if(!empty($cache)) {
         for($i = 0; $i < count($cache); $i++) {
             $now = new DateTime('NOW');
-            $then = new DateTime($cache[$i]->date);
-            $diff = $now->diff($then);
+            $then = new DateTime($cache[$i]->year_stats->data->origin_date);
+            $diff = $then->diff($now);
 
-            if($diff->format('%D') < $config->cache_age_limit) {
+            if($diff->format('%a') < $config->cache_age_limit && !$cache[$i]->year_stats->error) {
                 return $cache[$i]->year_stats->data;
             }
         }
@@ -592,6 +592,8 @@ function tautulli_get_year_stats($id) {
     $duration = array_column($users, 'duration');
     array_multisort($duration, SORT_DESC, $users);
 
-    return array("top_movies" => $movies, "users" => $users, "top_shows" => $shows);
+    $now = new DateTime('NOW');
+
+    return array("origin_date" => $now->format('Y-m-d'), "top_movies" => $movies, "users" => $users, "top_shows" => $shows);
 }
 ?>
