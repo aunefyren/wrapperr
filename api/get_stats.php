@@ -23,9 +23,9 @@ $connection = create_url();
 
 //Declare given email
 if(!empty($data)){
-	$p_identity = htmlspecialchars($data->p_identity);
+	$p_identity = htmlspecialchars(trim($data->p_identity));
 } else if(isset($_GET["p_identity"])) {
-	$p_identity = htmlspecialchars($_GET["p_identity"]);
+	$p_identity = htmlspecialchars(trim($_GET["p_identity"]));
 } else {
     echo json_encode(array("message" => "No input provided.", "error" => true));
     exit(0);
@@ -157,7 +157,7 @@ function tautulli_get_user($input) {
     }
 
     for ($i = 0; $i < count($response->response->data); $i++) {
-        if ($response->response->data[$i]->email == $input || $response->response->data[$i]->username == $input) {
+        if (strtolower($response->response->data[$i]->email) == strtolower($input) || strtolower($response->response->data[$i]->username) == strtolower($input)) {
             return $response->response->data[$i]->user_id;
         }
     }
@@ -191,7 +191,12 @@ function tautulli_get_name($id) {
 function check_cache() {
     global $config;
     global $id;
-    $cache = json_decode(file_get_contents("../config/cache.json"));
+	
+	$path = "../config/cache.json";
+	if(!file_exists($path)) {
+		fopen($path, "w");
+	}	
+    $cache = json_decode(file_get_contents($path));
 
     if(!empty($cache)) {
         for($i = 0; $i < count($cache); $i++) {

@@ -1,7 +1,12 @@
 <?php
 $path = "../config/config.json";
 $path2 = "../config/cache.json";
+
 $data = json_decode(file_get_contents("php://input"));
+
+if(!file_exists($path)) {
+	fopen($path, "w");
+}	
 $config = json_decode(file_get_contents($path));
 
 if(!empty($data)) {

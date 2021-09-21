@@ -14,7 +14,7 @@ function search_box() {
 
             <div class='form-group'>
 
-                <label for="timeout" title="">Timeout between each call</label>
+                <label for="timeout" title="">Timeout between each call in seconds</label>
                 <input type="number" class='form-control' name="timeout" id="timeout" value='10' autocomplete="off" required />
 
             </div>
@@ -49,7 +49,7 @@ function cache() {
                 <img id="loading_icon" src="assets/loading.gif" style="padding: 1em;width: 4em; height: 4em; display:inline-block;">
             </div>
 
-            <h3>Caching results</h3>
+            <h3>Caching results:</h3>
 
             <div id="cache_results">
             </div>

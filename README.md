@@ -25,7 +25,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 ## Instructions
 This is a web-based platform. Place it in a webserver like Apache or Nginx and make sure it processes PHP content.
 
-There are multiple settings you must configure! They will be stored in config/config.json, but can be configured easily at <b>you-domain-or-ip/admin.html</b>.
+There are multiple settings you must configure! They will be stored in config/config.json, but can be configured easily at <b>your-domain-or-ip/admin.html</b>.
 
 PHP will have issues with this API based on the results you want. If you have a large time frame for your wrapped period and there is a huge amount of Tautulli entries you can have multiple issues.
 In your php.ini file you may have to change:
@@ -37,11 +37,11 @@ You need to give PHP permission to edit files in the directory called <b>config<
 
 The cache is stored at config/cache.json, but can be cleared using the admin menu.
 
-Your password is stored hashed in the config.json.
+Your password is hashed and stored in the config.json.
 
-If you visit <b>you-domain-or-ip/caching.html</b> you can do a pre-caching of a set of users. This is very useful if you want to prepare for a lot of traffic.
+If you visit <b>your-domain-or-ip/caching.html</b> you can do a pre-caching of a set of users. This is very useful if you want to prepare for a lot of traffic.
 
 ## Need help?
-If you have any issues feel free to contact me. I am always trying to improve the project. If I can't, many people on several forums (including /r/plex) might be able to assist you.
+If you have any issues feel free to contact me. I am always trying to improve the project. If I can't, many people on several forums (including [/r/plex](https://www.reddit.com/r/plex)) might be able to assist you.
 
 <b>Goodybye.</b>

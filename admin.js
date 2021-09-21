@@ -125,27 +125,27 @@ function set_tautulli(back) {
 
     html += '<div class="form-group">';
     html += '<label for="tautulli_apikey" title="The API key needed to interact with Tautulli. Commonly found at Tautulli->Settings->Web Interface->API Key.">Tautulli API key</label>';
-    html += '<input type="text" class="form-control" id="tautulli_apikey" value="' + tautulli_apikey + '" autocomplete="off" required /><br>';
+    html += '<input type="text" class="form-control" id="tautulli_apikey" value="' + tautulli_apikey + '" autocomplete="off" required placeholder="l0NgWe1rDAp1K3y..." /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="tautulli_ip" title="The IP address or domain that connects to Tautulli. No subfolders as this is another setting, but subdomains can be defined.">IP or domain for Tautulli connection</label>';
-    html += '<input type="text" class="form-control" id="tautulli_ip" value="' + tautulli_ip + '" required /><br>';
+    html += '<input type="text" class="form-control" id="tautulli_ip" value="' + tautulli_ip + '" required placeholder="mycooldomain.plex" /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="tautulli_port" title="The port Tautulli uses for connections. Typically empty if a domain is used.">Port for Tautulli (optional)</label>';
-    html += '<input type="text" class="form-control" id="tautulli_port" value="' + tautulli_port + '" /><br>';
+    html += '<input type="text" class="form-control" id="tautulli_port" value="' + tautulli_port + '" placeholder="8181" /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="tautulli_length" title="The max amount of items Tautulli responds with. Typically doesn\'t need to be changed, but with server-wide stats it could limit results if the amount of items needed are extreme.">Tautlli item length</label>';
-    html += '<input type="number" class="form-control" id="tautulli_length" value="' + tautulli_length + '" autocomplete="off" required /><br>';
+    html += '<label for="tautulli_length" title="The max amount of entries Tautulli responds with during API calls. Typically doesn\'t need to be changed, but with server-wide stats it could limit results if the amount of entries in your Tautulli is extreme.">Tautlli item length</label>';
+    html += '<input type="number" min="0" class="form-control" id="tautulli_length" value="' + tautulli_length + '" autocomplete="off" placeholder="5000" required /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="tautulli_root" title="Subfolder for Tautulli, no slashes needed at the beginning or end. It is the folder accessed after the main IP/domain. For example: tautulli.com/subfolder.">Root for Tautulli (optional)</label>';
-    html += '<input type="text" class="form-control" id="tautulli_root" value="' + tautulli_root + '" autocomplete="off" /><br>';
+    html += '<input type="text" class="form-control" id="tautulli_root" value="' + tautulli_root + '" autocomplete="off" placeholder="tautulli"/><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
@@ -158,13 +158,13 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="library_id_movies" title="The ID for your chosen movie library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the url as section_id.">ID for movie-library in Tautulli</label>';
-    html += '<input type="number" class="form-control" id="library_id_movies" value="' + library_id_movies + '" autocomplete="off" required /><br>';
+    html += '<label for="library_id_movies" title="The ID for your chosen movie library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for movie-library in Tautulli</label>';
+    html += '<input type="number" min="0" class="form-control" id="library_id_movies" value="' + library_id_movies + '" autocomplete="off" required placeholder="1" /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="library_id_shows" title="The ID for your chosen show library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the url as section_id.">ID for show-library in Tautulli</label>';
-    html += '<input type="number" class="form-control" id="library_id_shows" value="' + library_id_shows + '" autocomplete="off" required /><br>';
+    html += '<label for="library_id_shows" title="The ID for your chosen show library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for show-library in Tautulli</label>';
+    html += '<input type="number" min="0" class="form-control" id="library_id_shows" value="' + library_id_shows + '" autocomplete="off" required placeholder="2" /><br> ';
     html += '</div>';
 
     html += '<div class="form-group">';
@@ -279,11 +279,11 @@ function set_tautulli_details(back) {
 
     html += '<div class="form-group">';
     html += '<label for="cache_age_limit" title="How old the cache can be in days before it expires.">Amount of days cache is valid (optional)<br>';
-    html += '<input type="number" class="form-control" id="cache_age_limit" value="' + cache_age_limit + '" /></label>';
+    html += '<input type="number" min="0" class="form-control" id="cache_age_limit" value="' + cache_age_limit + '" placeholder="7" /></label>';
     html += '</div>';
 
-    html += '<div class="form-group" title="Clear the cache to include the newest settings.">';
-    html += '<label for="clear_cache">Clear cache (optional)<br>';
+    html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
+    html += '<label for="clear_cache">Clear cache now (optional)<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
