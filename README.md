@@ -27,7 +27,7 @@ This is a web-based platform. Place it in a webserver like Apache or Nginx and m
 
 There are multiple settings you must configure! They will be stored in config/config.json, but can be configured easily at <b>your-domain-or-ip/admin.html</b>.
 
-PHP will have issues with this API based on the results you want. If you have a large time frame for your wrapped period and there is a huge amount of Tautulli entries you can have multiple issues.
+PHP will have issues with this API based on the results you want. If you have a large time frame for your wrapped period and there are a huge amount of Tautulli entries you can have multiple issues.
 In your php.ini file you may have to change:
 - max_execution_time=<b>enough seconds for the script to finish</b>
 - memory_limit=<b>enough M for the script to handle JSON data</b>
