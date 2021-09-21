@@ -267,6 +267,15 @@ function set_tautulli_details(back) {
     }
     html += '/><br>';
     html += '</div>';
+	
+	html += '<div class="form-group">';
+    html += '<label for="use_logs" title="Logs every API request into a log-file in the config folder. ID for Wrapped request included.">Log API calls (optional)<br>';
+    html += '<input type="checkbox" class="form-control" id="use_logs" ';
+    if(use_logs) {
+        html += 'checked="' + use_logs + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="use_cache" title="Caches your results in cache.json for later use.">Cache results for later use (optional)<br>';
@@ -357,6 +366,7 @@ function set_tautulli_last(back) {
         get_user_show_buddy = document.getElementById('get_user_show_buddy').checked;
         get_year_stats = document.getElementById('get_year_stats').checked;
         use_cache = document.getElementById('use_cache').checked;
+		use_logs = document.getElementById('use_logs').checked;
         cache_age_limit = document.getElementById('cache_age_limit').value;
 
         set_config();

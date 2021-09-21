@@ -7,6 +7,14 @@ if(empty($data)) {
     exit(0);
 }
 
+// Log API request if enabled
+if($config->use_logs) {
+	if(!log_activity()) {
+		echo json_encode(array("message" => "Failed to log event.", "error" => true));
+		exit(0);
+	}
+}
+
 $arrContextOptions= [
     'ssl' => [
         'verify_peer'=> false,
@@ -36,4 +44,24 @@ try {
 
 echo json_encode(array("error" => false, "message" => "Tautulli reached.", "data" => $response));
 exit(0);
+
+function log_activity() {
+	$date = date('Y-m-d H:i:s');
+	
+	$path = "../config/wrapped.log";
+	if(!file_exists($path)) {
+		$temp = fopen($path, "w");
+		fwrite($temp, 'Plex Wrapped');
+		fclose($temp);
+	}	
+	
+	$log_file = fopen($path, 'a');
+	fwrite($log_file, PHP_EOL . $date . ' - get_connection.php');   
+	
+	if(fclose($log_file)) {
+		return True;
+	}
+	
+	return False;
+}
 ?>

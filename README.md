@@ -33,9 +33,9 @@ In your php.ini file you may have to change:
 - memory_limit=<b>enough M for the script to handle JSON data</b>
 - max_input_time=<b>enough seconds for the script to parse JSON data</b>
 
-You need to give PHP permission to edit files in the directory called <b>config</b>.
+You need to give PHP permission to read and write to files in the directory called <b>config</b>.
 
-The cache is stored at config/cache.json, but can be cleared using the admin menu.
+The cache is stored in config/cache.json, but can be cleared using the admin menu.
 
 Your password is hashed and stored in the config.json.
 

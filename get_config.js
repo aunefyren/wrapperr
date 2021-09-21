@@ -38,6 +38,7 @@ function get_config() {
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var result = JSON.parse(this.responseText);
+			
             if(result.error) {
                 alert(result.message);
                 document.getElementById('password').value = '';
@@ -67,6 +68,7 @@ function get_config() {
                 get_year_stats = result.data.get_year_stats;
 
                 use_cache = result.data.use_cache;
+				use_logs = result.data.use_logs;
                 cache_age_limit = result.data.cache_age_limit;
 
                 set_tautulli(true);

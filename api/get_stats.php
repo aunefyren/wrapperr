@@ -1,5 +1,10 @@
 <?php
 $data = json_decode(file_get_contents("php://input"));
+
+$path = "../config/config.json";
+if(!file_exists($path)) {
+	fopen($path, "w");
+}	
 $config = json_decode(file_get_contents("../config/config.json"));
 
 $arrContextOptions= [
@@ -36,6 +41,14 @@ $id = tautulli_get_user($p_identity);
 if (!$id) {
     echo json_encode(array("message" => "No user found.", "error" => true));
     exit(0);
+}
+
+// Log API request if enabled
+if($config->use_logs) {
+	if(!log_activity($id)) {
+		echo json_encode(array("message" => "Failed to log event.", "error" => true));
+		exit(0);
+	}
 }
 
 // Use cache
@@ -234,6 +247,26 @@ function update_cache($result) {
     $save = json_encode($cache);
     file_put_contents("../config/cache.json", $save);
     return True;
+}
+
+function log_activity($id) {
+	$date = date('Y-m-d H:i:s');
+	
+	$path = "../config/wrapped.log";
+	if(!file_exists($path)) {
+		$temp = fopen($path, "w");
+		fwrite($temp, 'Plex Wrapped');
+		fclose($temp);
+	}	
+	
+	$log_file = fopen($path, 'a');
+	fwrite($log_file, PHP_EOL . $date . ' - get_stats.php - ID: ' . $id);   
+	
+	if(fclose($log_file)) {
+		return True;
+	}
+	
+	return False;
 }
 
 function tautulli_get_user_movies($id) {

@@ -22,6 +22,7 @@ function set_config() {
                             "get_user_show_buddy" : get_user_show_buddy,
                             "get_year_stats" : get_year_stats,
                             "use_cache" : use_cache,
+							"use_logs" : use_logs,
                             "cache_age_limit" : cache_age_limit
                         }
                    };

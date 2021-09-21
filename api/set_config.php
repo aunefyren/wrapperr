@@ -23,6 +23,14 @@ if(empty($config->password)) {
 }
 
 if(password_verify($password, $config->password)) {
+	// Log API request if enabled
+	if($config->use_logs) {
+		if(!log_activity()) {
+			echo json_encode(array("message" => "Failed to log event.", "error" => true));
+			exit(0);
+		}
+	}
+	
     save_config();
     exit(0);
 } else {
@@ -57,5 +65,25 @@ function save_config() {
         echo json_encode(array("error" => true, "message" => "Changes were not saved."));
         exit(0);
     }
+}
+
+function log_activity() {
+	$date = date('Y-m-d H:i:s');
+	
+	$path = "../config/wrapped.log";
+	if(!file_exists($path)) {
+		$temp = fopen($path, "w");
+		fwrite($temp, 'Plex Wrapped');
+		fclose($temp);
+	}	
+	
+	$log_file = fopen($path, 'a');
+	fwrite($log_file, PHP_EOL . $date . ' - set_config.php');   
+	
+	if(fclose($log_file)) {
+		return True;
+	}
+	
+	return False;
 }
 ?>
