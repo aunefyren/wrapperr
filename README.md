@@ -16,9 +16,9 @@ A website-based platform and API for collecting Plex user stats within a set tim
 ![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_02.PNG?raw=true)
 
 ### Credit
-- Beautiful illustrations downloaded from https://freewebillustrations.com/
+- Beautiful illustrations downloaded from [FreeWebIllustrations](https://freewebillustrations.com)
 - Amazing statistics gathered using [Tautulli](https://github.com/Tautulli/Tautulli)
-- Wonderful loading icon from [icons8](https://icons8.com/preloaders/en/miscellaneous/hourglass/)
+- Wonderful loading icon from [icons8](https://icons8.com/preloaders/en/miscellaneous/hourglass)
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_03.PNG?raw=true)
 
