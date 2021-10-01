@@ -56,11 +56,16 @@ function load_page(data){
     if(!results.user.user_movies.error && functions.get_user_movie_stats) {
         load_movies();
     }
+	
     if(!results.user.user_shows.error && functions.get_user_show_stats) {
         load_shows();
     }
+	
+	if(!results.user.user_music.error && functions.get_user_music_stats) {
+        load_music();
+    }
 
-    if(!results.year_stats.error && functions.get_year_stats) {
+    if(!results.year_stats.error && (functions.get_year_stats_movies || functions.get_year_stats_shows || functions.get_year_stats_music)) {
         load_users();
     }
 
@@ -110,7 +115,7 @@ function load_movies() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_movies.data.movies, "Your top movies");
+                    text += top_list(results.user.user_movies.data.movies, "Your top movies", false, true);
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -155,7 +160,7 @@ function load_movies() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_movies.data.movies, "Your movie");
+                    text += top_list(results.user.user_movies.data.movies, "Your movie", false, true);
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -206,7 +211,7 @@ function load_shows() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_shows.data.shows, "Your top shows");
+                    text += top_list(results.user.user_shows.data.shows, "Your top shows", false, true);
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -243,7 +248,7 @@ function load_shows() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_shows.data.shows, "Your show");
+                    text += top_list(results.user.user_shows.data.shows, "Your show", false, true);
                 text += "</div>";
 
                 if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
@@ -272,6 +277,85 @@ function load_shows() {
     }
 
     document.getElementById("search_results").innerHTML += text;
+}
+
+//MUSIC
+function load_music() {
+	var text = "";
+	
+	var albums = [];
+	var artists = [];
+	
+	for(var i = 0; i < results.user.user_music.data.music.length; i++) {
+		var found = false;
+		
+		for(var j = 0; j < albums.length; j++) {
+			if(albums[j].title == results.user.user_music.data.music[i].parent_title && albums[j].grandparent_title == results.user.user_music.data.music[i].grandparent_title) {
+				albums[j]["plays"] = albums[j].plays + 1;
+				albums[j]["duration"] = results.user.user_music.data.music[i].duration + albums[j].duration;
+				found = true;
+				break;
+			}
+		}
+		
+		if(!found && results.user.user_music.data.music[i].parent_title != "" && results.user.user_music.data.music[i].grandparent_title != "") {
+			albums.push({"title" : results.user.user_music.data.music[i].parent_title, "parent_rating_key" : results.user.user_music.data.music[i].parent_rating_key,"grandparent_title" : results.user.user_music.data.music[i].grandparent_title, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration});
+		}
+	}
+	
+	albums.sort(function(a, b) {
+		return parseFloat(b.duration) - parseFloat(a.duration);
+	});
+	
+	for(var i = 0; i < results.user.user_music.data.music.length; i++) {
+		var found = false;
+		
+		for(var j = 0; j < artists.length; j++) {
+			if(artists[j].title == results.user.user_music.data.music[i].grandparent_title) {
+				artists[j]["plays"] = artists[j].plays + 1;
+				artists[j]["duration"] = results.user.user_music.data.music[i].duration + artists[j].duration;
+				found = true;
+				break;
+			}
+		}
+		
+		if(!found && results.user.user_music.data.music[i].grandparent_title != "") {
+			artists.push({"title" : results.user.user_music.data.music[i].grandparent_title, "grandparent_rating_key" : results.user.user_music.data.music[i].grandparent_rating_key, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration});
+		}
+	}
+	
+	artists.sort(function(a, b) {
+		return parseFloat(b.duration) - parseFloat(a.duration);
+	});
+
+    if(results.user.user_music.data.music.length > 1) {
+        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+
+            text += "<div class='boks3'>";
+                text += "<h1>Music!</h1>";
+                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.music.length + ' different tracks.</h2><p>(If you can call your taste "music"...)</p>'
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_music.data.music, "Your top tracks", true, false);
+                text += "</div>";
+				
+				text += "<div class='boks2'>";
+                    text += top_list(albums, "Your top albums", true, false);
+                text += "</div>";
+				
+				text += "<div class='boks2'>";
+                    text += top_list(artists, "Your top artists", false, false);
+                text += "</div>";
+
+            text += "</div>";
+        text += "</div>";
+
+    }
+	
+	document.getElementById("search_results").innerHTML += text;
 }
 
 function oldest_movie(array) {
@@ -388,9 +472,9 @@ function you_spent(time, category) {
     return html;
 }
 
-function top_list(array, title) {
+function top_list(array, title, music, year) {
     var html = "";
-
+	
     html += "<div class='status' id='list3'>";
         html += "<div class='stats'>";
             html += "<div class='status-title'>" + title + "</div>";
@@ -401,12 +485,18 @@ function top_list(array, title) {
                             html += i+1 + ". ";
                         html += "</div>";
 
-                        html += "<div class='movie_name'><b>";
-                            html += array[i].title;
+                        html += "<div class='movie_name'>";
+							if(music) {
+								html+= array[i].grandparent_title + "<br>";
+							}
+							
+							html += "<b>";
+							
+							html += array[i].title;
                             html += "</b>";
                             var movie_hour = seconds_to_time(array[i].duration, true);
 
-                            if(typeof(array[i].year) != "undefined") {
+                            if(typeof(array[i].year) != "undefined" && year) {
                                 html += " (" + array[i].year + ")";
                             }
 
@@ -471,47 +561,117 @@ function load_users() {
 
         text += "<div class='boks3'>";
 
-            text += "<div class='boks2'>";
-                text += top_list_names(results.year_stats.data.users, 'Top users');
-            text += "</div>";
+            if(functions.get_year_stats_leaderboard) {
 
-            var sum_movies = 0;
-            for(i = 0; (i < results.year_stats.data.top_movies.length); i++) {
-                sum_movies += results.year_stats.data.top_movies[i].duration;
-            }
+                text += "<div class='boks2'>";
+                    text += top_list_names(results.year_stats.data.users, 'Top users');
+                text += "</div>";
 
-            var sum_shows = 0;
-            for(i = 0; (i < results.year_stats.data.top_shows.length); i++) {
-                sum_shows += results.year_stats.data.top_shows[i].duration;
-            }
+                var sum_movies = 0;
+                var sum_shows = 0;
+                var sum_artists = 0;
 
-            var time_movies = seconds_to_time(sum_movies, false);
-            var time_shows = seconds_to_time(sum_shows, false);
-            var time_all = seconds_to_time(Math.floor(sum_movies + sum_shows), false);
+                if(functions.get_year_stats_movies) {
+                    for(i = 0; (i < results.year_stats.data.top_movies.length); i++) {
+                        sum_movies += results.year_stats.data.top_movies[i].duration;
+                    }
+                }
 
-            text += "<div class='boks2'>";
-                text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-                    text += "<div class='stats'>";
-                        text += "All the different users combined spent <b>" + time_movies + "</b>";
-                        text += " watching movies.";
-                        text += "<br><br>And, the users spent <b>" + time_shows + "</b>";
-                        text += " watching shows.";
-                        text += "<br><br>That is <b>" + time_all + "</b><br>of content!";
-                        text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
+                if(functions.get_year_stats_shows) {
+                    for(i = 0; (i < results.year_stats.data.top_shows.length); i++) {
+                        sum_shows += results.year_stats.data.top_shows[i].duration;
+                    }
+                }
+
+                if(functions.get_year_stats_music) {
+                    for(i = 0; (i < results.year_stats.data.top_artists.length); i++) {
+                        sum_artists += results.year_stats.data.top_artists[i].duration;
+                    }
+                }
+
+                var time_movies = seconds_to_time(sum_movies, false);
+                var time_shows = seconds_to_time(sum_shows, false);
+                var time_artists = seconds_to_time(sum_artists, false);
+                var time_all = seconds_to_time(Math.floor(sum_movies + sum_shows + sum_artists), false);
+
+                text += "<div class='boks2'>";
+                    text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+                        text += "<div class='stats'>";
+
+                            if(functions.get_year_stats_movies) {
+                                text += "All the different users combined spent <b>" + time_movies + "</b>";
+                                text += " watching movies.";
+                                text += "<br><br>";
+                            }
+
+                            if(functions.get_year_stats_shows) {
+                                text += "All the different users combined spent <b>" + time_shows + "</b>";
+                                text += " watching shows.";
+                                text += "<br><br>";
+                            }
+
+                            if(functions.get_year_stats_music) {
+                                text += "All the different users combined spent <b>" + time_artists + "</b>";
+                                text += " listening to artists.";
+                                text += "<br><br>";
+                            }
+
+                            if(functions.get_year_stats_movies && (functions.get_year_stats_shows || functions.get_year_stats_music) || (functions.get_year_stats_shows && functions.get_year_stats_music)) {
+                                text += "That is <b>" + time_all + "</b><br>of content!";
+                            }
+
+                            text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
+
+                        text += "</div>";
                     text += "</div>";
                 text += "</div>";
-            text += "</div>";
+
+            }
 
         text += "</div>";
         text += "<div class='boks3'>";
 
-            text += "<div class='boks2'>";
-                text += top_list(results.year_stats.data.top_movies, "Top movies");
-            text += "</div>";
+            if(functions.get_year_stats_movies) {
+                text += "<div class='boks2'>";
+                    text += top_list(results.year_stats.data.top_movies, "Top movies", false, true);
+                text += "</div>";
+            }
 
-            text += "<div class='boks2'>";
-                text += top_list(results.year_stats.data.top_shows, "Top shows");
-            text += "</div>";
+            if(functions.get_year_stats_shows) {
+                text += "<div class='boks2'>";
+                    text += top_list(results.year_stats.data.top_shows, "Top shows", false, true);
+                text += "</div>";
+            }
+
+            if(functions.get_year_stats_music) {
+                var artists = [];
+
+                for(var i = 0; i < results.year_stats.data.top_artists.length; i++) {
+                    var found = false;
+
+                    for(var j = 0; j < artists.length; j++) {
+                        if(artists[j].title == results.year_stats.data.top_artists[i].grandparent_title) {
+                            artists[j]["plays"] = artists[j].plays + 1;
+                            artists[j]["duration"] = results.year_stats.data.top_artists[i].duration + artists[j].duration;
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found && results.year_stats.data.top_artists[i].grandparent_title != "") {
+                        artists.push({"title" : results.year_stats.data.top_artists[i].grandparent_title, "grandparent_rating_key" : results.year_stats.data.top_artists[i].grandparent_rating_key, "plays" : 1, "duration" : results.year_stats.data.top_artists[i].duration});
+                    }
+                }
+
+                artists.sort(function(a, b) {
+                    return parseFloat(b.duration) - parseFloat(a.duration);
+                });
+
+
+                text += "<div class='boks2'>";
+                    text += top_list(artists, "Top artists", false, false);
+                text += "</div>";
+            }
 
         text += "</div>";
     text += "</div>";

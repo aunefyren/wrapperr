@@ -149,7 +149,7 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="ssl" title="Enable if your connection uses HTTPS.">Use SSL (optional)</label>';
+    html += '<label for="ssl" title="Enable if your connection uses HTTPS.">Use SSL</label>';
     html += '<input type="checkbox" class="form-control" id="ssl" ';
     if(ssl) {
         html += 'checked="' + ssl + '" ';
@@ -158,13 +158,18 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="library_id_movies" title="The ID for your chosen movie library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for movie-library in Tautulli</label>';
-    html += '<input type="number" min="0" class="form-control" id="library_id_movies" value="' + library_id_movies + '" autocomplete="off" required placeholder="1" /><br>';
+    html += '<label for="library_id_movies" title="The ID for your chosen movie library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for movie-library in Tautulli (optional)</label>';
+    html += '<input type="number" min="0" class="form-control" id="library_id_movies" value="' + library_id_movies + '" autocomplete="off" placeholder="1" /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="library_id_shows" title="The ID for your chosen show library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for show-library in Tautulli</label>';
-    html += '<input type="number" min="0" class="form-control" id="library_id_shows" value="' + library_id_shows + '" autocomplete="off" required placeholder="2" /><br> ';
+    html += '<label for="library_id_shows" title="The ID for your chosen show library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for show-library in Tautulli (optional)</label>';
+    html += '<input type="number" min="0" class="form-control" id="library_id_shows" value="' + library_id_shows + '" autocomplete="off" placeholder="2" /><br> ';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="library_id_music" title="The ID for your chosen music library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for music-library in Tautulli (optional)</label>';
+    html += '<input type="number" min="0" class="form-control" id="library_id_music" value="' + library_id_music + '" autocomplete="off" placeholder="3" /><br> ';
     html += '</div>';
 
     html += '<div class="form-group">';
@@ -191,6 +196,7 @@ function set_tautulli_details(back) {
         ssl = document.getElementById('ssl').checked;
         library_id_movies = document.getElementById('library_id_movies').value;
         library_id_shows = document.getElementById('library_id_shows').value;
+        library_id_music = document.getElementById('library_id_music').value;
     }
     var html = '<div class="form-group">';
     html += '<button class="form-control btn" onclick="set_tautulli(true, false)">Tautulli settings</button>';
@@ -233,7 +239,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="get_user_movie_stats" title="Includes movie statistics in your wrapped period.">Get users movie statistics (optional)<br>';
+    html += '<label for="get_user_movie_stats" title="Includes movie statistics in your wrapped period.">Get users movie statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_movie_stats" ';
     if(get_user_movie_stats) {
         html += 'checked="' + get_user_movie_stats + '" ';
@@ -242,7 +248,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="get_user_show_stats" title="Includes show statistics in your wrapped period.">Get users show statistics (optional)<br>';
+    html += '<label for="get_user_show_stats" title="Includes show statistics in your wrapped period.">Get users show statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_stats" ';
     if(get_user_show_stats) {
         html += 'checked="' + get_user_show_stats + '" ';
@@ -251,7 +257,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="get_user_show_buddy" title="Includes the users top show-buddy in your wrapped period. Requires show stats.">Get users show-buddy (optional)<br>';
+    html += '<label for="get_user_show_buddy" title="Includes the users top show-buddy in your wrapped period. Requires show stats.">Get users show-buddy<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_buddy" ';
     if(get_user_show_buddy) {
         html += 'checked="' + get_user_show_buddy + '" ';
@@ -260,16 +266,52 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="get_year_stats" title="Includes server-wide statistics in your wrapped period.">Get server-wide statistics (optional)<br>';
-    html += '<input type="checkbox" class="form-control" id="get_year_stats" ';
-    if(get_year_stats) {
-        html += 'checked="' + get_year_stats + '" ';
+    html += '<label for="get_user_music_stats" title="Includes music statistics in your wrapped period.">Get users music statistics<br>';
+    html += '<input type="checkbox" class="form-control" id="get_user_music_stats" ';
+    if(get_user_music_stats) {
+        html += 'checked="' + get_user_music_stats + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="get_year_stats_movies" title="Includes server-wide movie statistics in your wrapped period.">Get server-wide movie statistics<br>';
+    html += '<input type="checkbox" class="form-control" id="get_year_stats_movies" ';
+    if(get_year_stats_movies) {
+        html += 'checked="' + get_year_stats_movies + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="get_year_stats_shows" title="Includes server-wide show statistics in your wrapped period.">Get server-wide show statistics<br>';
+    html += '<input type="checkbox" class="form-control" id="get_year_stats_shows" ';
+    if(get_year_stats_shows) {
+        html += 'checked="' + get_year_stats_shows + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="get_year_stats_music" title="Includes server-wide music statistics in your wrapped period.">Get server-wide music statistics<br>';
+    html += '<input type="checkbox" class="form-control" id="get_year_stats_music" ';
+    if(get_year_stats_music) {
+        html += 'checked="' + get_year_stats_music + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="get_year_stats_leaderboard" title="Creates a user leaderboard based on the server-wide statistics in your wrapped period.">Get server-wide leaderboard rankings<br>';
+    html += '<input type="checkbox" class="form-control" id="get_year_stats_leaderboard" ';
+    if(get_year_stats_leaderboard) {
+        html += 'checked="' + get_year_stats_leaderboard + '" ';
     }
     html += '/><br>';
     html += '</div>';
 	
 	html += '<div class="form-group">';
-    html += '<label for="use_logs" title="Logs every API request into a log-file in the config folder. ID for Wrapped request included.">Log API calls (optional)<br>';
+    html += '<label for="use_logs" title="Logs every API request into a log-file in the config folder. ID for Wrapped request included.">Log API calls<br>';
     html += '<input type="checkbox" class="form-control" id="use_logs" ';
     if(use_logs) {
         html += 'checked="' + use_logs + '" ';
@@ -278,7 +320,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="use_cache" title="Caches your results in cache.json for later use.">Cache results for later use (optional)<br>';
+    html += '<label for="use_cache" title="Caches your results in cache.json for later use.">Cache results for later use<br>';
     html += '<input type="checkbox" class="form-control" id="use_cache" ';
     if(use_cache) {
         html += 'checked="' + use_cache + '" ';
@@ -292,7 +334,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
-    html += '<label for="clear_cache">Clear cache now (optional)<br>';
+    html += '<label for="clear_cache">Clear cache now<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
@@ -364,7 +406,11 @@ function set_tautulli_last(back) {
         get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
         get_user_show_stats = document.getElementById('get_user_show_stats').checked;
         get_user_show_buddy = document.getElementById('get_user_show_buddy').checked;
-        get_year_stats = document.getElementById('get_year_stats').checked;
+        get_user_music_stats = document.getElementById('get_user_music_stats').checked;
+        get_year_stats_movies = document.getElementById('get_year_stats_movies').checked;
+        get_year_stats_shows = document.getElementById('get_year_stats_shows').checked;
+        get_year_stats_music = document.getElementById('get_year_stats_music').checked;
+        get_year_stats_leaderboard = document.getElementById('get_year_stats_leaderboard').checked;
         use_cache = document.getElementById('use_cache').checked;
 		use_logs = document.getElementById('use_logs').checked;
         cache_age_limit = document.getElementById('cache_age_limit').value;

@@ -61,7 +61,7 @@ var first_time = false;
 var tautulli_apikey = "";
 var tautulli_ip = "";
 var tautulli_port = "";
-var tautulli_length = 50000;
+var tautulli_length = 5000;
 var tautulli_root = "";
 
 var ssl = false;
@@ -70,6 +70,7 @@ var password = "";
 
 var library_id_movies = "";
 var library_id_shows = "";
+var library_id_music = "";
 
 var wrapped_start = new Date(0);
 wrapped_start.setUTCSeconds(1609455600);
@@ -80,7 +81,12 @@ wrapped_end.setUTCSeconds(1640991540);
 var get_user_movie_stats = true;
 var get_user_show_stats = true;
 var get_user_show_buddy = true;
-var get_year_stats = true;
+var get_user_music_stats = true;
+
+var get_year_stats_movies = true;
+var get_year_stats_shows = true;
+var get_year_stats_music = true;
+var get_year_stats_leaderboard = true;
 
 var use_cache = true;
 var cache_age_limit = 7;

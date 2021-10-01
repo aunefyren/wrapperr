@@ -55,6 +55,7 @@ function get_config() {
 
                 library_id_movies = result.data.library_id_movies;
                 library_id_shows = result.data.library_id_shows;
+                library_id_music = result.data.library_id_music;
 
                 wrapped_start = new Date(0);
                 wrapped_start.setUTCSeconds(result.data.wrapped_start);
@@ -65,7 +66,12 @@ function get_config() {
                 get_user_movie_stats = result.data.get_user_movie_stats;
                 get_user_show_stats = result.data.get_user_show_stats;
                 get_user_show_buddy = result.data.get_user_show_buddy;
-                get_year_stats = result.data.get_year_stats;
+                get_user_music_stats = result.data.get_user_music_stats;
+
+                get_year_stats_movies = result.data.get_year_stats_movies;
+                get_year_stats_shows = result.data.get_year_stats_shows;
+                get_year_stats_music = result.data.get_year_stats_music;
+                get_year_stats_leaderboard = result.data.get_year_stats_leaderboard;
 
                 use_cache = result.data.use_cache;
 				use_logs = result.data.use_logs;

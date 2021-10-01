@@ -8,7 +8,7 @@ if(empty($data)) {
 }
 
 // Log API request if enabled
-if($config->use_logs) {
+if(empty($config) || $config->use_logs) {
 	if(!log_activity()) {
 		echo json_encode(array("message" => "Failed to log event.", "error" => true));
 		exit(0);

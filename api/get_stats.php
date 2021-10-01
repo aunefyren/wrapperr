@@ -22,6 +22,7 @@ if (empty($config)) {
 // Libraries for movies and shows
 $library_id_movies = $config->library_id_movies;
 $library_id_shows = $config->library_id_shows;
+$library_id_music = $config->library_id_music;
 
 //Base-URL for connections
 $connection = create_url();
@@ -90,7 +91,13 @@ if($config->get_user_show_buddy && $config->get_user_show_stats && !empty($user_
     $user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
 }
 
-if($config->get_year_stats) {
+if($config->get_user_music_stats) {
+    $user_music = array("data" => tautulli_get_user_music($id), "message" => "Success. User music-stats are loaded.", "error" => False);
+} else {
+    $user_music = array("error" => True, "message" => "Disabled in config.");
+}
+
+if($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) {
     if($config->use_cache) {
         $year_stats = array("data" => tautulli_get_year_stats_cache($id), "error" => False, "message" => "Year stats are loaded.");
     } else {
@@ -109,7 +116,8 @@ $result = json_encode(array("error" => False,
                             "user" => array("name" => $name,
                                             "id" => $id,
                                             "user_movies" => $user_movies,
-                                            "user_shows" => $user_shows
+                                            "user_shows" => $user_shows,
+											"user_music" => $user_music
                                             ),
                             "year_stats" => $year_stats,
                             ));
@@ -269,6 +277,56 @@ function log_activity($id) {
 	return False;
 }
 
+function tautulli_get_user_music($id) {
+    global $connection;
+    global $config;
+    global $library_id_music;
+    global $arrContextOptions;
+
+    $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&user_id=" . $id . '&section_id=' . $library_id_music . "&media_type=track&order_column=date&order_dir=desc&include_activity=0&length=" . $config->tautulli_length . "";
+	
+    if($config->ssl) {
+        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+    } else {
+        $response = json_decode(file_get_contents($url));
+    }
+
+    $array = $response->response->data->data;
+	$tracks = array();
+	
+	for ($i = 0; $i < count($array); $i++) {
+        if($array[$i]->date > $config->wrapped_end) {
+            continue;
+        } else if ($array[$i]->date < $config->wrapped_start) {
+            break;
+        }
+		
+		if($array[$i]->title == "" || $array[$i]->grandparent_title == "" || $array[$i]->parent_title == "") {
+			continue;
+		}
+		
+		$found = False;
+		
+		for ($j = 0; $j < count($tracks); $j++) {
+			if($array[$i]->title == $tracks[$j]["title"] && $array[$i]->parent_title == $tracks[$j]["parent_title"] && $array[$i]->grandparent_title == $tracks[$j]["grandparent_title"]) {
+				$tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
+				$tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + $array[$i]->duration;
+				break;
+			}
+		}
+		
+		if(!$found) {
+			array_push($tracks, array("title" => $array[$i]->title, "parent_title" => $array[$i]->parent_title, "grandparent_title" => $array[$i]->grandparent_title, "plays" => 1, "duration" => $array[$i]->duration, "year" => $array[$i]->year, "rating_key" => $array[$i]->rating_key, "parent_rating_key" => $array[$i]->parent_rating_key, "grandparent_rating_key" => $array[$i]->grandparent_rating_key));
+		}
+		
+    }
+	
+	// Sort $tracks for longest pause
+    $duration = array_column($tracks, 'duration');
+    array_multisort($duration, SORT_DESC, $tracks);
+    return array("music" => $tracks);
+}
+	
 function tautulli_get_user_movies($id) {
     global $connection;
     global $config;
@@ -503,128 +561,223 @@ function tautulli_get_year_stats_cache($id) {
 function tautulli_get_year_stats($id) {
     global $connection;
     global $config;
-    global $library_id_shows;
+    global $library_id_movies;
+	global $library_id_shows;
+	global $library_id_music;
     global $name;
     global $arrContextOptions;
-
-    $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&media_type=movie&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
-
-    if($config->ssl) {
-        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
-    } else {
-        $response = json_decode(file_get_contents($url));
-    }
-
-    $array = $response->response->data->data;
-    $users = array();
+	
+	$users = array();
     $movies = array();
     $shows = array();
+	$tracks = array();
 
-    for ($i = 0; $i < count($array); $i++) {
-        if(intval($array[$i]->date) > $config->wrapped_end) {
-            continue;
-        } else if(intval($array[$i]->date) < $config->wrapped_start) {
-            break;
+    $earliest_date_movies = 999999999999;
+    $earliest_date_shows = 999999999999;
+    $earliest_date_tracks = 999999999999;
+
+	if($config->get_year_stats_movies) {
+        //GET MOVIES
+        $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&section_id=" . $library_id_movies . "&media_type=movie&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
+
+        if($config->ssl) {
+            $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+        } else {
+            $response = json_decode(file_get_contents($url));
         }
 
-        $title = $array[$i]->full_title;
-        $duration = $array[$i]->duration;
-        $user = $array[$i]->friendly_name;
-        $user_id = $array[$i]->user_id;
-        $year = $array[$i]->year;
+        $array = $response->response->data->data;
 
-        $user_found = False;
-        $movie_found = False;
-
-        for ($j = 0; $j < count($users); $j++) {
-            if($users[$j]["id"] == $user_id) {
-                $users[$j]["duration_movies"] = intval($users[$j]["duration_movies"]) + intval($duration);
-                $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
-                $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
-                $user_found = True;
+        for ($i = 0; $i < count($array); $i++) {
+            if(intval($array[$i]->date) > $config->wrapped_end) {
+                continue;
+            } else if(intval($array[$i]->date) < $config->wrapped_start) {
                 break;
+            }
+
+            $title = $array[$i]->full_title;
+            $duration = $array[$i]->duration;
+            $user = $array[$i]->friendly_name;
+            $user_id = $array[$i]->user_id;
+            $year = $array[$i]->year;
+
+            $user_found = False;
+            $movie_found = False;
+
+            if($array[$i]->date < $earliest_date_movies) {
+                $earliest_date_movies = $array[$i]->date;
+            }
+
+            for ($j = 0; $j < count($users); $j++) {
+                if($users[$j]["id"] == $user_id) {
+                    $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
+                    $users[$j]["duration_movies"] = intval($users[$j]["duration_movies"]) + intval($duration);
+                    $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
+                    $user_found = True;
+                    break;
+                }
+            }
+
+            if(!$user_found) {
+                array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => $duration, "duration_shows" => 0, "duration_artists" => 0, "plays" => 1));
+            }
+
+            for ($j = 0; $j < count($movies); $j++) {
+                if($movies[$j]["title"] == $title && $movies[$j]["year"] == $year) {
+                    $movies[$j]["duration"] = intval($movies[$j]["duration"]) + intval($duration);
+                    $movies[$j]["plays"] = intval($movies[$j]["plays"]) + 1;
+                    $movie_found = True;
+                    break;
+                }
+            }
+
+            if(!$movie_found) {
+                array_push($movies, array("title" => $title, "year" => $year, "duration" => $duration, "plays" => 1));
             }
         }
 
-        if(!$user_found) {
-            array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => $duration, "duration_shows" => 0, "plays" => 1));
-        }
+        // Sort movies by duration
+        $duration = array_column($movies, 'duration');
+        array_multisort($duration, SORT_DESC, $movies);
 
-        for ($j = 0; $j < count($movies); $j++) {
-            if($movies[$j]["title"] == $title && $movies[$j]["year"] == $year) {
-                $movies[$j]["duration"] = intval($movies[$j]["duration"]) + intval($duration);
-                $movies[$j]["plays"] = intval($movies[$j]["plays"]) + 1;
-                $movie_found = True;
-                break;
-            }
-        }
-
-        if(!$movie_found) {
-            array_push($movies, array("title" => $title, "year" => $year, "duration" => $duration, "plays" => 1));
-        }
-    }
-
-    $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&media_type=episode&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
-
-    if($config->ssl) {
-        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
     } else {
-        $response = json_decode(file_get_contents($url));
+        $movies = array("message" => "Disabled in config.", "error" => True);
     }
 
-    $array = $response->response->data->data;
+	if($config->get_year_stats_shows) {
+        //GET EPISODES
+        $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&section_id=" . $library_id_shows . "&media_type=episode&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
 
-    for ($i = 0; $i < count($array); $i++) {
-        if(intval($array[$i]->date) > $config->wrapped_end) {
-            continue;
-        } else if(intval($array[$i]->date) < $config->wrapped_start) {
-            break;
+        if($config->ssl) {
+            $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+        } else {
+            $response = json_decode(file_get_contents($url));
         }
 
-        $title = $array[$i]->grandparent_title;
-        $duration = $array[$i]->duration;
-        $user = $array[$i]->friendly_name;
-        $user_id = $array[$i]->user_id;
-        $year = $array[$i]->year;
+        $array = $response->response->data->data;
 
-        $user_found = False;
-        $show_found = False;
-
-        for ($j = 0; $j < count($users); $j++) {
-            if($users[$j]["id"] == $user_id) {
-                $users[$j]["duration_shows"] = intval($users[$j]["duration_shows"]) + intval($duration);
-                $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
-                $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
-                $user_found = True;
+        for ($i = 0; $i < count($array); $i++) {
+            if(intval($array[$i]->date) > $config->wrapped_end) {
+                continue;
+            } else if(intval($array[$i]->date) < $config->wrapped_start) {
                 break;
+            }
+
+            $title = $array[$i]->grandparent_title;
+            $duration = $array[$i]->duration;
+            $user = $array[$i]->friendly_name;
+            $user_id = $array[$i]->user_id;
+            $year = $array[$i]->year;
+
+            $user_found = False;
+            $show_found = False;
+
+            if($array[$i]->date < $earliest_date_shows) {
+                $earliest_date_shows = $array[$i]->date;
+            }
+
+            for ($j = 0; $j < count($users); $j++) {
+                if($users[$j]["id"] == $user_id) {
+                    $users[$j]["duration"] = intval($users[$j]["duration"]) + intval($duration);
+                    $users[$j]["duration_shows"] = intval($users[$j]["duration_shows"]) + intval($duration);
+                    $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
+                    $user_found = True;
+                    break;
+                }
+            }
+
+            if(!$user_found) {
+                array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => 0, "duration_shows" => $duration, "duration_artists" => 0, "plays" => 1));
+            }
+
+            for ($j = 0; $j < count($shows); $j++) {
+                if($shows[$j]["title"] == $title) {
+                    $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
+                    $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
+                    $show_found = True;
+                    break;
+                }
+            }
+
+            if(!$show_found) {
+                array_push($shows, array("title" => $title, "year" => $year, "duration" => $duration, "plays" => 1));
             }
         }
 
-        if(!$user_found) {
-            array_push($users, array("user" => $user, "id" => $user_id, "duration" => $duration, "duration_movies" => 0, "duration_shows" => $duration, "plays" => 1));
-        }
+        // Sort shows by duration
+        $duration = array_column($shows, 'duration');
+        array_multisort($duration, SORT_DESC, $shows);
 
-        for ($j = 0; $j < count($shows); $j++) {
-            if($shows[$j]["title"] == $title) {
-                $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
-                $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
-                $show_found = True;
-                break;
-            }
-        }
-
-        if(!$show_found) {
-            array_push($shows, array("title" => $title, "duration" => $duration, "plays" => 1));
-        }
+    } else {
+        $shows = array("message" => "Disabled in config.", "error" => True);
     }
 
-    // Sort movies by duration
-    $duration = array_column($movies, 'duration');
-    array_multisort($duration, SORT_DESC, $movies);
+	if($config->get_year_stats_shows) {
+        //GET TRACKS
+        $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&section_id=" . $library_id_music . "&media_type=track&include_activity=0&order_column=date&order_dir=desc&length=" . $config->tautulli_length;
 
-    // Sort movies by duration
-    $duration = array_column($shows, 'duration');
-    array_multisort($duration, SORT_DESC, $shows);
+        if($config->ssl) {
+            $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+        } else {
+            $response = json_decode(file_get_contents($url));
+        }
+
+        $array = $response->response->data->data;
+
+        for ($i = 0; $i < count($array); $i++) {
+            if($array[$i]->date > $config->wrapped_end) {
+                continue;
+            } else if ($array[$i]->date < $config->wrapped_start) {
+                break;
+            }
+
+            if($array[$i]->title == "" || $array[$i]->grandparent_title == "" || $array[$i]->parent_title == "") {
+                continue;
+            }
+
+            $user_found = False;
+            $artist_found = False;
+
+
+            if($array[$i]->date < $earliest_date_tracks) {
+                $earliest_date_tracks = $array[$i]->date;
+            }
+
+            for ($j = 0; $j < count($users); $j++) {
+                if($users[$j]["id"] == $array[$i]->user_id) {
+                    $users[$j]["duration"] = intval($users[$j]["duration"]) + $array[$i]->duration;
+                    $users[$j]["duration_artists"] = intval($users[$j]["duration_artists"]) + $array[$i]->duration;
+                    $users[$j]["plays"] = intval($users[$j]["plays"]) + 1;
+                    $user_found = True;
+                    break;
+                }
+            }
+
+            if(!$user_found) {
+                array_push($users, array("user" => $$array[$i]->friendly_name, "id" => $array[$i]->user_id, "duration" => $array[$i]->duration, "duration_movies" => 0, "duration_shows" => 0, "duration_artists" => $array[$i]->duration, "plays" => 1));
+            }
+
+            for ($j = 0; $j < count($tracks); $j++) {
+                if($array[$i]->title == $tracks[$j]["title"] && $array[$i]->parent_title == $tracks[$j]["parent_title"] && $array[$i]->grandparent_title == $tracks[$j]["grandparent_title"]) {
+                    $tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
+                    $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + $array[$i]->duration;
+                    break;
+                }
+            }
+
+            if(!$artist_found) {
+                array_push($tracks, array("title" => $array[$i]->title, "parent_title" => $array[$i]->parent_title, "grandparent_title" => $array[$i]->grandparent_title, "plays" => 1, "duration" => $array[$i]->duration, "year" => $array[$i]->year, "rating_key" => $array[$i]->rating_key, "parent_rating_key" => $array[$i]->parent_rating_key, "grandparent_rating_key" => $array[$i]->grandparent_rating_key));
+            }
+
+        }
+
+        // Sort tracks by duration
+        $duration = array_column($tracks, 'duration');
+        array_multisort($duration, SORT_DESC, $tracks);
+
+    } else {
+        $tracks = array("message" => "Disabled in config.", "error" => True);
+    }
 
     // Sort users by combined duration
     $duration = array_column($users, 'duration');
@@ -632,6 +785,6 @@ function tautulli_get_year_stats($id) {
 
     $now = new DateTime('NOW');
 
-    return array("origin_date" => $now->format('Y-m-d'), "top_movies" => $movies, "users" => $users, "top_shows" => $shows);
+    return array("origin_date" => $now->format('Y-m-d'), "top_movies" => $movies, "top_movies_earliest" => $earliest_date_movies, "users" => $users, "top_shows" => $shows, "top_show_earliest" => $earliest_date_shows, "top_artists" => $tracks, "top_artists_earliest" => $earliest_date_tracks);
 }
 ?>

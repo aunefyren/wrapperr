@@ -15,7 +15,11 @@ if (empty($config)) {
 $functions = array("get_user_movie_stats" => $config->get_user_movie_stats,
                     "get_user_show_stats" => $config->get_user_show_stats,
                     "get_user_show_buddy" => $config->get_user_show_buddy,
-                    "get_year_stats" => $config->get_year_stats
+					"get_user_music_stats" => $config->get_user_music_stats,
+                    "get_year_stats_movies" => $config->get_year_stats_movies,
+                    "get_year_stats_shows" => $config->get_year_stats_shows,
+                    "get_year_stats_music" => $config->get_year_stats_music,
+                    "get_year_stats_leaderboard" => $config->get_year_stats_leaderboard
                     );
 
 // Log API request if enabled

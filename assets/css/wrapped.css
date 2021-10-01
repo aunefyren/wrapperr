@@ -182,7 +182,7 @@ img {
 }
 
 .stats-list {
-    max-height: 60em;
+    max-height: 75em;
     overflow-x: hidden;
     overflow-y: auto;
     scrollbar-width: thin;
