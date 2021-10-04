@@ -61,6 +61,8 @@ function get_config() {
                 library_id_shows = result.data.library_id_shows;
                 library_id_music = result.data.library_id_music;
 
+                timezone = result.data.timezone;
+
                 wrapped_start = new Date(0);
                 wrapped_start.setUTCSeconds(result.data.wrapped_start);
 

@@ -163,6 +163,11 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<label for="timezone" title="The timezone the data is located in.">Timezone</label>';
+    html += '<input type="text" class="form-control" id="timezone" value="Europe/Oslo" autocomplete="off" placeholder="Europe/Oslo" required /><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="ssl" title="Enable if your connection uses HTTPS.">Use SSL</label>';
     html += '<input type="checkbox" class="form-control" id="ssl" ';
     if(ssl) {
@@ -207,6 +212,7 @@ function set_tautulli_details(back) {
         tautulli_port = document.getElementById('tautulli_port').value;
         tautulli_length = document.getElementById('tautulli_length').value;
         tautulli_root = document.getElementById('tautulli_root').value;
+        timezone = document.getElementById('timezone').value;
         ssl = document.getElementById('ssl').checked;
         library_id_movies = document.getElementById('library_id_movies').value;
         library_id_shows = document.getElementById('library_id_shows').value;

@@ -16,6 +16,7 @@ function get_stats() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
+            console.log(this.responseText);
             var result = JSON.parse(this.responseText);
             if(result.error) {
                 loading_icon.style.display = "none";

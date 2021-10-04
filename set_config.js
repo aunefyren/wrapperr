@@ -18,6 +18,7 @@ function set_config() {
                             "library_id_movies" : library_id_movies,
                             "library_id_shows" : library_id_shows,
                             "library_id_music" : library_id_music,
+                            "timezone" : timezone,
                             "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
                             "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
                             "get_user_movie_stats" : get_user_movie_stats,
