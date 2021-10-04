@@ -154,6 +154,14 @@ img {
     width: 22em;
 }
 
+.warning {
+    padding: 0.5em;
+    margin: 0.5em;
+    background-color: #ffbd55;
+    border-radius: 25px;
+    color: black;
+}
+
 .boks-knapp {
   height: 5em;
   width: 100% !important;

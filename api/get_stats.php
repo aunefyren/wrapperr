@@ -59,7 +59,7 @@ if($config->use_cache) {
         $then = new DateTime($cache->date);
         $diff = $now->diff($then);
 
-        if($diff->format('%a') < $config->cache_age_limit) {
+        if($diff->format('%a') < $config->cache_age_limit || $config->cache_age_limit == "" || $config->cache_age_limit == 0) {
             echo json_encode($cache);
             exit(0);
         }
@@ -549,7 +549,7 @@ function tautulli_get_year_stats_cache($id) {
             $then = new DateTime($cache[$i]->year_stats->data->origin_date);
             $diff = $then->diff($now);
 
-            if($diff->format('%a') < $config->cache_age_limit && !$cache[$i]->year_stats->error) {
+            if(($diff->format('%a') < $config->cache_age_limit || $config->cache_age_limit == "" || $config->cache_age_limit == 0) && !$cache[$i]->year_stats->error) {
                 return $cache[$i]->year_stats->data;
             }
         }

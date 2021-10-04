@@ -252,7 +252,12 @@ function set_tautulli_details(back) {
     html += '<input type="datetime-local" class="form-control" id="wrapped_end" value="' + temp_date_first[2].trim() + '-' + temp_date_first[1].trim() + '-' + temp_date_first[0].trim() + 'T' + temp_date_second[0].trim() + ':' + temp_date_second[1].trim() + '" required /></label>';
     html += '</div>';
 
+    html += '<hr>';
+
     html += '<div class="form-group">';
+    if(library_id_movies == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for movie library not configured!</div>';
+    }
     html += '<label for="get_user_movie_stats" title="Includes movie statistics in your wrapped period.">Get users movie statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_movie_stats" ';
     if(get_user_movie_stats) {
@@ -262,6 +267,9 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    if(library_id_shows == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
+    }
     html += '<label for="get_user_show_stats" title="Includes show statistics in your wrapped period.">Get users show statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_stats" ';
     if(get_user_show_stats) {
@@ -271,6 +279,9 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    if(library_id_shows == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
+    }
     html += '<label for="get_user_show_buddy" title="Includes the users top show-buddy in your wrapped period. Requires show stats.">Get users show-buddy<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_buddy" ';
     if(get_user_show_buddy) {
@@ -280,6 +291,9 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    if(library_id_music == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for music library not configured!</div>';
+    }
     html += '<label for="get_user_music_stats" title="Includes music statistics in your wrapped period.">Get users music statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_music_stats" ';
     if(get_user_music_stats) {
@@ -288,7 +302,12 @@ function set_tautulli_details(back) {
     html += '/><br>';
     html += '</div>';
 
+    html += '<hr>';
+
     html += '<div class="form-group">';
+    if(library_id_movies == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for movie library not configured!</div>';
+    }
     html += '<label for="get_year_stats_movies" title="Includes server-wide movie statistics in your wrapped period.">Get server-wide movie statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_movies" ';
     if(get_year_stats_movies) {
@@ -298,6 +317,9 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    if(library_id_shows == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
+    }
     html += '<label for="get_year_stats_shows" title="Includes server-wide show statistics in your wrapped period.">Get server-wide show statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_shows" ';
     if(get_year_stats_shows) {
@@ -307,6 +329,9 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
+    if(library_id_music == "") {
+        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for music library not configured!</div>';
+    }
     html += '<label for="get_year_stats_music" title="Includes server-wide music statistics in your wrapped period.">Get server-wide music statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_music" ';
     if(get_year_stats_music) {
@@ -323,6 +348,8 @@ function set_tautulli_details(back) {
     }
     html += '/><br>';
     html += '</div>';
+
+    html += '<hr>';
 	
 	html += '<div class="form-group">';
     html += '<label for="use_logs" title="Logs every API request into a log-file in the config folder. ID for Wrapped request included.">Log API calls<br>';
