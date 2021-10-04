@@ -36,9 +36,11 @@ In your php.ini file you may have to change:
 
 You need to give PHP permission to read and write to files in the directory called <b>config</b>.
 
+The config directory contains sensitive information that must be accessed by PHP scripts! There is an .htaccess file included that is effective with Apache, but if you are using Nginx you must add a directory deny in your Nginx configuration!
+
 The cache is stored in config/cache.json, but can be cleared using the admin menu.
 
-Your password is hashed and stored in the config.json.
+Your password is hashed and stored in the config/config.json.
 
 If you visit <b>your-domain-or-ip/caching.html</b> you can do a pre-caching of a set of users. This is very useful if you want to prepare for a lot of traffic.
 

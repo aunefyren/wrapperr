@@ -1,7 +1,8 @@
 function get_config_initial() {
 
     config_form = {
-                        "password" : ""
+                        "password" : "",
+                        "username" : "",
                    };
 
     var config_data = JSON.stringify(config_form);
@@ -27,9 +28,11 @@ function get_config_initial() {
 function get_config() {
 
     current_password = document.getElementById('password').value;
+    current_username = document.getElementById('username').value;
 
     config_form = {
-                        "password" : current_password
+                        "password" : current_password,
+                        "username" : current_username,
                    };
 
     var config_data = JSON.stringify(config_form);
@@ -51,6 +54,7 @@ function get_config() {
 
                 ssl = result.data.ssl;
 
+                username = result.data.username;
                 password = "";
 
                 library_id_movies = result.data.library_id_movies;

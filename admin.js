@@ -71,6 +71,11 @@ function login_menu() {
     var html = '<form id="password_login_form" onsubmit="get_config();return false">'
 
     html += '<div class="form-group">';
+    html += '<label for="username" title="The username chosen during first-time setup.">Username</label>';
+    html += '<input type="text" class="form-control" id="username" value="" minlength=4 autocomplete="on" required />';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="password" title="The password chosen during first-time setup.">Password</label>';
     html += '<input type="password" class="form-control" id="password" value="" autocomplete="off" required />';
     html += '</div>';
@@ -86,6 +91,11 @@ function login_menu() {
 function set_password(back) {
     topFunction();
     var html = '<form id="password_form" onsubmit="set_tautulli(false);return false">'
+
+    html += '<div class="form-group">';
+    html += '<label for="username" title="The username needed to change the config-file remotely.">Set an admin username</label>';
+    html += '<input type="text" class="form-control" id="username" value="' + username + '" minlength=4 autocomplete="on" required />';
+    html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="password" title="The password needed to change the config-file remotely.">Set an admin password</label>';
@@ -109,11 +119,15 @@ function set_tautulli(back) {
 
     topFunction();
     if(!back) {
-        if(document.getElementById('password').value == document.getElementById('password_2').value) {
-            password = document.getElementById('password').value;
+        if(document.getElementById('password').value != document.getElementById('password_2').value) {
+            alert("The passwords must match.");
+            document.getElementById('password').value = "";
+            document.getElementById('password_2').value = "";
+            document.getElementById('password').focus();
+            return false;
         } else {
-           alert("The passwords must match.");
-           return false;
+            password = document.getElementById('password').value;
+            username = document.getElementById('username').value;
        }
     }
 

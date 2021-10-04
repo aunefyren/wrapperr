@@ -123,7 +123,8 @@ function topFunction() {
 function get_config_cache() {
 
     config_form = {
-                        "password" : ""
+                        "password" : "",
+                        "username" : "",
                    };
 
     var config_data = JSON.stringify(config_form);
@@ -147,9 +148,11 @@ function get_config_cache() {
 function get_config() {
 
     current_password = document.getElementById('password').value;
+    current_username = document.getElementById('username').value;
 
     config_form = {
-                        "password" : current_password
+                        "password" : current_password,
+                        "username" : current_username
                    };
 
     var config_data = JSON.stringify(config_form);
@@ -176,6 +179,11 @@ function get_config() {
 function login_menu() {
     topFunction();
     var html = '<form id="password_login_form" onsubmit="get_config();return false">'
+
+    html += '<div class="form-group">';
+    html += '<label for="username" title="The username chosen during first-time setup.">Username</label>';
+    html += '<input type="text" class="form-control" id="username" value="" autocomplete="on" minlength=4 required />';
+    html += '</div>';
 
     html += '<div class="form-group">';
     html += '<label for="password" title="The password chosen during first-time setup.">Password</label>';

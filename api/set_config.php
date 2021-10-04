@@ -16,13 +16,14 @@ if(!empty($data)) {
     exit(0);
 }
 $password = htmlspecialchars($data->password);
+$username = htmlspecialchars($data->username);
 
 if(empty($config->password)) {
     save_config();
     exit(0);
 }
 
-if(password_verify($password, $config->password)) {
+if(password_verify($password, $config->password) && $username == $config->username) {
 	// Log API request if enabled
 	if($config->use_logs) {
 		if(!log_activity()) {
@@ -34,7 +35,7 @@ if(password_verify($password, $config->password)) {
     save_config();
     exit(0);
 } else {
-    echo json_encode(array("error" => true, "message" => "Password not accepted.", "password" => true));
+    echo json_encode(array("error" => true, "message" => "Password and username combination not accepted.", "password" => true));
     exit(0);
 }
 

@@ -4,6 +4,7 @@ function set_config() {
 
     config_form = {
                         "password" : current_password,
+                        "username" : current_username,
                         "clear_cache" : clear_cache,
                         "data" : {
                             "tautulli_apikey" : tautulli_apikey,
@@ -13,6 +14,7 @@ function set_config() {
                             "tautulli_root" : tautulli_root,
                             "ssl" : ssl,
                             "password" : password,
+                            "username" : username,
                             "library_id_movies" : library_id_movies,
                             "library_id_shows" : library_id_shows,
                             "library_id_music" : library_id_music,
