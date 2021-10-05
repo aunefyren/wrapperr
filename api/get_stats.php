@@ -69,6 +69,8 @@ if($config->use_cache) {
     } else {
         $tautulli_data = array();
     }
+} else {
+    $tautulli_data = array();
 }
 
 // UPDATE THE CACHE
@@ -224,10 +226,12 @@ function check_cache() {
     global $id;
 	
 	$path = "../config/cache.json";
+
 	if(!file_exists($path)) {
 		fopen($path, "w");
 	}	
-    $cache = json_decode(file_get_contents($path));
+
+    $cache = json_decode(file_get_contents($path), True);
 
     if(!empty($cache)) {
         return $cache;
@@ -238,27 +242,7 @@ function check_cache() {
 
 function update_cache($result) {
     global $config;
-    $cache = json_decode(file_get_contents("../config/cache.json"));
-    $decode_result = json_decode($result);
-    $found = False;
-
-    if(!empty($cache)) {
-        for($i = 0; $i < count($cache); $i++) {
-            if($cache[$i]->user->id == $decode_result->user->id && !$found) {
-                $cache[$i] = $decode_result;
-                $found = True;
-                break;
-            }
-        }
-    } else {
-        $cache = array();
-    }
-
-    if(!$found) {
-        array_push($cache, $decode_result);
-    }
-
-    $save = json_encode($cache);
+    $save = json_encode($result);
     file_put_contents("../config/cache.json", $save);
     return True;
 }
@@ -284,6 +268,9 @@ function log_activity($id, $message) {
 }
 
 function tautulli_get_wrapped_dates($id, $array) {
+
+    $time_start = microtime(true);
+
     global $connection;
     global $config;
     global $arrContextOptions;
@@ -294,41 +281,68 @@ function tautulli_get_wrapped_dates($id, $array) {
     for ($i = 0; $loop_time <= $end_loop_date; $i++) {
 
         $current_loop_date = date('Y-m-d', $loop_time);
+        $now = new DateTime('NOW');
+        $then = new DateTime($current_loop_date);
 
+        if($then > $now) {
+            break;
+        }
+
+        $found_date = False;
         for($j = 0; $j < count($array); $j++) {
             if($array[$j]["date"] == $current_loop_date) {
-                continue;
+                $found_date = True;
+                break;
             }
+        }
+        if($found_date) {
+            continue;
         }
 
         $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&order_column=date&order_dir=desc&include_activity=0&length=" . $config->tautulli_length . "&start_date=" . $current_loop_date;
 
         if($config->ssl) {
-            $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
+            $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)), True);
         } else {
-            $response = json_decode(file_get_contents($url));
+            $response = json_decode(file_get_contents($url), True);
         }
 
-        $temp = $response->response->data->data;
-        if(!empty($temp)) {
-            for($j = 0; $j < count($temp); $j++) {
-                if($temp[$j]->media_type == "movie" || $temp[$j]->media_type == "episode" || $temp[$j]->media_type == "track") {
-                    array_push($array, array("date" => $current_loop_date, "data" => $temp[$j]));
-                }
+        $temp = $response["response"]["data"]["data"];
+        $temp_clean = array();
+        for($j = 0; $j < count($temp); $j++) {
+            if($temp[$j]["media_type"] == "movie" || $temp[$j]["media_type"] == "episode" || $temp[$j]["media_type"] == "track") {
+                array_push($temp_clean, $temp[$j]);
             }
         }
+
+        array_push($array, array("date" => $current_loop_date, "data" => $temp_clean));
 
         $loop_time += 86400;
     }
 
     // Sort data by date
     $date = array_column($array, 'date');
-    array_multisort($date, SORT_DESC, $array);
+    array_multisort($date, SORT_ASC, $array);
+
+    $time_end = microtime(true);
+
+    //dividing with 60 will give the execution time in minutes otherwise seconds
+    $execution_time = ($time_end - $time_start)/60;
+
+    //execution time of the script
+    echo '<b>Data Downloading Execution Time:</b> '.$execution_time.' Mins';
+    // if you get weird results, use number_format((float) $execution_time, 10)
 
     return $array;
 }
 
-function data_get_user_stats_loop($id, $array_data) {
+function data_get_user_stats_loop($id, $array) {
+
+    $time_start = microtime(true);
+
+    global $connection;
+    global $config;
+    global $arrContextOptions;
 
     $movies = array();
     $movies_percent_complete = array();
@@ -337,26 +351,27 @@ function data_get_user_stats_loop($id, $array_data) {
 
     for ($i = 0; $i < count($array); $i++) {
 
-        for($d = 0; $d < count($array->data); $d++) {
+        for($d = 0; $d < count($array[$i]["data"]); $d++) {
 
-            if($config->get_user_movie_stats && $array[$i]->data[$d]->media_type == "movie" && $array[$i]->data[$d]->user_id == $id) {
+            if($config->get_user_movie_stats && $array[$i]["data"][$d]["media_type"] == "movie" && $array[$i]["data"][$d]["user_id"] == $id) {
 
-                if($array[$i]->data[$d]->date > $config->wrapped_end) {
+                if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
-                } else if ($array[$i]->data[$d]->date < $config->wrapped_start) {
+                } else if ($array[$i]["data"][$d]["date"] < $config->wrapped_start) {
                     break;
                 }
 
-                $duration = $array[$i]->data[$d]->duration;
+                $duration = $array[$i]["data"][$d]["duration"];
+                $percent_complete = $array[$i]["data"][$d]["percent_complete"];
 
                 if($duration > 300) {
-                    array_push($movies_percent_complete, $array[$i]->data[$d]->percent_complete);
+                    array_push($movies_percent_complete, $percent_complete);
                 }
 
-                $title = $array[$i]->data[$d]->full_title;
-                $year = $array[$i]->data[$d]->year;
-                $percent_complete = $array[$i]->data[$d]->percent_complete;
-                $paused_counter = $array[$i]->data[$d]->paused_counter;
+                $title = $array[$i]["data"][$d]["full_title"];
+                $year = $array[$i]["data"][$d]["year"];
+                $percent_complete = $array[$i]["data"][$d]["percent_complete"];
+                $paused_counter = $array[$i]["data"][$d]["paused_counter"];
 
                 $found = False;
 
@@ -375,15 +390,15 @@ function data_get_user_stats_loop($id, $array_data) {
                 }
             }
 
-            if($config->get_user_show_stats && $array[$i]->data[$d]->media_type == "episode" && $array[$i]->data[$d]->user_id == $id) {
-                if($array[$i]->data[$d]->date > $config->wrapped_end) {
+            if($config->get_user_show_stats && $array[$i]["data"][$d]["media_type"] == "episode" && $array[$i]["data"][$d]["user_id"] == $id) {
+                if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
-                } else if ($array[$i]->data[$d]->date < $config->wrapped_start) {
+                } else if ($array[$i]["data"][$d]["date"] < $config->wrapped_start) {
                     break;
                 }
 
-                $title = $array[$i]->data[$d]->grandparent_title;
-                $duration = $array[$i]->data[$d]->duration;
+                $title = $array[$i]["data"][$d]["grandparent_title"];
+                $duration = $array[$i]["data"][$d]["duration"];
                 $found = False;
 
                 for ($j = 0; $j < count($shows); $j++) {
@@ -401,29 +416,38 @@ function data_get_user_stats_loop($id, $array_data) {
                 }
             }
 
-            if($config->get_user_music_stats && $array[$i]->data[$d]->media_type == "track" && $array[$i]->data[$d]->user_id == $id) {
-                if($array[$i]->data[$d]->date > $config->wrapped_end) {
+            if($config->get_user_music_stats && $array[$i]["data"][$d]["media_type"] == "track" && $array[$i]["data"][$d]["user_id"] == $id) {
+                if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
-                } else if ($array[$i]->data[$d]->date < $config->wrapped_start) {
+                } else if ($array[$i]["data"][$d]["date"] < $config->wrapped_start) {
                     break;
                 }
 
-                if($array[$i]->data[$d]->title == "" || $array[$i]->data[$d]->grandparent_title == "" || $array[$i]->data[$d]->parent_title == "") {
+                $title = $array[$i]["data"][$d]["title"];
+                $parent_title = $array[$i]["data"][$d]["parent_title"];
+                $grandparent_title = $array[$i]["data"][$d]["grandparent_title"];
+                $duration = $array[$i]["data"][$d]["duration"];
+                $year = $array[$i]["data"][$d]["year"];
+                $rating_key = $array[$i]["data"][$d]["rating_key"];
+                $parent_rating_key = $array[$i]["data"][$d]["parent_rating_key"];
+                $grandparent_rating_key = $array[$i]["data"][$d]["grandparent_rating_key"];
+
+                if($title == "" || $grandparent_title == "" || $parent_title == "") {
                     continue;
                 }
 
                 $found = False;
 
                 for ($j = 0; $j < count($tracks); $j++) {
-                    if($array[$i]->data[$d]->title == $tracks[$j]["title"] && $array[$i]->data[$d]->parent_title == $tracks[$j]["parent_title"] && $array[$i]->data[$d]->grandparent_title == $tracks[$j]["grandparent_title"]) {
+                    if($title == $tracks[$j]["title"] && $parent_title == $tracks[$j]["parent_title"] && $grandparent_title == $tracks[$j]["grandparent_title"]) {
                         $tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
-                        $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + $array[$i]->data[$d]->duration;
+                        $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + intval($duration);
                         break;
                     }
                 }
 
                 if(!$found) {
-                    array_push($tracks, array("title" => $array[$i]->data[$d]->title, "parent_title" => $array[$i]->data[$d]->parent_title, "grandparent_title" => $array[$i]->data[$d]->grandparent_title, "plays" => 1, "duration" => $array[$i]->data[$d]->duration, "year" => $array[$i]->data[$d]->year, "rating_key" => $array[$i]->data[$d]->rating_key, "parent_rating_key" => $array[$i]->data[$d]->parent_rating_key, "grandparent_rating_key" => $array[$i]->data[$d]->grandparent_rating_key));
+                    array_push($tracks, array("title" => $title, "parent_title" => $parent_title, "grandparent_title" => $grandparent_title, "plays" => 1, "duration" => $duration, "year" => $year, "rating_key" => $rating_key, "parent_rating_key" => $parent_rating_key, "grandparent_rating_key" => $grandparent_rating_key));
                 }
             }
         }
@@ -488,6 +512,15 @@ function data_get_user_stats_loop($id, $array_data) {
     }else {
         $return_music = array();
     }
+
+    $time_end = microtime(true);
+
+    //dividing with 60 will give the execution time in minutes otherwise seconds
+    $execution_time = ($time_end - $time_start)/60;
+
+    //execution time of the script
+    echo '<b>Data Processing Execution Time:</b> '.$execution_time.' Mins';
+    // if you get weird results, use number_format((float) $execution_time, 10)
 
     return array("movies" => $return_movies, "shows" => $return_shows, "music" => $return_music);
 }
