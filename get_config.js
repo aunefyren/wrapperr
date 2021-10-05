@@ -57,10 +57,6 @@ function get_config() {
                 username = result.data.username;
                 password = "";
 
-                library_id_movies = result.data.library_id_movies;
-                library_id_shows = result.data.library_id_shows;
-                library_id_music = result.data.library_id_music;
-
                 timezone = result.data.timezone;
 
                 wrapped_start = new Date(0);
@@ -81,7 +77,6 @@ function get_config() {
 
                 use_cache = result.data.use_cache;
 				use_logs = result.data.use_logs;
-                cache_age_limit = result.data.cache_age_limit;
 
                 set_tautulli(true);
             }

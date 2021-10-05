@@ -163,7 +163,7 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="timezone" title="The timezone the data is located in.">Timezone</label>';
+    html += '<label for="timezone" title="The timezone the data is located in.">Timezone <a href="https://www.php.net/manual/en/timezones.php" target="_blank">(List)</a></label>';
     html += '<input type="text" class="form-control" id="timezone" value="Europe/Oslo" autocomplete="off" placeholder="Europe/Oslo" required /><br>';
     html += '</div>';
 
@@ -174,21 +174,6 @@ function set_tautulli(back) {
         html += 'checked="' + ssl + '" ';
     }
     html += '/><br>';
-    html += '</div>';
-
-    html += '<div class="form-group">';
-    html += '<label for="library_id_movies" title="The ID for your chosen movie library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for movie-library in Tautulli (optional)</label>';
-    html += '<input type="number" min="0" class="form-control" id="library_id_movies" value="' + library_id_movies + '" autocomplete="off" placeholder="1" /><br>';
-    html += '</div>';
-
-    html += '<div class="form-group">';
-    html += '<label for="library_id_shows" title="The ID for your chosen show library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for show-library in Tautulli (optional)</label>';
-    html += '<input type="number" min="0" class="form-control" id="library_id_shows" value="' + library_id_shows + '" autocomplete="off" placeholder="2" /><br> ';
-    html += '</div>';
-
-    html += '<div class="form-group">';
-    html += '<label for="library_id_music" title="The ID for your chosen music library in Tautulli. Can be found by going to Tautulli->Libraries->Your library. The ID is the URL as section_id.">ID for music-library in Tautulli (optional)</label>';
-    html += '<input type="number" min="0" class="form-control" id="library_id_music" value="' + library_id_music + '" autocomplete="off" placeholder="3" /><br> ';
     html += '</div>';
 
     html += '<div class="form-group">';
@@ -214,9 +199,6 @@ function set_tautulli_details(back) {
         tautulli_root = document.getElementById('tautulli_root').value;
         timezone = document.getElementById('timezone').value;
         ssl = document.getElementById('ssl').checked;
-        library_id_movies = document.getElementById('library_id_movies').value;
-        library_id_shows = document.getElementById('library_id_shows').value;
-        library_id_music = document.getElementById('library_id_music').value;
     }
     var html = '<div class="form-group">';
     html += '<button class="form-control btn" onclick="set_tautulli(true, false)">Tautulli settings</button>';
@@ -261,9 +243,6 @@ function set_tautulli_details(back) {
     html += '<hr>';
 
     html += '<div class="form-group">';
-    if(library_id_movies == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for movie library not configured!</div>';
-    }
     html += '<label for="get_user_movie_stats" title="Includes movie statistics in your wrapped period.">Get users movie statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_movie_stats" ';
     if(get_user_movie_stats) {
@@ -273,9 +252,6 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    if(library_id_shows == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
-    }
     html += '<label for="get_user_show_stats" title="Includes show statistics in your wrapped period.">Get users show statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_stats" ';
     if(get_user_show_stats) {
@@ -285,9 +261,6 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    if(library_id_shows == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
-    }
     html += '<label for="get_user_show_buddy" title="Includes the users top show-buddy in your wrapped period. Requires show stats.">Get users show-buddy<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_show_buddy" ';
     if(get_user_show_buddy) {
@@ -297,9 +270,6 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    if(library_id_music == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for music library not configured!</div>';
-    }
     html += '<label for="get_user_music_stats" title="Includes music statistics in your wrapped period.">Get users music statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_user_music_stats" ';
     if(get_user_music_stats) {
@@ -311,9 +281,6 @@ function set_tautulli_details(back) {
     html += '<hr>';
 
     html += '<div class="form-group">';
-    if(library_id_movies == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for movie library not configured!</div>';
-    }
     html += '<label for="get_year_stats_movies" title="Includes server-wide movie statistics in your wrapped period.">Get server-wide movie statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_movies" ';
     if(get_year_stats_movies) {
@@ -323,9 +290,6 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    if(library_id_shows == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for show library not configured!</div>';
-    }
     html += '<label for="get_year_stats_shows" title="Includes server-wide show statistics in your wrapped period.">Get server-wide show statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_shows" ';
     if(get_year_stats_shows) {
@@ -335,9 +299,6 @@ function set_tautulli_details(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    if(library_id_music == "") {
-        html += '<div class="warning" title="ID needed to find data.">Warning!<br>ID for music library not configured!</div>';
-    }
     html += '<label for="get_year_stats_music" title="Includes server-wide music statistics in your wrapped period.">Get server-wide music statistics<br>';
     html += '<input type="checkbox" class="form-control" id="get_year_stats_music" ';
     if(get_year_stats_music) {
@@ -373,11 +334,6 @@ function set_tautulli_details(back) {
         html += 'checked="' + use_cache + '" ';
     }
     html += '/><br>';
-    html += '</div>';
-
-    html += '<div class="form-group">';
-    html += '<label for="cache_age_limit" title="How old the cache can be in days before it expires.">Amount of days cache is valid (optional)<br>';
-    html += '<input type="number" min="0" class="form-control" id="cache_age_limit" value="' + cache_age_limit + '" placeholder="7" /></label>';
     html += '</div>';
 
     html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
@@ -460,7 +416,6 @@ function set_tautulli_last(back) {
         get_year_stats_leaderboard = document.getElementById('get_year_stats_leaderboard').checked;
         use_cache = document.getElementById('use_cache').checked;
 		use_logs = document.getElementById('use_logs').checked;
-        cache_age_limit = document.getElementById('cache_age_limit').value;
 
         set_config();
     }

@@ -15,9 +15,6 @@ function set_config() {
                             "ssl" : ssl,
                             "password" : password,
                             "username" : username,
-                            "library_id_movies" : library_id_movies,
-                            "library_id_shows" : library_id_shows,
-                            "library_id_music" : library_id_music,
                             "timezone" : timezone,
                             "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
                             "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
@@ -30,8 +27,7 @@ function set_config() {
                             "get_year_stats_music" : get_year_stats_music,
                             "get_year_stats_leaderboard" : get_year_stats_leaderboard,
                             "use_cache" : use_cache,
-							"use_logs" : use_logs,
-                            "cache_age_limit" : cache_age_limit
+							"use_logs" : use_logs
                         }
                    };
 

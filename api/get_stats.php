@@ -19,11 +19,6 @@ if (empty($config)) {
     exit(0);
 }
 
-// Libraries for movies and shows
-$library_id_movies = $config->library_id_movies;
-$library_id_shows = $config->library_id_shows;
-$library_id_music = $config->library_id_music;
-
 // Set time-zone
 date_default_timezone_set($config->timezone);
 
@@ -328,11 +323,12 @@ function tautulli_get_wrapped_dates($id, $array) {
         $found_date = False;
         for($j = 0; $j < count($array); $j++) {
             if($array[$j]["date"] == $current_loop_date) {
+                $found_date_index = $j;
                 $found_date = True;
                 break;
             }
         }
-        if($found_date) {
+        if($found_date && $array[$j]["complete"]) {
             continue;
         }
 
@@ -354,7 +350,17 @@ function tautulli_get_wrapped_dates($id, $array) {
             }
         }
 
-        array_push($array, array("date" => $current_loop_date, "data" => $temp_clean));
+        if($now->format('Y-m-d') == $then->format('Y-m-d')) {
+            $complete = False;
+        } else {
+            $complete = True;
+        }
+
+        if($found_date) {
+            $array[$found_date_index] = array("date" => $current_loop_date, "data" => $temp_clean, "complete" => $complete);
+        } else {
+            array_push($array, array("date" => $current_loop_date, "data" => $temp_clean, "complete" => $complete));
+        }
     }
 
     // Sort data by date

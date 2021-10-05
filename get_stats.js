@@ -139,7 +139,7 @@ function load_movies() {
                     }
 
                     text += "<div class='boks2'>";
-                        text += you_spent(sum, 'movies');
+                        text += you_spent(sum, 'movies', 'watching');
                     text += "</div>";
 
                 text += "</div>";
@@ -187,7 +187,7 @@ function load_movies() {
                 text += "<div class='status'>";
                     text += "<h1>Movies!</h1>";
                     text += "<br><br><br>";
-                    text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it out)</p>"
+                    text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
                     text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
                 text += "</div>";
             text += "</div>";
@@ -229,7 +229,7 @@ function load_shows() {
                     }
 
                     text += "<div class='boks2'>";
-                        text += you_spent(sum, 'shows');
+                        text += you_spent(sum, 'shows', 'watching');
                     text += "</div>";
 
                 text += "</div>";
@@ -269,7 +269,7 @@ function load_shows() {
                 text += "<div class='status'>";
                     text += "<h1>Shows!</h1>";
                     text += "<br><br><br>";
-                    text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it out)</p>"
+                    text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
                     text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
                 text += "</div>";
             text += "</div>";
@@ -351,10 +351,50 @@ function load_music() {
                     text += top_list(artists, "Your top artists", false, false);
                 text += "</div>";
 
+                var sum = 0;
+                for(i = 0; (i < results.user.user_music.data.music.length); i++) {
+                    sum += results.user.user_music.data.music[i].duration;
+                }
+
+                text += "<div class='boks2'>";
+                    text += you_spent(sum, 'music', 'listening');
+                text += "</div>";
+
             text += "</div>";
         text += "</div>";
 
-    }
+    } else if(results.user.user_shows.data.shows.length == 1) {
+
+        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+
+            text += "<div class='boks3'>";
+                text += "<h1>Music!</h1>";
+                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.music.length + " track.</h2><p>(Whatever floats your boat...)</p>"
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<div class='boks2'>";
+                    text += top_list(results.user.user_music.data.music, "Your track", true, false);
+                text += "</div>";
+            text += "</div>";
+
+        text += "</div>";
+
+        } else {
+
+            text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+
+                text += "<div class='boks3'>";
+                    text += "<div class='status'>";
+                        text += "<h1>Shows!</h1>";
+                        text += "<br><br><br>";
+                        text += "<h2>You listened to " + results.user.user_music.data.music.length + " tracks. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
+                        text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
+                    text += "</div>";
+                text += "</div>";
+
+            text += "</div>";
+        }
 	
 	document.getElementById("search_results").innerHTML += text;
 }
@@ -373,8 +413,10 @@ function oldest_movie(array) {
                 html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             } else if(array.year < 2000) {
                 html += "<br>Was it a 4K, UHD, 3D, Dolby Atmos remaster?";
+                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             } else {
                 html += "<br>Enjoying the classics, huh?";
+                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             }
         html += "</div>";
     html += "</div>";
@@ -437,11 +479,11 @@ function load_showbuddy() {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "<b>Your show was " + results.user.user_shows.data.shows[0].title + "</b><br>";
+            html += "<b>Your top show was " + results.user.user_shows.data.shows[0].title + "</b><br>";
             if(!results.user.user_shows.data.show_buddy.error) {
                 if(!results.user.user_shows.data.show_buddy.user.found) {
                     html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
-                    html += "<br>That means you dared to explore where no one else would, because you're the only viewer of that show";
+                    html += "<br>That means you dared to explore where no one else would, because you are the only viewer of that show";
                 } else {
                     html += "And you're not alone! Your " + results.user.user_shows.data.shows[0].title + "-buddy is ";
                     html += "<b>" + results.user.user_shows.data.show_buddy.user.user + "!</b><br><br>";
@@ -457,7 +499,7 @@ function load_showbuddy() {
     return html;
 }
 
-function you_spent(time, category) {
+function you_spent(time, category, verb) {
     var html = "";
 
     var time = seconds_to_time(time, false);
@@ -465,8 +507,13 @@ function you_spent(time, category) {
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
             html += "You spent <b>" + time + "</b>";
-            html += " watching " + category;
-            html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
+            html += " " + verb + " ";
+            html += category;
+            if(category == 'music') {
+                html += '<br><img src="assets/img/music.svg" style="margin: auto; display: block; width: 15em;">';
+            } else {
+                html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
+            }
         html += "</div>";
     html += "</div>";
 
