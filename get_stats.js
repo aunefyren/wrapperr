@@ -565,7 +565,7 @@ function load_users() {
             if(functions.get_year_stats_leaderboard) {
 
                 text += "<div class='boks2'>";
-                    text += top_list_names(results.year_stats.data.users, 'Top users');
+                    text += top_list_names(results.year_stats.year_users.data, 'Top users');
                 text += "</div>";
 
                 var sum_movies = 0;
@@ -573,20 +573,20 @@ function load_users() {
                 var sum_artists = 0;
 
                 if(functions.get_year_stats_movies) {
-                    for(i = 0; (i < results.year_stats.data.top_movies.length); i++) {
-                        sum_movies += results.year_stats.data.top_movies[i].duration;
+                    for(i = 0; (i < results.year_stats.year_movies.data.length); i++) {
+                        sum_movies += results.year_stats.year_movies.data[i].duration;
                     }
                 }
 
                 if(functions.get_year_stats_shows) {
-                    for(i = 0; (i < results.year_stats.data.top_shows.length); i++) {
-                        sum_shows += results.year_stats.data.top_shows[i].duration;
+                    for(i = 0; (i < results.year_stats.year_shows.data.length); i++) {
+                        sum_shows += results.year_stats.year_shows.data[i].duration;
                     }
                 }
 
                 if(functions.get_year_stats_music) {
-                    for(i = 0; (i < results.year_stats.data.top_artists.length); i++) {
-                        sum_artists += results.year_stats.data.top_artists[i].duration;
+                    for(i = 0; (i < results.year_stats.year_music.data.length); i++) {
+                        sum_artists += results.year_stats.year_music.data[i].duration;
                     }
                 }
 
@@ -634,33 +634,33 @@ function load_users() {
 
             if(functions.get_year_stats_movies) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.data.top_movies, "Top movies", false, true);
+                    text += top_list(results.year_stats.year_movies.data, "Top movies", false, true);
                 text += "</div>";
             }
 
             if(functions.get_year_stats_shows) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.data.top_shows, "Top shows", false, true);
+                    text += top_list(results.year_stats.year_shows.data, "Top shows", false, false);
                 text += "</div>";
             }
 
             if(functions.get_year_stats_music) {
                 var artists = [];
 
-                for(var i = 0; i < results.year_stats.data.top_artists.length; i++) {
+                for(var i = 0; i < results.year_stats.year_music.data.length; i++) {
                     var found = false;
 
                     for(var j = 0; j < artists.length; j++) {
-                        if(artists[j].title == results.year_stats.data.top_artists[i].grandparent_title) {
+                        if(artists[j].title == results.year_stats.year_music.data[i].grandparent_title) {
                             artists[j]["plays"] = artists[j].plays + 1;
-                            artists[j]["duration"] = results.year_stats.data.top_artists[i].duration + artists[j].duration;
+                            artists[j]["duration"] = results.year_stats.year_music.data[i].duration + artists[j].duration;
                             found = true;
                             break;
                         }
                     }
 
-                    if(!found && results.year_stats.data.top_artists[i].grandparent_title != "") {
-                        artists.push({"title" : results.year_stats.data.top_artists[i].grandparent_title, "grandparent_rating_key" : results.year_stats.data.top_artists[i].grandparent_rating_key, "plays" : 1, "duration" : results.year_stats.data.top_artists[i].duration});
+                    if(!found && results.year_stats.year_music.data[i].grandparent_title != "") {
+                        artists.push({"title" : results.year_stats.year_music.data[i].grandparent_title, "grandparent_rating_key" : results.year_stats.year_music.data[i].grandparent_rating_key, "plays" : 1, "duration" : results.year_stats.year_music.data[i].duration});
                     }
                 }
 
