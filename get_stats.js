@@ -5,10 +5,9 @@ function get_stats() {
 
     var p_identity = document.getElementById("p_identity").value;
 
-    //var p_identity = p_identity.replace(/[&\/\\#,+()$~%:*?<>{}]/g, '');
-
     stats_form = {
-                        "p_identity" : p_identity.trim()
+                        "p_identity" : p_identity.trim(),
+						"caching" : "False"
                    };
 
     var stats_data = JSON.stringify(stats_form);
@@ -16,16 +15,21 @@ function get_stats() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-            console.log(this.responseText);
-            var result = JSON.parse(this.responseText);
-            if(result.error) {
-                loading_icon.style.display = "none";
-                search_button("SEARCH");
-                document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
-
-            } else {
-                load_page(this.responseText);
-            }
+			try {
+				var result= JSON.parse(this.responseText);
+				if(result.error) {
+					loading_icon.style.display = "none";
+					search_button("SEARCH");
+					document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
+				} else {
+					load_page(this.responseText);
+				}
+			} catch(error) {
+				document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + "API response can't be parsed." + '</p>';
+				console.log('Error: ' + error);
+				console.log(this.responseText);
+				loading_icon.style.display = "none";
+			}
         }
     };
     xhttp.withCredentials = true;
@@ -184,12 +188,14 @@ function load_movies() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
-                text += "<div class='status'>";
-                    text += "<h1>Movies!</h1>";
-                    text += "<br><br><br>";
-                    text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
-                    text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
-                text += "</div>";
+				text += "<div class='boks2'>";
+					text += "<div class='status'>";
+						text += "<h1>Movies!</h1>";
+						text += "<br><br><br>";
+						text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
+						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
+					text += "</div>";
+				text += "</div>";
             text += "</div>";
 
             text += "</div>";
@@ -220,6 +226,12 @@ function load_shows() {
                     if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
                         text += "<div class='boks2'>";
                             text += load_showbuddy();
+                        text += "</div>";
+                    }
+					
+					if(results.user.user_shows.data.episode_duration_longest.plays != 0 && results.user.user_shows.data.episode_duration_longest.duration != 0) {
+                        text += "<div class='boks2'>";
+                            text += load_longest_episode(results.user.user_shows.data.episode_duration_longest);
                         text += "</div>";
                     }
 
@@ -257,6 +269,12 @@ function load_shows() {
                         text += load_showbuddy();
                     text += "</div>";
                 }
+				
+				if(results.user.user_shows.data.episode_duration_longest.plays != 0 && results.user.user_shows.data.episode_duration_longest.duration != 0) {
+					text += "<div class='boks2'>";
+						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest);
+					text += "</div>";
+				}
 
             text += "</div>";
         text += "</div>";
@@ -266,12 +284,14 @@ function load_shows() {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
-                text += "<div class='status'>";
-                    text += "<h1>Shows!</h1>";
-                    text += "<br><br><br>";
-                    text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
-                    text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
-                text += "</div>";
+				text += "<div class='boks2'>";
+					text += "<div class='status'>";
+						text += "<h1>Shows!</h1>";
+						text += "<br><br><br>";
+						text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
+						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
+					text += "</div>";
+				text += "</div>";
             text += "</div>";
 
             text += "</div>";
@@ -286,6 +306,7 @@ function load_music() {
 	
 	var albums = [];
 	var artists = [];
+	var tracks = results.user.user_music.data.music;
 	
 	for(var i = 0; i < results.user.user_music.data.music.length; i++) {
 		var found = false;
@@ -300,7 +321,7 @@ function load_music() {
 		}
 		
 		if(!found && results.user.user_music.data.music[i].parent_title != "" && results.user.user_music.data.music[i].grandparent_title != "") {
-			albums.push({"title" : results.user.user_music.data.music[i].parent_title, "parent_rating_key" : results.user.user_music.data.music[i].parent_rating_key,"grandparent_title" : results.user.user_music.data.music[i].grandparent_title, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration});
+			albums.push({"title" : results.user.user_music.data.music[i].parent_title, "parent_rating_key" : results.user.user_music.data.music[i].parent_rating_key,"grandparent_title" : results.user.user_music.data.music[i].grandparent_title, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration, "year" : results.user.user_music.data.music[i].year});
 		}
 	}
 	
@@ -350,20 +371,31 @@ function load_music() {
 				text += "<div class='boks2'>";
                     text += top_list(artists, "Your top artists", false, false);
                 text += "</div>";
+				
+				text += "<div class='boks2' style='padding: 0;'>";
+					
+					albums.sort(function(a, b) {
+						return parseFloat(a.year) - parseFloat(b.year);
+					});
+					text += "<div class='boks2'>";
+						text += oldest_album(albums);
+					text += "</div>";
+					
+					var sum = 0;
+					for(i = 0; (i < results.user.user_music.data.music.length); i++) {
+						sum += results.user.user_music.data.music[i].duration;
+					}
 
-                var sum = 0;
-                for(i = 0; (i < results.user.user_music.data.music.length); i++) {
-                    sum += results.user.user_music.data.music[i].duration;
-                }
-
-                text += "<div class='boks2'>";
-                    text += you_spent(sum, 'music', 'listening');
-                text += "</div>";
+					text += "<div class='boks2'>";
+						text += you_spent(sum, 'music', 'listening');
+					text += "</div>";
+				
+				text += "</div>";
 
             text += "</div>";
         text += "</div>";
 
-    } else if(results.user.user_shows.data.shows.length == 1) {
+    } else if(results.user.user_music.data.music.length == 1) {
 
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
 
@@ -385,12 +417,14 @@ function load_music() {
             text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
 
                 text += "<div class='boks3'>";
-                    text += "<div class='status'>";
-                        text += "<h1>Shows!</h1>";
-                        text += "<br><br><br>";
-                        text += "<h2>You listened to " + results.user.user_music.data.music.length + " tracks. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
-                        text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
-                    text += "</div>";
+					text += "<div class='boks2'>";
+						text += "<div class='status'>";
+							text += "<h1>Music!</h1>";
+							text += "<br><br><br>";
+							text += "<h2>You listened to " + results.user.user_music.data.music.length + " tracks. No speakers, huh?</h2><p>(might wanna try it)</p>"
+							text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
+						text += "</div>";
+					text += "</div>";
                 text += "</div>";
 
             text += "</div>";
@@ -418,6 +452,21 @@ function oldest_movie(array) {
                 html += "<br>Enjoying the classics, huh?";
                 html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             }
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function oldest_album(array) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+            html += "The oldest album you listened to was <br><b>" + array[0].title + " (" + array[0].year + ")</b> by " + array[0].grandparent_title + "<br>";
+			html += "<br>Maybe get the vinyl release?";
+			html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            
         html += "</div>";
     html += "</div>";
 
@@ -474,6 +523,7 @@ function paused_movie(array, single) {
 
     return html;
 }
+
 function load_showbuddy() {
     var html = "";
 
@@ -481,18 +531,31 @@ function load_showbuddy() {
         html += "<div class='stats'>";
             html += "<b>Your top show was " + results.user.user_shows.data.shows[0].title + "</b><br>";
             if(!results.user.user_shows.data.show_buddy.error) {
-                if(!results.user.user_shows.data.show_buddy.user.found) {
+                if(!results.user.user_shows.data.show_buddy.found) {
                     html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
                     html += "<br>That means you dared to explore where no one else would, because you are the only viewer of that show";
                 } else {
                     html += "And you're not alone! Your " + results.user.user_shows.data.shows[0].title + "-buddy is ";
-                    html += "<b>" + results.user.user_shows.data.show_buddy.user.user + "!</b><br><br>";
-                    var combined = results.user.user_shows.data.show_buddy.user.duration + parseInt(results.user.user_shows.data.shows[0].duration);
+                    html += "<b>" + results.user.user_shows.data.show_buddy.friendly_name + "!</b><br><br>";
+                    var combined = results.user.user_shows.data.show_buddy.duration + parseInt(results.user.user_shows.data.shows[0].duration);
                     var combined_2 = seconds_to_time(combined);
                     html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
                     html += "<br>Your combined efforts resulted in <b>" + combined_2 + "</b> of " + results.user.user_shows.data.shows[0].title + "!</b>";
                 }
             }
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function load_longest_episode(array) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+            html += "Your really liked the episode <b>" + array.title + "</b> from " + array.grandparent_title + "<br>";
+			html += "<br>It recieved " + play_plays(array.plays) + " and was endured for " + seconds_to_time(array.duration, false) + ".";
         html += "</div>";
     html += "</div>";
 
@@ -619,19 +682,19 @@ function load_users() {
                 var sum_shows = 0;
                 var sum_artists = 0;
 
-                if(functions.get_year_stats_movies) {
+                if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
                     for(i = 0; (i < results.year_stats.year_movies.data.length); i++) {
                         sum_movies += results.year_stats.year_movies.data[i].duration;
                     }
                 }
 
-                if(functions.get_year_stats_shows) {
+                if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
                     for(i = 0; (i < results.year_stats.year_shows.data.length); i++) {
                         sum_shows += results.year_stats.year_shows.data[i].duration;
                     }
                 }
 
-                if(functions.get_year_stats_music) {
+                if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
                     for(i = 0; (i < results.year_stats.year_music.data.length); i++) {
                         sum_artists += results.year_stats.year_music.data[i].duration;
                     }
@@ -641,30 +704,34 @@ function load_users() {
                 var time_shows = seconds_to_time(sum_shows, false);
                 var time_artists = seconds_to_time(sum_artists, false);
                 var time_all = seconds_to_time(Math.floor(sum_movies + sum_shows + sum_artists), false);
+				var function_sum = 0;
 
                 text += "<div class='boks2'>";
                     text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
                         text += "<div class='stats'>";
 
-                            if(functions.get_year_stats_movies) {
+                            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
                                 text += "All the different users combined spent <b>" + time_movies + "</b>";
                                 text += " watching movies.";
                                 text += "<br><br>";
+								function_sum += 1;
                             }
 
-                            if(functions.get_year_stats_shows) {
+                            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
                                 text += "All the different users combined spent <b>" + time_shows + "</b>";
                                 text += " watching shows.";
                                 text += "<br><br>";
+								function_sum += 1;
                             }
 
-                            if(functions.get_year_stats_music) {
+                            if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
                                 text += "All the different users combined spent <b>" + time_artists + "</b>";
                                 text += " listening to artists.";
                                 text += "<br><br>";
+								function_sum += 1;
                             }
 
-                            if(functions.get_year_stats_movies && (functions.get_year_stats_shows || functions.get_year_stats_music) || (functions.get_year_stats_shows && functions.get_year_stats_music)) {
+                            if(function_sum > 1) {
                                 text += "That is <b>" + time_all + "</b><br>of content!";
                             }
 
@@ -679,19 +746,19 @@ function load_users() {
         text += "</div>";
         text += "<div class='boks3'>";
 
-            if(functions.get_year_stats_movies) {
+            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
                 text += "<div class='boks2'>";
                     text += top_list(results.year_stats.year_movies.data, "Top movies", false, true);
                 text += "</div>";
             }
 
-            if(functions.get_year_stats_shows) {
+            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
                 text += "<div class='boks2'>";
                     text += top_list(results.year_stats.year_shows.data, "Top shows", false, false);
                 text += "</div>";
             }
 
-            if(functions.get_year_stats_music) {
+            if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
                 var artists = [];
 
                 for(var i = 0; i < results.year_stats.year_music.data.length; i++) {

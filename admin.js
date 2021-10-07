@@ -143,7 +143,7 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="tautulli_ip" title="The IP address or domain that connects to Tautulli. No subfolders as this is another setting, but subdomains can be defined.">IP or domain for Tautulli connection</label>';
+    html += '<label for="tautulli_ip" title="The IP address or domain that connects to Tautulli. No subfolders, as this is another setting, but subdomains can be defined.">IP or domain for Tautulli connection</label>';
     html += '<input type="text" class="form-control" id="tautulli_ip" value="' + tautulli_ip + '" required placeholder="mycooldomain.plex" /><br>';
     html += '</div>';
 
@@ -153,7 +153,7 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="tautulli_length" title="The max amount of entries Tautulli responds with during API calls. Typically doesn\'t need to be changed, but with server-wide stats it could limit results if the amount of entries in your Tautulli is extreme.">Tautlli item length</label>';
+    html += '<label for="tautulli_length" title="The max amount of entries Tautulli responds with during API calls. Typically doesn\'t need to be changed, but if you have more than 5000 entries in a day, they won\'t be loaded.">Tautlli item length</label>';
     html += '<input type="number" min="0" class="form-control" id="tautulli_length" value="' + tautulli_length + '" autocomplete="off" placeholder="5000" required /><br>';
     html += '</div>';
 
@@ -168,7 +168,7 @@ function set_tautulli(back) {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="ssl" title="Enable if your connection uses HTTPS.">Use SSL</label>';
+    html += '<label for="ssl" title="Enable if your connection uses HTTPS or HTTP.">Use HTTPS</label>';
     html += '<input type="checkbox" class="form-control" id="ssl" ';
     if(ssl) {
         html += 'checked="' + ssl + '" ';
@@ -219,6 +219,7 @@ function set_tautulli_details(back) {
     var temp_date_first = temp_date[0].split('/');
     var temp_date_second = temp_date[1].split(':');
     html += '<div class="form-group">';
+	html += '<div class="warning">!<br>Load time for long wrapped periods are extensive. Consider enabling caching and performing pre-caching once.</div>';
     html += '<label for="wrapped_start" title="The start of the period you want wrapped.">Start of wrapped period</label>';
     html += '<input type="datetime-local" class="form-control" id="wrapped_start" value="' + temp_date_first[2].trim() + '-' + temp_date_first[1].trim() + '-' + temp_date_first[0].trim() + 'T' + temp_date_second[0].trim() + ':' + temp_date_second[1].trim() + '" required /><br>';
     html += '</div>';
@@ -326,8 +327,9 @@ function set_tautulli_details(back) {
     }
     html += '/><br>';
     html += '</div>';
-
+	
     html += '<div class="form-group">';
+	html += '<div class="warning">!<br>If your wrapped period is long and no results are cached, the wait time can be extensive. Using the cache feature and pre-caching once is recommended.</div>';
     html += '<label for="use_cache" title="Caches your results in cache.json for later use.">Cache results for later use<br>';
     html += '<input type="checkbox" class="form-control" id="use_cache" ';
     if(use_cache) {

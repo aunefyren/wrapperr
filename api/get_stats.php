@@ -25,14 +25,86 @@ date_default_timezone_set($config->timezone);
 //Base-URL for connections
 $connection = create_url();
 
-//Declare given email
+//Declare given inputs
 if(!empty($data)){
 	$p_identity = htmlspecialchars(trim($data->p_identity));
-} else if(isset($_GET["p_identity"])) {
+	$caching = htmlspecialchars(trim($data->caching));
+} else if(isset($_GET["p_identity"]) && isset($_GET["caching"])) {
 	$p_identity = htmlspecialchars(trim($_GET["p_identity"]));
+	$caching = htmlspecialchars(trim($_GET["caching"]));
 } else {
-    echo json_encode(array("message" => "No input provided.", "error" => true));
+    echo json_encode(array("message" => "Input error.", "error" => true));
     exit(0);
+}
+
+if($caching == "False" || $caching == "false") {
+	$caching = False;
+} else if($caching == "True" || $caching == "true") {
+	$caching = True;
+} else {
+	echo json_encode(array("message" => "Can't parse caching parameter.", "error" => true));
+    exit(0);
+}
+
+// Confirm input variables
+if($caching) {
+	if(!empty($data->cache_limit)) {
+		$cache_limit = htmlspecialchars(trim($data->cache_limit));
+	} else if(isset($_GET["cache_limit"])) {
+		$cache_limit = htmlspecialchars(trim($_GET["cache_limit"]));
+	} else {
+		echo json_encode(array("message" => "No cache_limit input.", "error" => true));
+		exit(0);
+	}
+}
+
+// IF CACHING IS TRUE DO THIS
+if($caching) {
+	$id = "Caching mode";
+	log_activity($id, "Caching mode enabled");
+	
+	if(!$config->use_cache) {
+		echo json_encode(array("message" => "Caching is disabled.", "error" => true));
+		exit(0);
+	}
+	
+	// Log checking cache
+	log_activity($id, "Starting cache loop");
+	
+
+	// Log checking cache
+	log_activity($id, "Checking data-cache");
+
+	// GET WRAPPED DATES CACHE
+	if($config->use_cache) {
+		if($cache = check_cache()) {
+			$tautulli_data = $cache;
+		} else {
+			$tautulli_data = array();
+		}
+	} else {
+		$tautulli_data = array();
+	}
+
+	// Log refresh cache
+	log_activity($id, "Refreshing data-cache of missing/incomplete days, maximum " . $cache_limit . " days");
+
+	// REFRESH THE CACHE
+	$tautulli_data = tautulli_get_wrapped_dates($id, $tautulli_data, $cache_limit);
+	$complete_date_loop = $tautulli_data["complete"];
+	$tautulli_data = $tautulli_data["data"];
+	
+	// Log updating cache
+	log_activity($id, "Saving data-cache");
+
+	// SAVE WRAPPED DATES CACHE
+	if($config->use_cache) {
+		update_cache($tautulli_data);
+	}
+
+	echo json_encode(array("message" => "Caching complete.", "caching_complete" => $complete_date_loop, "error" => False));
+	exit(0);
+	
 }
 
 // Get user ID
@@ -67,10 +139,11 @@ if($config->use_cache) {
 }
 
 // Log refresh cache
-log_activity($id, "Refreshing data-cache");
+log_activity($id, "Refreshing data-cache of missing/incomplete days");
 
 // REFRESH THE CACHE
-$tautulli_data = tautulli_get_wrapped_dates($id, $tautulli_data);
+$tautulli_data = tautulli_get_wrapped_dates($id, $tautulli_data, False);
+$tautulli_data = $tautulli_data["data"];
 
 // Log updating cache
 log_activity($id, "Saving data-cache");
@@ -84,7 +157,7 @@ if($config->use_cache) {
 log_activity($id, "Creating wrapped data");
 
 // NEW LOOP USER-STATS
-if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get_user_music_stats || $config->get_year_stats_movies) {
+if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get_user_music_stats || $config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) {
     $user_stats = data_get_user_stats_loop($id, $tautulli_data);
 
     if($config->get_user_movie_stats) {
@@ -139,7 +212,14 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
     $year_users = array("error" => True, "message" => "Disabled in config.");
 }
 
-$user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
+if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_shows["data"]["shows"]) > 0) {
+	log_activity($id, "Getting show buddy");
+	//print_r($tautulli_data);
+	//exit();
+	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows"][0]["title"], $tautulli_data));
+} else {
+	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
+}
 
 $now = new DateTime('NOW');
 
@@ -300,7 +380,7 @@ function log_activity($id, $message) {
 	return True;
 }
 
-function tautulli_get_wrapped_dates($id, $array) {
+function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
 
     $time_start = microtime(true);
 
@@ -309,6 +389,12 @@ function tautulli_get_wrapped_dates($id, $array) {
     global $arrContextOptions;
 
     $end_loop_date = $config->wrapped_end;
+	
+	if($loop_interval == 0) {
+		$loop_interval = False;
+	}
+	
+	$complete_date_loop = True;
 
     for ($loop_time = $config->wrapped_start; $loop_time <= $end_loop_date; $loop_time += 86400) {
 
@@ -346,8 +432,9 @@ function tautulli_get_wrapped_dates($id, $array) {
         $temp_clean = array();
         for($j = 0; $j < count($temp); $j++) {
             if($temp[$j]["media_type"] == "movie" || $temp[$j]["media_type"] == "episode" || $temp[$j]["media_type"] == "track") {
-                array_push($temp_clean, $temp[$j]);
-            }
+				$temp2 = array("date" => $temp[$j]["date"], "duration" => $temp[$j]["duration"], "friendly_name" => $temp[$j]["friendly_name"], "full_title" => $temp[$j]["full_title"], "grandparent_rating_key" => $temp[$j]["grandparent_rating_key"], "grandparent_title" => $temp[$j]["grandparent_title"], "original_title" => $temp[$j]["original_title"], "media_type" => $temp[$j]["media_type"], "parent_rating_key" => $temp[$j]["parent_rating_key"], "parent_title" => $temp[$j]["parent_title"], "paused_counter" => $temp[$j]["paused_counter"], "percent_complete" => $temp[$j]["percent_complete"], "rating_key" => $temp[$j]["rating_key"], "title" => $temp[$j]["title"], "user" => $temp[$j]["user"], "user_id" => $temp[$j]["user_id"], "year" => $temp[$j]["year"]);
+				array_push($temp_clean, $temp2);
+			}
         }
 
         if($now->format('Y-m-d') == $then->format('Y-m-d')) {
@@ -361,8 +448,15 @@ function tautulli_get_wrapped_dates($id, $array) {
         } else {
             array_push($array, array("date" => $current_loop_date, "data" => $temp_clean, "complete" => $complete));
         }
+		
+		if($loop_interval > 0) {
+			$loop_interval -= 1;
+		} else if($loop_interval === 0) {
+			$complete_date_loop = False;
+			break;
+		}
     }
-
+	
     // Sort data by date
     $date = array_column($array, 'date');
     array_multisort($date, SORT_ASC, $array);
@@ -370,8 +464,8 @@ function tautulli_get_wrapped_dates($id, $array) {
     $time_end = microtime(true);
     $execution_time = ($time_end - $time_start);
     log_activity($id, 'Refresh execution: '.$execution_time.' Seconds');
-
-    return $array;
+	
+    return array("data" => $array, "complete" => $complete_date_loop);
 }
 
 function data_get_user_stats_loop($id, $array) {
@@ -385,6 +479,7 @@ function data_get_user_stats_loop($id, $array) {
     $movies = array();
     $movies_percent_complete = array();
     $shows = array();
+	$episodes = array();
     $tracks = array();
 
     $year_movies = array();
@@ -407,15 +502,18 @@ function data_get_user_stats_loop($id, $array) {
 
                 $duration = $array[$i]["data"][$d]["duration"];
                 $percent_complete = $array[$i]["data"][$d]["percent_complete"];
-
-                if($duration > 300) {
-                    array_push($movies_percent_complete, $percent_complete);
-                }
-
                 $title = $array[$i]["data"][$d]["full_title"];
                 $year = $array[$i]["data"][$d]["year"];
                 $percent_complete = $array[$i]["data"][$d]["percent_complete"];
                 $paused_counter = $array[$i]["data"][$d]["paused_counter"];
+				
+				if($year == "") {
+					continue;
+				}
+				
+				if($duration > 300) {
+                    array_push($movies_percent_complete, $percent_complete);
+                }
 
                 $found = False;
 
@@ -443,21 +541,38 @@ function data_get_user_stats_loop($id, $array) {
                 }
 
                 $title = $array[$i]["data"][$d]["grandparent_title"];
+				$episode_title = $array[$i]["data"][$d]["title"];
+				$season_title = $array[$i]["data"][$d]["parent_title"];
                 $duration = $array[$i]["data"][$d]["duration"];
-                $found = False;
+                $show_found = False;
+				$episode_found = False;
 
                 for ($j = 0; $j < count($shows); $j++) {
                     if($shows[$j]["title"] == $title) {
                         $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
                         $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
-                        $found = True;
+                        $show_found = True;
+
+                        break;
+                    }
+                }
+				
+				for ($j = 0; $j < count($episodes); $j++) {
+                    if($episodes[$j]["grandparent_title"] == $title && $episodes[$j]["parent_title"] == $season_title && $episodes[$j]["title"] == $episode_title) {
+                        $episodes[$j]["duration"] = intval($episodes[$j]["duration"]) + intval($duration);
+                        $episodes[$j]["plays"] = intval($episodes[$j]["plays"]) + 1;
+                        $episode_found = True;
 
                         break;
                     }
                 }
 
-                if(!$found) {
+                if(!$show_found) {
                     array_push($shows, array("title" => $title, "duration" => $duration, "plays" => 1));
+                }
+				
+				if(!$episode_found) {
+                    array_push($episodes, array("title" => $episode_title, "parent_title" => $season_title, "grandparent_title" => $title, "duration" => $duration, "plays" => 1));
                 }
             }
 
@@ -510,6 +625,10 @@ function data_get_user_stats_loop($id, $array) {
                 $user = $array[$i]["data"][$d]["friendly_name"];
                 $user_id = $array[$i]["data"][$d]["user_id"];
                 $year = $array[$i]["data"][$d]["year"];
+				
+				if($year == "") {
+					continue;
+				}
 
                 $user_found = False;
                 $movie_found = False;
@@ -669,6 +788,15 @@ function data_get_user_stats_loop($id, $array) {
     //Sort shows by duration
     $duration = array_column($shows, 'duration');
     array_multisort($duration, SORT_DESC, $shows);
+	
+	//Sort episodes by duration
+    $duration = array_column($episodes, 'duration');
+    array_multisort($duration, SORT_DESC, $episodes);
+	if(count($episodes) > 0) {
+        $episode_duration_longest = $episodes[0];
+    } else {
+        $episode_duration_longest = array("title" => "None", "parent_title" => "None", "grandparent_title" => "None", "duration" => 0, "plays" => 0);
+    }
 
     // Sort $tracks for longest pause
     $duration = array_column($tracks, 'duration');
@@ -708,7 +836,7 @@ function data_get_user_stats_loop($id, $array) {
     }
 
     if($config->get_user_show_stats) {
-        $return_shows = array("shows" => $shows);
+        $return_shows = array("shows" => $shows, "episode_duration_longest" => $episode_duration_longest);
     } else {
         $return_shows = array();
     }
@@ -750,51 +878,45 @@ function data_get_user_stats_loop($id, $array) {
     return array("movies" => $return_movies, "shows" => $return_shows, "music" => $return_music, "year_movies" => $return_year_movies, "year_shows" => $return_year_shows, "year_music" => $return_year_music, "year_users" => $return_year_users);
 }
 
-function tautulli_get_user_show_buddy($id, $shows) {
+function data_get_user_show_buddy($id, $show, $array) {
+	
+	$time_start = microtime(true);
+	
     global $connection;
     global $config;
-    global $library_id_shows;
     global $name;
     global $arrContextOptions;
 
-    $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&section_id=" . $library_id_shows . "&order_column=date&include_activity=0&media_type=episode&order_dir=desc&length=" . $config->tautulli_length . "&search=" . urlencode($shows[0]["title"]);
-
-    if($config->ssl) {
-        $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
-    } else {
-        $response = json_decode(file_get_contents($url));
-    }
-
-    $array = $response->response->data->data;
-    if(empty($array)) {
-        $array = array();
-    }
     $top_show_users = array();
 
     for ($i = 0; $i < count($array); $i++) {
-        $user = $array[$i]->friendly_name;
-        $duration = $array[$i]->duration;
+		for($j = 0; $j < count($array[$i]["data"]); $j++) {
+			$user_id = $array[$i]["data"][$j]["user_id"];
+			$friendly_name = $array[$i]["data"][$j]["friendly_name"];
+			$duration = $array[$i]["data"][$j]["duration"];
+			$grandparent_title = $array[$i]["data"][$j]["grandparent_title"];
 
-        if($array[$i]->date > $config->wrapped_end || $array[$i]->grandparent_title != $shows[0]["title"]) {
-    		continue;
-        } else if($array[$i]->date < $config->wrapped_start) {
-            break;
-        }
+			if($array[$i]["data"][$j]["date"] > $config->wrapped_end || $grandparent_title != $show) {
+				continue;
+			} else if($array[$i]["data"][$j]["date"] < $config->wrapped_start) {
+				break;
+			}
 
-        $found = False;
+			$found = False;
 
-        for ($j = 0; $j < count($top_show_users); $j++) {
-            if($top_show_users[$j]["user"] == $user) {
-                $top_show_users[$j]["duration"] = intval($top_show_users[$j]["duration"]) + intval($duration);
-                $found = True;
+			for ($u = 0; $u < count($top_show_users); $u++) {
+				if($top_show_users[$u]["user_id"] == $user_id) {
+					$top_show_users[$u]["duration"] = intval($top_show_users[$u]["duration"]) + intval($duration);
+					$found = True;
 
-                break;
-            }
-        }
+					break;
+				}
+			}
 
-        if(!$found) {
-            array_push($top_show_users, array("user" => $user, "duration" => $duration));
-        }
+			if(!$found) {
+				array_push($top_show_users, array("user_id" => $user_id, "duration" => $duration, "friendly_name" => $friendly_name));
+			}
+		}
     }
 
     // Sort show-buddies by duration
@@ -804,20 +926,24 @@ function tautulli_get_user_show_buddy($id, $shows) {
     $index = 0;
     if(count($top_show_users) > 1) {
         for($i = 0; $i < count($top_show_users); $i++) {
-            if($top_show_users[$i]["user"] == $name) {
+            if($top_show_users[$i]["user_id"] == $id) {
                 $index = $i;
             }
         }
 
         if((($index == 0) || ($index % 2 == 0)) AND ($index < count($top_show_users)-1)) {
-            $buddy = array("user" => $top_show_users[$index+1]["user"], "duration" => $top_show_users[$index+1]["duration"], "found" => True, "watched_relative_to_you" => "less");
+            $buddy = array("friendly_name" => $top_show_users[$index+1]["friendly_name"], "user_id" => $top_show_users[$index+1]["user_id"], "duration" => $top_show_users[$index+1]["duration"], "found" => True, "watched_relative_to_you" => "less");
         } else {
-            $buddy = array("user" => $top_show_users[$index-1]["user"], "duration" => $top_show_users[$index-1]["duration"], "found" => True, "watched_relative_to_you" => "more");
+            $buddy = array("friendly_name" => $top_show_users[$index-1]["friendly_name"], "user_id" => $top_show_users[$index-1]["user_id"], "duration" => $top_show_users[$index-1]["duration"], "found" => True, "watched_relative_to_you" => "more");
         }
 
     } else {
-        $buddy = array("user" => False, "duration" => 0, "found" => False, "watched_relative_to_you" => False);
+        $buddy = array("friendly_name" => False, "user_id" => False, "duration" => 0, "found" => False, "watched_relative_to_you" => False);
     }
+	
+	$time_end = microtime(true);
+    $execution_time = ($time_end - $time_start);
+    log_activity($id, 'Buddy execution: '.$execution_time.' seconds');
 
     return $buddy;
 }

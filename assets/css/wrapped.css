@@ -160,6 +160,7 @@ img {
     background-color: #ffbd55;
     border-radius: 25px;
     color: black;
+	font-size: 0.75em;
 }
 
 .boks-knapp {
@@ -369,9 +370,20 @@ form {
 .btn {
     background-color: #ffbd55;
     border: none;
+	cursor: pointer;
 }
+
+label {
+	cursor: pointer;
+}
+
 input[type="checkbox" i] {
     transform: scale(1.5);
+    cursor: pointer;
+    width: auto;
+    box-sizing: content-box;
+    display: block;
+    margin-top: 0.5em;
 }
 
 .footer {
