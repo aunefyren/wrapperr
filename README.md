@@ -12,7 +12,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 - Friendly, dynamic display for statistics with nice illustrations
 - Email and username search
 - Admin page with authentication for settings
-- Pre-caching of user-sets
+- Pre-caching of data
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_02.PNG?raw=true)
 
