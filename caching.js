@@ -41,7 +41,7 @@ function cache() {
         <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
 
             <div class='form-group'>
-                <img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em; width: 4em; height: 4em; display: inline;">
+                <img id="loading_icon" src="../assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em; width: 4em; height: 4em; display: inline;">
             </div>
 
             <h3>Caching log:</h3>
@@ -80,7 +80,7 @@ function get_stats(days) {
 
     stats_form = {
                         "p_identity" : '0',
-						"caching" : "True",
+						"caching" : true,
 						"cache_limit" : days
                    };
 
@@ -110,7 +110,7 @@ function get_stats(days) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get_stats.php", );
+    xhttp.open("post", root + "api/get_stats.php", );
     xhttp.send(stats_data);
     return;
 }
@@ -137,11 +137,12 @@ function get_config_cache() {
                 login_menu();
             } else {
                 alert(result.message);
+                window.location.href = "../admin";
             }
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get_config.php");
+    xhttp.open("post", root + "api/get_config.php");
     xhttp.send(config_data);
 }
 
@@ -172,7 +173,7 @@ function get_config() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get_config.php");
+    xhttp.open("post", root + "api/get_config.php");
     xhttp.send(config_data);
 }
 

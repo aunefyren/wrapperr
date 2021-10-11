@@ -7,20 +7,21 @@ function get_stats() {
 
     stats_form = {
                         "p_identity" : p_identity.trim(),
-						"caching" : "False"
+						"caching" : false
                    };
 
     var stats_data = JSON.stringify(stats_form);
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
 			try {
 				var result= JSON.parse(this.responseText);
 				if(result.error) {
 					loading_icon.style.display = "none";
 					search_button("SEARCH");
-					document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
+                    document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
+
 				} else {
 					load_page(this.responseText);
 				}
@@ -555,7 +556,7 @@ function load_longest_episode(array) {
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
             html += "Your really liked the episode <b>" + array.title + "</b> from " + array.grandparent_title + "<br>";
-			html += "<br>It recieved " + play_plays(array.plays) + " and was endured for " + seconds_to_time(array.duration, false) + ".";
+			html += "<br>It recieved " + play_plays(array.plays) + " and was endured for " + seconds_to_time(array.duration, false) + "";
         html += "</div>";
     html += "</div>";
 

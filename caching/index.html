@@ -8,11 +8,11 @@
         <title>Plex Wrapped</title>
 
         <!-- Bootstrap 4 CSS and custom CSS -->
-        <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
-        <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="../assets/css/wrapped.css" />
+        <link rel="shortcut icon" href="../assets/img/favicons/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-        <script src="./caching.js"></script>
+        <script src="../caching.js"></script>
 
     </head>
 <body>
@@ -24,7 +24,7 @@
         <div class="boks3" id="search_input" style="padding: 0 !important;">
 
             <div class="boks2" style="float: none !important; display: block; padding: 0; margin-top: 0em;">
-                <img src="assets/img/gift.svg" onclick="window.location.href = './';" style="width: 15em; cursor: pointer;">
+                <img src="../assets/img/gift.svg" onclick="window.location.href = '../';" style="width: 15em; cursor: pointer;">
             </div>
 
             <div class="boks2" style="float: none !important; display: block; margin-top: 0em; padding-top: 0;">
@@ -32,7 +32,7 @@
                 <div class="stats_tekst" style="height: auto;">
                     <p>
                     If you want to decrease loadtime for your users you can pre-cache their results.
-                    <br><br>Remember to configure the system first.
+                    <br><br><a href="../admin">Remember to configure the system first.</a>
                     </p>
                 </div>
 
@@ -45,18 +45,26 @@
                     <div class="search" id="cache">
 
 
+                    </div>
+
                 </div>
-
             </div>
-        </div>
 
+        </div>
     </div>
 </div>
-    <div class="content" id="search_results">
-    </div>
+
+<div class="content" id="search_results">
+</div>
+
+<div class="footer" id="footer">
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="https://github.com/aunefyren/Plex-Wrapped" target="_blank">Powered by Plex Wrapped</a>
+</div>
 
 
 <script type="text/javascript">
+
+    var root = "../";
 
     $(document).ready(function() {
 

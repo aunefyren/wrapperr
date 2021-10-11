@@ -21,7 +21,7 @@ function get_config_initial() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get_config.php");
+    xhttp.open("post", root + "api/get_config.php");
     xhttp.send(config_data);
 }
 
@@ -83,6 +83,6 @@ function get_config() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get_config.php");
+    xhttp.open("post", root + "api/get_config.php");
     xhttp.send(config_data);
 }

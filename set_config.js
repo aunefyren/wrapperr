@@ -41,11 +41,11 @@ function set_config() {
                 alert(result.message);
             } else {
                 alert(result.message);
-                window.location.href = "./";
+                window.location.href = "../";
             }
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/set_config.php");
+    xhttp.open("post", root + "api/set_config.php");
     xhttp.send(config_data);
 }

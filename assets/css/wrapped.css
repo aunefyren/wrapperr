@@ -63,6 +63,11 @@ p{
     margin: 0;
 }
 
+a {
+    color: inherit;
+    text-decoration: underline;
+}
+
 img {
     max-width: 100%;
 }

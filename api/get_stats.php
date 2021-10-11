@@ -15,6 +15,7 @@ $arrContextOptions= [
 ];
 
 if (empty($config)) {
+    http_response_code(400);
     echo json_encode(array("message" => "Plex Wrapped is not configured.", "error" => true));
     exit(0);
 }
@@ -28,22 +29,20 @@ $connection = create_url();
 //Declare given inputs
 if(!empty($data)){
 	$p_identity = htmlspecialchars(trim($data->p_identity));
-	$caching = htmlspecialchars(trim($data->caching));
-} else if(isset($_GET["p_identity"]) && isset($_GET["caching"])) {
+} else if(isset($_GET["p_identity"])) {
 	$p_identity = htmlspecialchars(trim($_GET["p_identity"]));
-	$caching = htmlspecialchars(trim($_GET["caching"]));
 } else {
+    http_response_code(400);
     echo json_encode(array("message" => "Input error.", "error" => true));
     exit(0);
 }
 
-if($caching == "False" || $caching == "false") {
-	$caching = False;
-} else if($caching == "True" || $caching == "true") {
-	$caching = True;
+if(!empty($data)){
+    $caching = filter_var(htmlspecialchars(trim($data->caching)), FILTER_VALIDATE_BOOLEAN);
+} else if(isset($_GET["caching"])) {
+    $caching = filter_var(htmlspecialchars(trim($_GET["caching"])), FILTER_VALIDATE_BOOLEAN);
 } else {
-	echo json_encode(array("message" => "Can't parse caching parameter.", "error" => true));
-    exit(0);
+    $caching = False;
 }
 
 // Confirm input variables
@@ -53,7 +52,8 @@ if($caching) {
 	} else if(isset($_GET["cache_limit"])) {
 		$cache_limit = htmlspecialchars(trim($_GET["cache_limit"]));
 	} else {
-		echo json_encode(array("message" => "No cache_limit input.", "error" => true));
+        http_response_code(400);
+		echo json_encode(array("message" => "Caching enabled. No 'cache_limit' input.", "error" => true));
 		exit(0);
 	}
 }
@@ -64,6 +64,7 @@ if($caching) {
 	log_activity($id, "Caching mode enabled");
 	
 	if(!$config->use_cache) {
+        http_response_code(400);
 		echo json_encode(array("message" => "Caching is disabled.", "error" => true));
 		exit(0);
 	}
@@ -102,6 +103,7 @@ if($caching) {
 		update_cache($tautulli_data);
 	}
 
+    http_response_code(200);
 	echo json_encode(array("message" => "Caching complete.", "caching_complete" => $complete_date_loop, "error" => False));
 	exit(0);
 	
@@ -110,6 +112,7 @@ if($caching) {
 // Get user ID
 $id = tautulli_get_user($p_identity);
 if (!$id) {
+    http_response_code(400);
     echo json_encode(array("message" => "No user found.", "error" => true));
     exit(0);
 }
@@ -120,6 +123,7 @@ log_activity($id, "User found");
 // Get user name
 $name = tautulli_get_name($id);
 if(!$name) {
+    http_response_code(400);
     echo json_encode(array("message" => "Could not find username.", "error" => true));
     exit(0);
 }
@@ -214,8 +218,6 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
 
 if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_shows["data"]["shows"]) > 0) {
 	log_activity($id, "Getting show buddy");
-	//print_r($tautulli_data);
-	//exit();
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows"][0]["title"], $tautulli_data));
 } else {
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
@@ -245,6 +247,7 @@ $result = json_encode(array("error" => False,
                             ));
 
 
+http_response_code(200);
 echo $result;
 exit(0);
 
@@ -291,7 +294,8 @@ function tautulli_get_user($input) {
         if(!isset($response)) {
             throw new Exception('Could not reach Tautulli.');
         }
-    } catch (Exception $e) {
+    } catch (Error $e) {
+        http_response_code(500);
         echo json_encode(array("message" => $e->getMessage(), "error" => true));
         exit(0);
     }
@@ -358,24 +362,30 @@ function log_activity($id, $message) {
     global $config;
 
     if($config->use_logs) {
-        $date = date('Y-m-d H:i:s');
+        try {
+            $date = date('Y-m-d H:i:s');
 
-        $path = "../config/wrapped.log";
-        if(!file_exists($path)) {
-            $temp = fopen($path, "w");
-            fwrite($temp, 'Plex Wrapped');
-            fclose($temp);
+            $path = "../config/wrapped.log";
+            if(@!file_exists($path)) {
+                $temp = @fopen($path, "w");
+                fwrite($temp, 'Plex Wrapped');
+                fclose($temp);
+            }
+        
+            $log_file = @fopen($path, 'a');
+            @fwrite($log_file, PHP_EOL . $date . ' - get_stats.php - ID: ' . $id . ' - ' . $message);
+
+            if(@fclose($log_file)) {
+                return True;
+            } 
+
+        } catch(Error $e) {
+            http_response_code(500);
+            echo json_encode(array("error" => True, "message" => "Failed to log event."));
+            exit();
         }
-
-        $log_file = fopen($path, 'a');
-        fwrite($log_file, PHP_EOL . $date . ' - get_stats.php - ID: ' . $id . ' - ' . $message);
-
-        if(fclose($log_file)) {
-            return True;
-        } else {
-            echo json_encode(array("error" => True, "message" => "Failed to log event"));
-        }
-	}
+	
+    }
 
 	return True;
 }
