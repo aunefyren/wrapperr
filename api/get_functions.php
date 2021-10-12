@@ -19,7 +19,8 @@ $functions = array("get_user_movie_stats" => $config->get_user_movie_stats,
                     "get_year_stats_movies" => $config->get_year_stats_movies,
                     "get_year_stats_shows" => $config->get_year_stats_shows,
                     "get_year_stats_music" => $config->get_year_stats_music,
-                    "get_year_stats_leaderboard" => $config->get_year_stats_leaderboard
+                    "get_year_stats_leaderboard" => $config->get_year_stats_leaderboard,
+					"stats_intro" => $config->stats_intro
                     );
 
 // Log API request if enabled

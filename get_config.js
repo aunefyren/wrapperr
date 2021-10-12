@@ -65,6 +65,8 @@ function get_config() {
                 wrapped_end = new Date(0);
                 wrapped_end.setUTCSeconds(result.data.wrapped_end);
 
+                stats_intro = result.data.stats_intro;
+
                 get_user_movie_stats = result.data.get_user_movie_stats;
                 get_user_show_stats = result.data.get_user_show_stats;
                 get_user_show_buddy = result.data.get_user_show_buddy;

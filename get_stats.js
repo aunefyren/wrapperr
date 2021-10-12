@@ -92,7 +92,7 @@ function load_introduction() {
                 text += "<br>";
                 text += "<h1 style='font-size:3em; display: block;'>Hey there, " + results.user.name + "!</h1>";
                 text += "<br><br><br><br>";
-                text += "<h2>New year, new page of statistics...</h2>";
+                text += "<h2>" + functions.stats_intro + "</h2>";
             text += "</div>";
 
         text += "</div>";
@@ -213,7 +213,7 @@ function load_shows() {
 
             text += "<div class='boks3'>";
                 text += "<h1>Shows!</h1>";
-                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " different shows.</h2><p>(No, watching The Office twice in a year doesn't count as two shows)</p>"
+                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " different shows.</h2><p>(No, watching The Office twice doesn't count as two shows)</p>"
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -374,12 +374,18 @@ function load_music() {
                 text += "</div>";
 				
 				text += "<div class='boks2' style='padding: 0;'>";
-					
-					albums.sort(function(a, b) {
+
+                    albums_year = []
+                    for(var i = 0; i < albums.length; i++) {
+                        if(typeof albums[i].year !== 'undefined' && albums[i].year !== "" && albums[i].year > 1000) {
+                            albums_year.push(albums[i]);
+                        }
+                    }
+					albums_year.sort(function(a, b) {
 						return parseFloat(a.year) - parseFloat(b.year);
 					});
 					text += "<div class='boks2'>";
-						text += oldest_album(albums);
+						text += oldest_album(albums_year[0]);
 					text += "</div>";
 					
 					var sum = 0;
@@ -459,12 +465,12 @@ function oldest_movie(array) {
     return html;
 }
 
-function oldest_album(array) {
+function oldest_album(album) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "The oldest album you listened to was <br><b>" + array[0].title + " (" + array[0].year + ")</b> by " + array[0].grandparent_title + "<br>";
+            html += "The oldest album you listened to was <br><b>" + album.title + " (" + album.year + ")</b> by " + album.grandparent_title + "<br>";
 			html += "<br>Maybe get the vinyl release?";
 			html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             
@@ -504,7 +510,12 @@ function paused_movie(array, single) {
             var pause_time = seconds_to_time(array.paused_counter, false);
             if(!single) {
                 html += "<div class='stats'>";
-                    html += "Your longest movie pause was watching <br><b>" + array.title + " (" + array.year + ")</b>";
+                    html += "Your longest movie pause was watching <br><b>" + array.title;
+                    if(typeof array.year !== 'undefined' && array.year !== "" && array.year > 1000) {
+                        html += " (" + array.year + ")</b>";
+                    } else {
+                        html += "</b>";
+                    }
                     html += "<br><br>It was paused for " + pause_time + "...";
                 html += "</div>";
             } else {
@@ -608,7 +619,7 @@ function top_list(array, title, music, year) {
                             html += "</b>";
                             var movie_hour = seconds_to_time(array[i].duration, true);
 
-                            if(typeof(array[i].year) != "undefined" && year) {
+                            if(typeof(array[i].year) !== "undefined" && year) {
                                 html += " (" + array[i].year + ")";
                             }
 
@@ -859,26 +870,26 @@ function seconds_to_days(seconds, comma) {
     var hour_string = '';
     var minute_string = '';
 
-    if(day < 2) {
+    if(day == 1) {
         day_string += day + ' day';
     } else {
         day_string += day + ' days';
     }
 
-    if(hour < 2) {
+    if(hour == 1) {
         hour_string += hour + ' hour';
     } else {
         hour_string += hour + ' hours';
     }
 
-    if(minute < 2) {
+    if(minute == 1) {
         minute_string += minute + ' minute';
     } else {
         minute_string += minute + ' minutes';
     }
 
-    if(!hour == 0) {
-        if(!minute == 0) {
+    if(hour >= 1) {
+        if(minute >= 1) {
             if(comma) {
                 return day_string + ', ' + hour_string + ', ' + minute_string;
             } else {
@@ -906,19 +917,19 @@ function seconds_to_hours(seconds, comma) {
     var hour_string = '';
     var minute_string = '';
 
-    if(hour < 2) {
+    if(hour == 1) {
         hour_string += hour + ' hour';
     } else {
         hour_string += hour + ' hours';
     }
 
-    if(minute < 2) {
+    if(minute == 1) {
         minute_string += minute + ' minute';
     } else {
         minute_string += minute + ' minutes';
     }
 
-    if(!minute == 0) {
+    if(minute >= 1) {
         if(comma) {
             return hour_string + ', ' + minute_string;
         } else {
@@ -938,20 +949,19 @@ function seconds_to_minutes(seconds, comma) {
     var minute_string = '';
     var second_string = '';
 
-
-    if(minute < 2) {
+    if(minute == 1) {
         minute_string += minute + ' minute';
     } else {
         minute_string += minute + ' minutes';
     }
 
-    if(seconds < 2) {
+    if(seconds == 1) {
         second_string += rest + ' second';
     } else {
         second_string += rest + ' seconds';
     }
-
-    if(!seconds == 0) {
+    
+    if(rest >= 1) {
         if(comma) {
             return minute_string + ', ' + second_string;
         } else {

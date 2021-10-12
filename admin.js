@@ -164,7 +164,7 @@ function set_tautulli(back) {
 
     html += '<div class="form-group">';
     html += '<label for="timezone" title="The timezone the data is located in.">Timezone <a href="https://www.php.net/manual/en/timezones.php" target="_blank">(List)</a></label>';
-    html += '<input type="text" class="form-control" id="timezone" value="Europe/Oslo" autocomplete="off" placeholder="Europe/Oslo" required /><br>';
+    html += '<input type="text" class="form-control" id="timezone" value="' + timezone + '" autocomplete="off" placeholder="Europe/Oslo" required /><br>';
     html += '</div>';
 
     html += '<div class="form-group">';
@@ -239,6 +239,11 @@ function set_tautulli_details(back) {
     html += '<div class="form-group">';
     html += '<label for="wrapped_end" title="The end of your wrapped period. All data until this point is viable.">End of wrapped period<br>';
     html += '<input type="datetime-local" class="form-control" id="wrapped_end" value="' + temp_date_first[2].trim() + '-' + temp_date_first[1].trim() + '-' + temp_date_first[0].trim() + 'T' + temp_date_second[0].trim() + ':' + temp_date_second[1].trim() + '" required /></label>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="stats_intro" title="Introduction text that is shown when the statistics are done loading. Could be used to inform about chosen timeframe. HTML allowed.">Introduction for statistics page<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="resize:vertical;" id="stats_intro" name="stats_intro" value="" autocomplete="off" placeholder="New year, new page of statistics..."></textarea></label>';
     html += '</div>';
 
     html += '<hr>';
@@ -349,6 +354,7 @@ function set_tautulli_details(back) {
 
     html += '</form>';
     document.getElementById("setup").innerHTML = html;
+    document.getElementById("stats_intro").value = stats_intro;
 }
 
 function test_tautulli_connection() {
@@ -407,7 +413,7 @@ function set_tautulli_last(back) {
             alert("The wrapped end period must be later than the wrapped start period.");
             return;
         }
-
+        stats_intro = document.getElementById('stats_intro').value;
         get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
         get_user_show_stats = document.getElementById('get_user_show_stats').checked;
         get_user_show_buddy = document.getElementById('get_user_show_buddy').checked;
