@@ -7,6 +7,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 
 ### Features
 - Custom timeframes
+- Custom introduction
 - Movies, shows & music
 - Caching of results
 - Friendly, dynamic display for statistics with nice illustrations
