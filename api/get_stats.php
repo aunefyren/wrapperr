@@ -613,7 +613,8 @@ function data_get_user_stats_loop($id, $array) {
                     if($title == $tracks[$j]["title"] && $parent_title == $tracks[$j]["parent_title"] && $grandparent_title == $tracks[$j]["grandparent_title"]) {
                         $tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
                         $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + intval($duration);
-                        break;
+                        $found = True;
+		    	break;
                     }
                 }
 
@@ -761,6 +762,7 @@ function data_get_user_stats_loop($id, $array) {
                     if($title == $year_music[$j]["title"] && $parent_title == $year_music[$j]["parent_title"] && $grandparent_title == $year_music[$j]["grandparent_title"]) {
                         $year_music[$j]["plays"] = intval($year_music[$j]["plays"]) + 1;
                         $year_music[$j]["duration"] = intval($year_music[$j]["duration"]) + $duration;
+		    	$artist_found = True;
                         break;
                     }
                 }
