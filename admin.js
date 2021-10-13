@@ -243,7 +243,7 @@ function set_tautulli_details(back) {
 
     html += '<div class="form-group">';
     html += '<label for="stats_intro" title="Introduction text that is shown when the statistics are done loading. Could be used to inform about chosen timeframe. HTML allowed.">Introduction for statistics page<br>';
-    html += '<textarea cols="40" rows="5" class="form-control" style="resize:vertical;" id="stats_intro" name="stats_intro" value="" autocomplete="off" placeholder="New year, new page of statistics..."></textarea></label>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="resize:vertical;min-height: 5em;" id="stats_intro" name="stats_intro" value="" autocomplete="off" placeholder="New year, new page of statistics..."></textarea></label>';
     html += '</div>';
 
     html += '<hr>';
@@ -334,7 +334,7 @@ function set_tautulli_details(back) {
     html += '</div>';
 	
     html += '<div class="form-group">';
-	html += '<div class="warning">!<br>If your wrapped period is long and no results are cached, the wait time can be extensive. Using the cache feature and pre-caching once is recommended.</div>';
+	html += '<div class="warning">!<br>If your wrapped period is long and no results are cached, the wait time can be extensive. Using the cache feature and <a href="../caching" target="_blank">pre-caching</a> once is recommended.</div>';
     html += '<label for="use_cache" title="Caches your results in cache.json for later use.">Cache results for later use<br>';
     html += '<input type="checkbox" class="form-control" id="use_cache" ';
     if(use_cache) {
