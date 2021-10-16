@@ -282,7 +282,7 @@ function load_shows() {
 
     } else {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
+        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
 
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
