@@ -243,7 +243,7 @@ function set_tautulli_details(back) {
 
     html += '<div class="form-group">';
     html += '<label for="stats_intro" title="Introduction text that is shown when the statistics are done loading. Could be used to inform about chosen timeframe. HTML allowed.">Introduction for statistics page<br>';
-    html += '<textarea cols="40" rows="5" class="form-control" style="resize:vertical;min-height: 5em;" id="stats_intro" name="stats_intro" value="" autocomplete="off" placeholder="New year, new page of statistics..."></textarea></label>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_intro" name="stats_intro" value="" autocomplete="off" placeholder="New year, new page of statistics..."></textarea></label>';
     html += '</div>';
 
     html += '<hr>';
