@@ -480,12 +480,15 @@ function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
 
 function data_get_user_stats_loop($id, $array) {
 
+    // Start execution timer
     $time_start = microtime(true);
 
+    // Define global values needed
     global $connection;
     global $config;
     global $arrContextOptions;
 
+    // Pre-define variables as empty
     $movies = array();
     $movies_percent_complete = array();
     $shows = array();
@@ -501,7 +504,7 @@ function data_get_user_stats_loop($id, $array) {
 
         for($d = 0; $d < count($array[$i]["data"]); $d++) {
 
-            // CHECK IF ENTRY IS MOVIE AND USER SPECIFIC
+            // Check if entry is movie and related to user
             if($config->get_user_movie_stats && $array[$i]["data"][$d]["media_type"] == "movie" && $array[$i]["data"][$d]["user_id"] == $id) {
 
                 if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
@@ -517,10 +520,12 @@ function data_get_user_stats_loop($id, $array) {
                 $percent_complete = $array[$i]["data"][$d]["percent_complete"];
                 $paused_counter = $array[$i]["data"][$d]["paused_counter"];
 				
+                // Skip movie if year is empty/missing
 				if($year == "") {
 					continue;
 				}
 				
+                // If movie play duration is < 300 seconds, use in array to calcualte average movie completion
 				if($duration > 300) {
                     array_push($movies_percent_complete, $percent_complete);
                 }
@@ -528,7 +533,7 @@ function data_get_user_stats_loop($id, $array) {
                 $found = False;
 
                 for ($j = 0; $j < count($movies); $j++) {
-                    if($movies[$j]["title"] == $title && $movies[$j]["year"] == $year ) {
+                    if(strtolower($movies[$j]["title"]) == strtolower($title) && $movies[$j]["year"] == $year ) {
                         $movies[$j]["plays"] = intval($movies[$j]["plays"]) + 1;
                         $movies[$j]["duration"] = intval($movies[$j]["duration"]) + intval($duration);
                         $found = True;
@@ -542,7 +547,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
             }
 
-            // CHECK IF ENTRY IS SHOW AND USER SPECIFIC
+            // Check if entry is show and related to user
             if($config->get_user_show_stats && $array[$i]["data"][$d]["media_type"] == "episode" && $array[$i]["data"][$d]["user_id"] == $id) {
                 if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
@@ -558,7 +563,7 @@ function data_get_user_stats_loop($id, $array) {
 				$episode_found = False;
 
                 for ($j = 0; $j < count($shows); $j++) {
-                    if($shows[$j]["title"] == $title) {
+                    if(strtolower($shows[$j]["title"]) == strtolower($title)) {
                         $shows[$j]["duration"] = intval($shows[$j]["duration"]) + intval($duration);
                         $shows[$j]["plays"] = intval($shows[$j]["plays"]) + 1;
                         $show_found = True;
@@ -568,7 +573,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
 				
 				for ($j = 0; $j < count($episodes); $j++) {
-                    if($episodes[$j]["grandparent_title"] == $title && $episodes[$j]["parent_title"] == $season_title && $episodes[$j]["title"] == $episode_title) {
+                    if(strtolower($episodes[$j]["grandparent_title"]) == strtolower($title) && strtolower($episodes[$j]["parent_title"]) == strtolower($season_title) && strtolower($episodes[$j]["title"]) == strtolower$episode_title)) {
                         $episodes[$j]["duration"] = intval($episodes[$j]["duration"]) + intval($duration);
                         $episodes[$j]["plays"] = intval($episodes[$j]["plays"]) + 1;
                         $episode_found = True;
@@ -586,7 +591,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
             }
 
-            // CHECK IF ENTRY IS MUSIC AND USER SPECIFIC
+            // Check if entry is music and related to user
             if($config->get_user_music_stats && $array[$i]["data"][$d]["media_type"] == "track" && $array[$i]["data"][$d]["user_id"] == $id) {
                 if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
@@ -602,7 +607,8 @@ function data_get_user_stats_loop($id, $array) {
                 $rating_key = $array[$i]["data"][$d]["rating_key"];
                 $parent_rating_key = $array[$i]["data"][$d]["parent_rating_key"];
                 $grandparent_rating_key = $array[$i]["data"][$d]["grandparent_rating_key"];
-
+                
+                // Skip entry if title, album or artist is empty/missing
                 if($title == "" || $grandparent_title == "" || $parent_title == "") {
                     continue;
                 }
@@ -610,7 +616,7 @@ function data_get_user_stats_loop($id, $array) {
                 $found = False;
 
                 for ($j = 0; $j < count($tracks); $j++) {
-                    if($title == $tracks[$j]["title"] && $parent_title == $tracks[$j]["parent_title"] && $grandparent_title == $tracks[$j]["grandparent_title"]) {
+                    if(strtolower($title) == strtolower($tracks[$j]["title"]) && strtolower($parent_title == $tracks[$j]["parent_title"]) && strtolower($grandparent_title) == strtolower($tracks[$j]["grandparent_title"])) {
                         $tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
                         $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + intval($duration);
                         $found = True;
@@ -623,7 +629,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
             }
 
-            // CHECK IF ENTRY IS MOVIE
+            // Check if entry is movie for year stats
             if($config->get_year_stats_movies && $array[$i]["data"][$d]["media_type"] == "movie") {
                 if(intval($array[$i]["data"][$d]["date"]) > $config->wrapped_end) {
                     continue;
@@ -637,6 +643,7 @@ function data_get_user_stats_loop($id, $array) {
                 $user_id = $array[$i]["data"][$d]["user_id"];
                 $year = $array[$i]["data"][$d]["year"];
 				
+				// Skip movie if year is empty/missing
 				if($year == "") {
 					continue;
 				}
@@ -659,7 +666,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
 
                 for ($j = 0; $j < count($year_movies); $j++) {
-                    if($year_movies[$j]["title"] == $title && $year_movies[$j]["year"] == $year) {
+                    if(strtolower($year_movies[$j]["title"]) == strtolower($title) && $year_movies[$j]["year"] == $year) {
                         $year_movies[$j]["duration"] = intval($year_movies[$j]["duration"]) + intval($duration);
                         $year_movies[$j]["plays"] = intval($year_movies[$j]["plays"]) + 1;
                         $movie_found = True;
@@ -672,7 +679,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
             }
 
-            // CHECK IF ENTRY IS SHOW
+            // Check if entry is show for year stats
             if($config->get_year_stats_shows && $array[$i]["data"][$d]["media_type"] == "episode") {
                 if(intval($array[$i]["data"][$d]["date"]) > $config->wrapped_end) {
                     continue;
@@ -704,7 +711,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
 
                 for ($j = 0; $j < count($year_shows); $j++) {
-                    if($year_shows[$j]["title"] == $title) {
+                    if(strtolower($year_shows[$j]["title"]) == strtolower($title)) {
                         $year_shows[$j]["duration"] = intval($year_shows[$j]["duration"]) + intval($duration);
                         $year_shows[$j]["plays"] = intval($year_shows[$j]["plays"]) + 1;
                         $show_found = True;
@@ -718,7 +725,7 @@ function data_get_user_stats_loop($id, $array) {
 
             }
 
-            // CHECK IF ENTRY IS MUSIC
+            // Check if entry is music for year stats
             if($config->get_year_stats_music && $array[$i]["data"][$d]["media_type"] == "track") {
                 if($array[$i]["data"][$d]["date"] > $config->wrapped_end) {
                     continue;
@@ -737,6 +744,7 @@ function data_get_user_stats_loop($id, $array) {
                 $parent_rating_key = $array[$i]["data"][$d]["parent_rating_key"];
                 $grandparent_rating_key = $array[$i]["data"][$d]["grandparent_rating_key"];
 
+                // Skip entry if title, album or artist is empty/missing
                 if($title == "" || $grandparent_title == "" || $parent_title == "") {
                     continue;
                 }
@@ -759,7 +767,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
 
                 for ($j = 0; $j < count($year_music); $j++) {
-                    if($title == $year_music[$j]["title"] && $parent_title == $year_music[$j]["parent_title"] && $grandparent_title == $year_music[$j]["grandparent_title"]) {
+                    if(strtolower($title) == strtolower($year_music[$j]["title"]) && strtolower($parent_title) == strtolower($year_music[$j]["parent_title"]) && strtolower($grandparent_title) == strtolower($year_music[$j]["grandparent_title"])) {
                         $year_music[$j]["plays"] = intval($year_music[$j]["plays"]) + 1;
                         $year_music[$j]["duration"] = intval($year_music[$j]["duration"]) + $duration;
 		    	$artist_found = True;
@@ -841,48 +849,56 @@ function data_get_user_stats_loop($id, $array) {
         $movie_percent_average = 0;
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_user_movie_stats) {
         $return_movies = array("movies" => $movies, "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
     } else {
         $return_movies = array();
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_user_show_stats) {
         $return_shows = array("shows" => $shows, "episode_duration_longest" => $episode_duration_longest);
     } else {
         $return_shows = array();
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_user_music_stats) {
         $return_music = array("music" => $tracks);
     }else {
         $return_music = array();
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_year_stats_movies) {
         $return_year_movies = $year_movies;
     }else {
         $return_year_movies = array();
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_year_stats_shows) {
         $return_year_shows = $year_shows;
     }else {
         $return_year_shows = array();
     }
 
+    // Choose return value based on if function is enabled
     if($config->get_year_stats_shows) {
         $return_year_music = $year_music;
     }else {
         $return_year_music = array();
     }
 
+    // Choose return value based on if function is enabled
     if(($config->get_year_stats_shows || $config->get_year_stats_shows || $config->get_year_stats_shows) && $config->get_year_stats_leaderboard) {
         $return_year_users = $year_users;
     } else {
         $return_year_users = array();
     }
 
+    // Calculate and log execution time
     $time_end = microtime(true);
     $execution_time = ($time_end - $time_start);
     log_activity($id, 'Wrapping execution: '.$execution_time.' seconds');
