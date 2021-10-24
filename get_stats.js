@@ -17,20 +17,20 @@ function get_stats() {
         if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
 			try {
 				var result= JSON.parse(this.responseText);
-				if(result.error) {
-					loading_icon.style.display = "none";
-					search_button("SEARCH");
-                    document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
-
-				} else {
-					load_page(this.responseText);
-				}
 			} catch(error) {
 				document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + "API response can't be parsed." + '</p>';
 				console.log('Error: ' + error);
 				console.log(this.responseText);
 				loading_icon.style.display = "none";
 			}
+            if(result.error) {
+                loading_icon.style.display = "none";
+                search_button("SEARCH");
+                document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
+
+            } else {
+                load_page(this.responseText);
+            }
         }
     };
     xhttp.withCredentials = true;
@@ -106,14 +106,14 @@ function load_introduction() {
 function load_movies() {
     var text = "";
 
-    if(results.user.user_movies.data.movies.length > 1) {
+    if(results.user.user_movies.data.movie_plays > 1) {
 
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Movies!</h1>";
                 text += "<br><br><br>";
-                text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's a lot of movies!</h2><p>(or not, I am pre-programmed to say that)</p>"
+                text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movies. That's a lot of movies!</h2><p>(or not, I am pre-programmed to say that)</p>"
 
                 text += "<br><br>";
             text += "</div>";
@@ -134,17 +134,14 @@ function load_movies() {
                         text += paused_movie(results.user.user_movies.data.user_movie_most_paused, false);
                     text += "</div>";
 
-                    text += "<div class='boks2'>";
-                        text += oldest_movie(results.user.user_movies.data.user_movie_oldest);
-                    text += "</div>";
-
-                    var sum = 0;
-                    for(i = 0; (i < results.user.user_movies.data.movies.length); i++) {
-                        sum += results.user.user_movies.data.movies[i].duration;
+                    if(!results.user.user_movies.data.user_movie_oldest.error) {
+                        text += "<div class='boks2'>";
+                            text += oldest_movie(results.user.user_movies.data.user_movie_oldest);
+                        text += "</div>";
                     }
 
                     text += "<div class='boks2'>";
-                        text += you_spent(sum, 'movies', 'watching');
+                        text += you_spent(results.user.user_movies.data.movie_duration, 'movies', 'watching');
                     text += "</div>";
 
                 text += "</div>";
@@ -152,14 +149,14 @@ function load_movies() {
             text += "</div>";
         text += "</div>";
 
-    } else if(results.user.user_movies.data.movies.length == 1) {
+    } else if(results.user.user_movies.data.movie_plays == 1) {
 
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Movies!</h1>";
                 text += "<br><br><br>";
-                text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movie. You know what you like!</h2><p>(at least you tried it out)</p>";
+                text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movie. You know what you like!</h2><p>(at least you tried it out)</p>";
                 text += "<br><br>";
             text += "</div>";
 
@@ -193,7 +190,7 @@ function load_movies() {
 					text += "<div class='status'>";
 						text += "<h1>Movies!</h1>";
 						text += "<br><br><br>";
-						text += "<h2>You watched " + results.user.user_movies.data.movies.length + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
+						text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -208,12 +205,12 @@ function load_movies() {
 function load_shows() {
     var text = "";
 
-    if(results.user.user_shows.data.shows.length > 1) {
+    if(results.user.user_shows.data.show_plays > 1) {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Shows!</h1>";
-                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " different shows.</h2><p>(No, watching The Office twice doesn't count as two shows)</p>"
+                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.show_plays + " different shows.</h2><p>(No, watching The Office twice doesn't count as two shows)</p>"
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -236,13 +233,8 @@ function load_shows() {
                         text += "</div>";
                     }
 
-                    var sum = 0;
-                    for(i = 0; (i < results.user.user_shows.data.shows.length); i++) {
-                        sum += results.user.user_shows.data.shows[i].duration;
-                    }
-
                     text += "<div class='boks2'>";
-                        text += you_spent(sum, 'shows', 'watching');
+                        text += you_spent(results.user.user_shows.data.show_duration, 'shows', 'watching');
                     text += "</div>";
 
                 text += "</div>";
@@ -250,13 +242,13 @@ function load_shows() {
             text += "</div>";
         text += "</div>";
 
-    } else if(results.user.user_shows.data.shows.length == 1) {
+    } else if(results.user.user_shows.data.show_plays == 1) {
 
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Shows!</h1>";
-                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.shows.length + " show.</h2><p>(Better not be that same one again...)</p>"
+                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.show_plays + " show.</h2><p>(Better not be that same one again...)</p>"
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -289,7 +281,7 @@ function load_shows() {
 					text += "<div class='status'>";
 						text += "<h1>Shows!</h1>";
 						text += "<br><br><br>";
-						text += "<h2>You watched " + results.user.user_shows.data.shows.length + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
+						text += "<h2>You watched " + results.user.user_shows.data.show_plays + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -304,97 +296,39 @@ function load_shows() {
 //MUSIC
 function load_music() {
 	var text = "";
-	
-	var albums = [];
-	var artists = [];
-	var tracks = results.user.user_music.data.music;
-	
-	for(var i = 0; i < results.user.user_music.data.music.length; i++) {
-		var found = false;
-		
-		for(var j = 0; j < albums.length; j++) {
-			if(albums[j].title == results.user.user_music.data.music[i].parent_title && albums[j].grandparent_title == results.user.user_music.data.music[i].grandparent_title) {
-				albums[j]["plays"] = albums[j].plays + 1;
-				albums[j]["duration"] = results.user.user_music.data.music[i].duration + albums[j].duration;
-				found = true;
-				break;
-			}
-		}
-		
-		if(!found && results.user.user_music.data.music[i].parent_title != "" && results.user.user_music.data.music[i].grandparent_title != "") {
-			albums.push({"title" : results.user.user_music.data.music[i].parent_title, "parent_rating_key" : results.user.user_music.data.music[i].parent_rating_key,"grandparent_title" : results.user.user_music.data.music[i].grandparent_title, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration, "year" : results.user.user_music.data.music[i].year});
-		}
-	}
-	
-	albums.sort(function(a, b) {
-		return parseFloat(b.duration) - parseFloat(a.duration);
-	});
-	
-	for(var i = 0; i < results.user.user_music.data.music.length; i++) {
-		var found = false;
-		
-		for(var j = 0; j < artists.length; j++) {
-			if(artists[j].title == results.user.user_music.data.music[i].grandparent_title) {
-				artists[j]["plays"] = artists[j].plays + 1;
-				artists[j]["duration"] = results.user.user_music.data.music[i].duration + artists[j].duration;
-				found = true;
-				break;
-			}
-		}
-		
-		if(!found && results.user.user_music.data.music[i].grandparent_title != "") {
-			artists.push({"title" : results.user.user_music.data.music[i].grandparent_title, "grandparent_rating_key" : results.user.user_music.data.music[i].grandparent_rating_key, "plays" : 1, "duration" : results.user.user_music.data.music[i].duration});
-		}
-	}
-	
-	artists.sort(function(a, b) {
-		return parseFloat(b.duration) - parseFloat(a.duration);
-	});
 
-    if(results.user.user_music.data.music.length > 1) {
+    if(results.user.user_music.data.track_plays > 1) {
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Music!</h1>";
-                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.music.length + ' different tracks.</h2><p>(If you can call your taste "music"...)</p>'
+                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.track_plays + ' different tracks.</h2><p>(If you can call your taste "music"...)</p>'
             text += "</div>";
 
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_music.data.music, "Your top tracks", true, false);
+                    text += top_list(results.user.user_music.data.tracks, "Your top tracks", "track", false);
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += top_list(albums, "Your top albums", true, false);
+                    text += top_list(results.user.user_music.data.albums, "Your top albums", "album", false);
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += top_list(artists, "Your top artists", false, false);
+                    text += top_list(results.user.user_music.data.artists, "Your top artists", "artist", false);
                 text += "</div>";
 				
 				text += "<div class='boks2' style='padding: 0;'>";
 
-                    albums_year = []
-                    for(var i = 0; i < albums.length; i++) {
-                        if(typeof albums[i].year !== 'undefined' && albums[i].year !== "" && albums[i].year > 1000) {
-                            albums_year.push(albums[i]);
-                        }
-                    }
-					albums_year.sort(function(a, b) {
-						return parseFloat(a.year) - parseFloat(b.year);
-					});
-					text += "<div class='boks2'>";
-						text += oldest_album(albums_year[0]);
-					text += "</div>";
-					
-					var sum = 0;
-					for(i = 0; (i < results.user.user_music.data.music.length); i++) {
-						sum += results.user.user_music.data.music[i].duration;
+                    if(!results.user.user_music.data.user_album_oldest.error) {
+                        text += "<div class='boks2'>";
+                            text += oldest_album(results.user.user_music.data.user_album_oldest);
+                        text += "</div>";
 					}
 
 					text += "<div class='boks2'>";
-						text += you_spent(sum, 'music', 'listening');
+						text += you_spent(results.user.user_music.data.track_duration, 'music', 'listening');
 					text += "</div>";
 				
 				text += "</div>";
@@ -402,13 +336,13 @@ function load_music() {
             text += "</div>";
         text += "</div>";
 
-    } else if(results.user.user_music.data.music.length == 1) {
+    } else if(results.user.user_music.data.track_plays == 1) {
 
         text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Music!</h1>";
-                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.music.length + " track.</h2><p>(Whatever floats your boat...)</p>"
+                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.track_plays + " track.</h2><p>(Whatever floats your boat...)</p>"
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -428,7 +362,7 @@ function load_music() {
 						text += "<div class='status'>";
 							text += "<h1>Music!</h1>";
 							text += "<br><br><br>";
-							text += "<h2>You listened to " + results.user.user_music.data.music.length + " tracks. No speakers, huh?</h2><p>(might wanna try it)</p>"
+							text += "<h2>You listened to " + results.user.user_music.data.track_plays + " tracks. No speakers, huh?</h2><p>(might wanna try it)</p>"
 							text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 						text += "</div>";
 					text += "</div>";
@@ -470,7 +404,7 @@ function oldest_album(album) {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "The oldest album you listened to was <br><b>" + album.title + " (" + album.year + ")</b> by " + album.grandparent_title + "<br>";
+            html += "The oldest album you listened to was <br><b>" + album.parent_title + " (" + album.year + ")</b> by " + album.grandparent_title + "<br>";
 			html += "<br>Maybe get the vinyl release?";
 			html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             
@@ -609,13 +543,20 @@ function top_list(array, title, music, year) {
                         html += "</div>";
 
                         html += "<div class='movie_name'>";
-							if(music) {
+							if(music === "track" || music === "album") {
 								html+= array[i].grandparent_title + "<br>";
 							}
 							
 							html += "<b>";
-							
-							html += array[i].title;
+
+							if(music === "album") {
+							    html += array[i].parent_title;
+							} else if(music === "artist") {
+							    html += array[i].grandparent_title;
+							} else {
+							    html += array[i].title;
+							}
+
                             html += "</b>";
                             var movie_hour = seconds_to_time(array[i].duration, true);
 
@@ -690,61 +631,39 @@ function load_users() {
                     text += top_list_names(results.year_stats.year_users.data, 'Top users');
                 text += "</div>";
 
-                var sum_movies = 0;
-                var sum_shows = 0;
-                var sum_artists = 0;
-
-                if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
-                    for(i = 0; (i < results.year_stats.year_movies.data.length); i++) {
-                        sum_movies += results.year_stats.year_movies.data[i].duration;
-                    }
-                }
-
-                if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
-                    for(i = 0; (i < results.year_stats.year_shows.data.length); i++) {
-                        sum_shows += results.year_stats.year_shows.data[i].duration;
-                    }
-                }
-
-                if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
-                    for(i = 0; (i < results.year_stats.year_music.data.length); i++) {
-                        sum_artists += results.year_stats.year_music.data[i].duration;
-                    }
-                }
-
-                var time_movies = seconds_to_time(sum_movies, false);
-                var time_shows = seconds_to_time(sum_shows, false);
-                var time_artists = seconds_to_time(sum_artists, false);
-                var time_all = seconds_to_time(Math.floor(sum_movies + sum_shows + sum_artists), false);
+                var time_movies = seconds_to_time(results.year_stats.year_movies.data.movie_duration, false);
+                var time_shows = seconds_to_time(results.year_stats.year_shows.data.show_duration, false);
+                var time_artists = seconds_to_time(results.year_stats.year_music.data.music_duration, false);
+                var time_all = seconds_to_time(Math.floor(results.year_stats.year_movies.data.movie_duration + results.year_stats.year_shows.data.show_duration + results.year_stats.year_music.data.music_duration), false);
 				var function_sum = 0;
 
                 text += "<div class='boks2'>";
                     text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
                         text += "<div class='stats'>";
 
-                            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
-                                text += "All the different users combined spent <b>" + time_movies + "</b>";
-                                text += " watching movies.";
+                            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
+                                text += "All the different users combined spent<br><b>" + time_movies + "</b>";
+                                text += "<br>watching movies.";
                                 text += "<br><br>";
 								function_sum += 1;
                             }
 
-                            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
-                                text += "All the different users combined spent <b>" + time_shows + "</b>";
-                                text += " watching shows.";
+                            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
+                                text += "All the different users combined spent<br><b>" + time_shows + "</b>";
+                                text += "<br>watching shows.";
                                 text += "<br><br>";
 								function_sum += 1;
                             }
 
-                            if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
-                                text += "All the different users combined spent <b>" + time_artists + "</b>";
-                                text += " listening to artists.";
+                            if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
+                                text += "All the different users combined spent<br><b>" + time_artists + "</b>";
+                                text += "<br>listening to artists.";
                                 text += "<br><br>";
 								function_sum += 1;
                             }
 
                             if(function_sum > 1) {
-                                text += "That is <b>" + time_all + "</b><br>of content!";
+                                text += "That is<br><b>" + time_all + "</b><br>of content!";
                             }
 
                             text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
@@ -758,45 +677,21 @@ function load_users() {
         text += "</div>";
         text += "<div class='boks3'>";
 
-            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.length > 0) {
+            if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.year_movies.data, "Top movies", false, true);
+                    text += top_list(results.year_stats.year_movies.data.movies, "Top movies", false, true);
                 text += "</div>";
             }
 
-            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.length > 0) {
+            if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.year_shows.data, "Top shows", false, false);
+                    text += top_list(results.year_stats.year_shows.data.shows, "Top shows", false, false);
                 text += "</div>";
             }
 
-            if(functions.get_year_stats_music && results.year_stats.year_music.data.length > 0) {
-                var artists = [];
-
-                for(var i = 0; i < results.year_stats.year_music.data.length; i++) {
-                    var found = false;
-
-                    for(var j = 0; j < artists.length; j++) {
-                        if(artists[j].title == results.year_stats.year_music.data[i].grandparent_title) {
-                            artists[j]["plays"] = artists[j].plays + 1;
-                            artists[j]["duration"] = results.year_stats.year_music.data[i].duration + artists[j].duration;
-                            found = true;
-                            break;
-                        }
-                    }
-
-                    if(!found && results.year_stats.year_music.data[i].grandparent_title != "") {
-                        artists.push({"title" : results.year_stats.year_music.data[i].grandparent_title, "grandparent_rating_key" : results.year_stats.year_music.data[i].grandparent_rating_key, "plays" : 1, "duration" : results.year_stats.year_music.data[i].duration});
-                    }
-                }
-
-                artists.sort(function(a, b) {
-                    return parseFloat(b.duration) - parseFloat(a.duration);
-                });
-
-
+            if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(artists, "Top artists", false, false);
+                    text += top_list(results.year_stats.year_music.data.artists, "Top artists", "artist", false);
                 text += "</div>";
             }
 

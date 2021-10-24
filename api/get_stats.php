@@ -37,7 +37,7 @@ if(!empty($data)){
     exit(0);
 }
 
-if(!empty($data)){
+if(!empty($data) && !empty($data->caching)) {
     $caching = filter_var(htmlspecialchars(trim($data->caching)), FILTER_VALIDATE_BOOLEAN);
 } else if(isset($_GET["caching"])) {
     $caching = filter_var(htmlspecialchars(trim($_GET["caching"])), FILTER_VALIDATE_BOOLEAN);
@@ -573,7 +573,7 @@ function data_get_user_stats_loop($id, $array) {
                 }
 				
 				for ($j = 0; $j < count($episodes); $j++) {
-                    if(strtolower($episodes[$j]["grandparent_title"]) == strtolower($title) && strtolower($episodes[$j]["parent_title"]) == strtolower($season_title) && strtolower($episodes[$j]["title"]) == strtolower$episode_title)) {
+                    if(strtolower($episodes[$j]["grandparent_title"]) == strtolower($title) && strtolower($episodes[$j]["parent_title"]) == strtolower($season_title) && strtolower($episodes[$j]["title"]) == strtolower($episode_title)) {
                         $episodes[$j]["duration"] = intval($episodes[$j]["duration"]) + intval($duration);
                         $episodes[$j]["plays"] = intval($episodes[$j]["plays"]) + 1;
                         $episode_found = True;
@@ -604,9 +604,6 @@ function data_get_user_stats_loop($id, $array) {
                 $grandparent_title = $array[$i]["data"][$d]["grandparent_title"];
                 $duration = $array[$i]["data"][$d]["duration"];
                 $year = $array[$i]["data"][$d]["year"];
-                $rating_key = $array[$i]["data"][$d]["rating_key"];
-                $parent_rating_key = $array[$i]["data"][$d]["parent_rating_key"];
-                $grandparent_rating_key = $array[$i]["data"][$d]["grandparent_rating_key"];
                 
                 // Skip entry if title, album or artist is empty/missing
                 if($title == "" || $grandparent_title == "" || $parent_title == "") {
@@ -620,12 +617,12 @@ function data_get_user_stats_loop($id, $array) {
                         $tracks[$j]["plays"] = intval($tracks[$j]["plays"]) + 1;
                         $tracks[$j]["duration"] = intval($tracks[$j]["duration"]) + intval($duration);
                         $found = True;
-		    	break;
+		    	        break;
                     }
                 }
 
                 if(!$found) {
-                    array_push($tracks, array("title" => $title, "parent_title" => $parent_title, "grandparent_title" => $grandparent_title, "plays" => 1, "duration" => $duration, "year" => $year, "rating_key" => $rating_key, "parent_rating_key" => $parent_rating_key, "grandparent_rating_key" => $grandparent_rating_key));
+                    array_push($tracks, array("title" => $title, "parent_title" => $parent_title, "grandparent_title" => $grandparent_title, "plays" => 1, "duration" => $duration, "year" => $year));
                 }
             }
 
@@ -642,11 +639,6 @@ function data_get_user_stats_loop($id, $array) {
                 $user = $array[$i]["data"][$d]["friendly_name"];
                 $user_id = $array[$i]["data"][$d]["user_id"];
                 $year = $array[$i]["data"][$d]["year"];
-				
-				// Skip movie if year is empty/missing
-				if($year == "") {
-					continue;
-				}
 
                 $user_found = False;
                 $movie_found = False;
@@ -740,9 +732,6 @@ function data_get_user_stats_loop($id, $array) {
                 $user_id = $array[$i]["data"][$d]["user_id"];
                 $friendly_name = $array[$i]["data"][$d]["friendly_name"];
                 $year = $array[$i]["data"][$d]["year"];
-                $rating_key = $array[$i]["data"][$d]["rating_key"];
-                $parent_rating_key = $array[$i]["data"][$d]["parent_rating_key"];
-                $grandparent_rating_key = $array[$i]["data"][$d]["grandparent_rating_key"];
 
                 // Skip entry if title, album or artist is empty/missing
                 if($title == "" || $grandparent_title == "" || $parent_title == "") {
@@ -767,16 +756,16 @@ function data_get_user_stats_loop($id, $array) {
                 }
 
                 for ($j = 0; $j < count($year_music); $j++) {
-                    if(strtolower($title) == strtolower($year_music[$j]["title"]) && strtolower($parent_title) == strtolower($year_music[$j]["parent_title"]) && strtolower($grandparent_title) == strtolower($year_music[$j]["grandparent_title"])) {
+                    if(strtolower($grandparent_title) == strtolower($year_music[$j]["grandparent_title"])) {
                         $year_music[$j]["plays"] = intval($year_music[$j]["plays"]) + 1;
                         $year_music[$j]["duration"] = intval($year_music[$j]["duration"]) + $duration;
-		    	$artist_found = True;
+		    	        $artist_found = True;
                         break;
                     }
                 }
 
                 if(!$artist_found) {
-                    array_push($year_music, array("title" => $title, "parent_title" => $parent_title, "grandparent_title" => $grandparent_title, "plays" => 1, "duration" => $duration, "year" => $year, "rating_key" => $rating_key, "parent_rating_key" => $parent_rating_key, "grandparent_rating_key" => $grandparent_rating_key));
+                    array_push($year_music, array("grandparent_title" => $grandparent_title, "plays" => 1, "duration" => $duration));
                 }
 
             }
@@ -792,45 +781,123 @@ function data_get_user_stats_loop($id, $array) {
         $movie_most_paused = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0);
     }
 
-    // Sort $movies for oldest movie
+    // Sort $movies for oldest movie and choose the oldest, verifiable movie
     $year = array_column($movies, 'year');
     array_multisort($year, SORT_ASC, $movies);
     if(count($movies) > 0) {
-        $movie_oldest = array("title" => $movies[0]["title"], "year" => $movies[0]["year"], "plays" => $movies[0]["plays"], "duration" => $movies[0]["duration"], "paused_counter" => $movies[0]["paused_counter"]);
+        $oldest_found = false;
+        for($i = 0; $i < count($movies); $i++) {
+            if($movies[$i]["year"] !== "" && $movies[$i]["year"] > 1000) {
+                $movie_oldest = array("title" => $movies[$i]["title"], "year" => $movies[$i]["year"], "plays" => $movies[$i]["plays"], "duration" => $movies[$i]["duration"], "paused_counter" => $movies[$i]["paused_counter"], "error" => false);
+                $oldest_found = true;
+                break;
+            }
+        }
+        if(!$oldest_found) {
+            $movie_oldest = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0, "error" => true);
+        }
     } else {
-        $movie_oldest = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0);
+        $movie_oldest = array("title" => "No movies watched", "year" => 0, "plays" => 0, "duration" => 0, "paused_counter" => 0, "error" => true);
     }
 
     // Sort $movies by longest duration
     $duration = array_column($movies, 'duration');
     array_multisort($duration, SORT_DESC, $movies);
 
-    //Sort shows by duration
+    //Sort $shows by longest duration
     $duration = array_column($shows, 'duration');
     array_multisort($duration, SORT_DESC, $shows);
 	
-	//Sort episodes by duration
+	//Sort episodes by duration and find longest episode duration
     $duration = array_column($episodes, 'duration');
     array_multisort($duration, SORT_DESC, $episodes);
 	if(count($episodes) > 0) {
         $episode_duration_longest = $episodes[0];
+        $episode_duration_longest["error"] = false;
     } else {
-        $episode_duration_longest = array("title" => "None", "parent_title" => "None", "grandparent_title" => "None", "duration" => 0, "plays" => 0);
+        $episode_duration_longest = array("title" => "None", "parent_title" => "None", "grandparent_title" => "None", "duration" => 0, "plays" => 0, "error" => true);
     }
 
-    // Sort $tracks for longest pause
+    // Declare artist and album variables
+    $artists = array();
+    $albums = array();
+
+    // Look for artists in track-list
+    for($i = 0; $i < count($tracks); $i++) {
+        $artist_found = false;
+
+        for($j = 0; $j < count($artists); $j++) {
+            if(strtolower($tracks[$i]["grandparent_title"]) == strtolower($artists[$j]["grandparent_title"])) {
+                $artists[$j]["plays"] += $tracks[$i]["plays"];
+                $artists[$j]["duration"] += $tracks[$i]["duration"];
+                $artist_found = true;
+                break;
+            }
+        }
+
+        if(!$artist_found) {
+            array_push($artists, array("grandparent_title" => $tracks[$i]["grandparent_title"], "duration" => $tracks[$i]["duration"], "plays" => $tracks[$i]["plays"]));
+        }
+    }
+
+    // Look for albums in track-list
+    for($i = 0; $i < count($tracks); $i++) {
+        $album_found = false;
+
+        for($j = 0; $j < count($albums); $j++) {
+            if(strtolower($tracks[$i]["grandparent_title"]) == strtolower($albums[$j]["grandparent_title"]) && strtolower($tracks[$i]["parent_title"]) == strtolower($albums[$j]["parent_title"])) {
+                $albums[$j]["plays"] += $tracks[$i]["plays"];
+                $albums[$j]["duration"] += $tracks[$i]["duration"];
+                $album_found = true;
+                break;
+            }
+        }
+
+        if(!$album_found) {
+            array_push($albums, array("parent_title" => $tracks[$i]["parent_title"], "grandparent_title" => $tracks[$i]["grandparent_title"], "duration" => $tracks[$i]["duration"], "plays" => 1, "year" => $tracks[$i]["year"]));
+        }
+    }
+
+    // Sort $albums for oldest album and choose the oldest, verifiable album
+    $year = array_column($albums, 'year');
+    array_multisort($year, SORT_ASC, $albums);
+    if(count($albums) > 0) {
+        $oldest_found = false;
+        for($i = 0; $i < count($albums); $i++) {
+            if($albums[$i]["year"] !== "" && $albums[$i]["year"] > 1000) {
+                $album_oldest = array("parent_title" => $albums[$i]["parent_title"], "grandparent_title" => $albums[$i]["grandparent_title"], "year" => $albums[$i]["year"], "plays" => $albums[$i]["plays"], "duration" => $albums[$i]["duration"], "error" => false);
+                $oldest_found = true;
+                break;
+            }
+        }
+        if(!$oldest_found) {
+            $album_oldest = array("parent_title" => "No albums played", "grandparent_title" => "No albums played", "year" => 0, "plays" => 0, "duration" => 0, "error" => true);
+        }
+    } else {
+        $album_oldest = array("parent_title" => "No albums played", "grandparent_title" => "No albums played", "year" => 0, "plays" => 0, "duration" => 0, "error" => true);
+    }
+
+    // Sort $tracks by longest duration
     $duration = array_column($tracks, 'duration');
     array_multisort($duration, SORT_DESC, $tracks);
 
-    // Sort year_movies by duration
+    // Sort $albums by longest duration
+    $duration = array_column($albums, 'duration');
+    array_multisort($duration, SORT_DESC, $albums);
+
+    // Sort $artists by longest duration
+    $duration = array_column($artists, 'duration');
+    array_multisort($duration, SORT_DESC, $artists);
+
+    // Sort $year_movies by duration
     $duration = array_column($year_movies, 'duration');
     array_multisort($duration, SORT_DESC, $year_movies);
 
-    // Sort year_shows by duration
+    // Sort $year_shows by duration
     $duration = array_column($year_shows, 'duration');
     array_multisort($duration, SORT_DESC, $year_shows);
 
-    // Sort tracks by duration
+    // Sort $year_music by duration
     $duration = array_column($year_music, 'duration');
     array_multisort($duration, SORT_DESC, $year_music);
 
@@ -851,49 +918,85 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_user_movie_stats) {
-        $return_movies = array("movies" => $movies, "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
+        $return_movies = array("movies" => array_slice($movies, 0, 10), "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
+        $duration = 0;
+        for($i = 0; $i < count($movies); $i++) {
+            $duration += $movies[$i]["duration"];
+        }
+        $return_movies["movie_duration"] = $duration;
+        $return_movies["movie_plays"] = count($movies);
     } else {
         $return_movies = array();
     }
 
     // Choose return value based on if function is enabled
     if($config->get_user_show_stats) {
-        $return_shows = array("shows" => $shows, "episode_duration_longest" => $episode_duration_longest);
+        $return_shows = array("shows" => array_slice($shows, 0, 10), "episode_duration_longest" => $episode_duration_longest);
+        $duration = 0;
+        for($i = 0; $i < count($shows); $i++) {
+            $duration += $shows[$i]["duration"];
+        }
+        $return_shows["show_duration"] = $duration;
+        $return_shows["show_plays"] = count($shows);
     } else {
         $return_shows = array();
     }
 
     // Choose return value based on if function is enabled
     if($config->get_user_music_stats) {
-        $return_music = array("music" => $tracks);
+        $return_music = array("tracks" => array_slice($tracks, 0, 10), "albums" => array_slice($albums, 0, 10), "user_album_oldest" => $album_oldest, "artists" => array_slice($artists, 0, 10));
+        $duration = 0;
+        for($i = 0; $i < count($tracks); $i++) {
+            $duration += $tracks[$i]["duration"];
+        }
+        $return_music["track_duration"] = $duration;
+        $return_music["track_plays"] = count($tracks);
     }else {
         $return_music = array();
     }
 
     // Choose return value based on if function is enabled
     if($config->get_year_stats_movies) {
-        $return_year_movies = $year_movies;
+        $return_year_movies["movies"] = array_slice($year_movies, 0, 10);
+        $duration = 0;
+        for($i = 0; $i < count($year_movies); $i++) {
+            $duration += $year_movies[$i]["duration"];
+        }
+        $return_year_movies["movie_duration"] = $duration;
+        $return_year_movies["movie_plays"] = count($year_movies);
     }else {
         $return_year_movies = array();
     }
 
     // Choose return value based on if function is enabled
     if($config->get_year_stats_shows) {
-        $return_year_shows = $year_shows;
+        $return_year_shows["shows"] = array_slice($year_shows, 0, 10);
+        $duration = 0;
+        for($i = 0; $i < count($year_shows); $i++) {
+            $duration += $year_shows[$i]["duration"];
+        }
+        $return_year_shows["show_duration"] = $duration;
+        $return_year_shows["show_plays"] = count($year_shows);
     }else {
         $return_year_shows = array();
     }
 
     // Choose return value based on if function is enabled
-    if($config->get_year_stats_shows) {
-        $return_year_music = $year_music;
+    if($config->get_year_stats_music) {
+        $return_year_music["artists"] = array_slice($year_music, 0, 10);
+        $duration = 0;
+        for($i = 0; $i < count($year_music); $i++) {
+            $duration += $year_music[$i]["duration"];
+        }
+        $return_year_music["music_duration"] = $duration;
+        $return_year_music["music_plays"] = count($year_music);
     }else {
         $return_year_music = array();
     }
 
     // Choose return value based on if function is enabled
     if(($config->get_year_stats_shows || $config->get_year_stats_shows || $config->get_year_stats_shows) && $config->get_year_stats_leaderboard) {
-        $return_year_users = $year_users;
+        $return_year_users = array_slice($year_users, 0, 10);
     } else {
         $return_year_users = array();
     }
