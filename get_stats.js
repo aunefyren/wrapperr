@@ -17,6 +17,7 @@ function get_stats() {
         if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
 			try {
 				var result= JSON.parse(this.responseText);
+				document.getElementById('snowflakes').style.display = 'none';
 			} catch(error) {
 				document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + "API response can't be parsed." + '</p>';
 				console.log('Error: ' + error);

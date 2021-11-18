@@ -167,55 +167,56 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
     if($config->get_user_movie_stats) {
         $user_movies = array("data" => $user_stats["movies"], "message" => "Success. User movie-stats are loaded.", "error" => False);
     } else {
-        $user_movies = array("error" => True, "message" => "Disabled in config.");
+        $user_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if($config->get_user_show_stats) {
         $user_shows = array("data" => $user_stats["shows"], "message" => "Success. User show-stats are loaded.", "error" => False);
     } else {
-        $user_shows = array("error" => True, "message" => "Disabled in config.");
+        $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if($config->get_user_show_stats) {
         $user_music = array("data" => $user_stats["music"], "message" => "Success. User music-stats are loaded.", "error" => False);
     } else {
-        $user_music = array("error" => True, "message" => "Disabled in config.");
+        $user_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if($config->get_year_stats_movies) {
         $year_movies = array("data" => $user_stats["year_movies"], "message" => "Success. User movie-year-stats are loaded.", "error" => False);
     } else {
-        $year_movies = array("error" => True, "message" => "Disabled in config.");
+        $year_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if($config->get_year_stats_shows) {
         $year_shows = array("data" => $user_stats["year_shows"], "message" => "Success. User show-year-stats are loaded.", "error" => False);
     } else {
-        $year_shows = array("error" => True, "message" => "Disabled in config.");
+        $year_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if($config->get_year_stats_music) {
         $year_music = array("data" => $user_stats["year_music"], "message" => "Success. User music-year-stats are loaded.", "error" => False);
     } else {
-        $year_music = array("error" => True, "message" => "Disabled in config.");
+        $year_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
     if(($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) && $config->get_year_stats_leaderboard ) {
         $year_users = array("data" => $user_stats["year_users"], "message" => "Success. User year-stats are loaded.", "error" => False);
     } else {
-        $year_users = array("error" => True, "message" => "Disabled in config.");
+        $year_users = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
 } else {
-    $user_movies = array("error" => True, "message" => "Disabled in config.");
-    $user_shows = array("error" => True, "message" => "Disabled in config.");
-    $user_music = array("error" => True, "message" => "Disabled in config.");
-    $year_movies = array("error" => True, "message" => "Disabled in config.");
-    $year_shows = array("error" => True, "message" => "Disabled in config.");
-    $year_music = array("error" => True, "message" => "Disabled in config.");
-    $year_users = array("error" => True, "message" => "Disabled in config.");
+    $user_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $user_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $year_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $year_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $year_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
+    $year_users = array("error" => True, "message" => "Disabled in config.", "data" => array());
 }
 
+//GET SHOW BUDDY
 if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_shows["data"]["shows"]) > 0) {
 	log_activity($id, "Getting show buddy");
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows"][0]["title"], $tautulli_data));
@@ -223,6 +224,7 @@ if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
 }
 
+//GET CURRENT DATE
 $now = new DateTime('NOW');
 
 // Log wrapped create
