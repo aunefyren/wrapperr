@@ -14,19 +14,20 @@ $arrContextOptions= [
     ],
 ];
 
+//Check if the config is configured. If not, exit the API call.
 if (empty($config)) {
     http_response_code(400);
     echo json_encode(array("message" => "Plex Wrapped is not configured.", "error" => true));
     exit(0);
 }
 
-// Set time-zone
+// Set time-zone to the one configured
 date_default_timezone_set($config->timezone);
 
-//Base-URL for connections
+//Base-URL for connections to Tautulli API.
 $connection = create_url();
 
-//Declare given inputs
+//Declare given inputs. GET and POST.
 if(!empty($data)){
 	$p_identity = htmlspecialchars(trim($data->p_identity));
 } else if(isset($_GET["p_identity"])) {
@@ -37,6 +38,7 @@ if(!empty($data)){
     exit(0);
 }
 
+//Check if Caching parameter was supplied through GET or POST
 if(!empty($data) && !empty($data->caching)) {
     $caching = filter_var(htmlspecialchars(trim($data->caching)), FILTER_VALIDATE_BOOLEAN);
 } else if(isset($_GET["caching"])) {
@@ -145,14 +147,14 @@ if($config->use_cache) {
 // Log refresh cache
 log_activity($id, "Refreshing data-cache of missing/incomplete days");
 
-// REFRESH THE CACHE
+// Refresh the cache
 $tautulli_data = tautulli_get_wrapped_dates($id, $tautulli_data, False);
 $tautulli_data = $tautulli_data["data"];
 
 // Log updating cache
 log_activity($id, "Saving data-cache");
 
-// SAVE WRAPPED DATES CACHE
+// Save the wrapped cache date
 if($config->use_cache) {
     update_cache($tautulli_data);
 }
@@ -160,46 +162,55 @@ if($config->use_cache) {
 // Log wrapped create
 log_activity($id, "Creating wrapped data");
 
-// NEW LOOP USER-STATS
+// Get stats based on configured options.
 if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get_user_music_stats || $config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) {
+    
+    // Create the dataset
     $user_stats = data_get_user_stats_loop($id, $tautulli_data);
 
+    // Select the retrieved dataset if movies are configured for users.
     if($config->get_user_movie_stats) {
         $user_movies = array("data" => $user_stats["movies"], "message" => "Success. User movie-stats are loaded.", "error" => False);
     } else {
         $user_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
+    // Select the retrieved dataset if shows are configured for users.
     if($config->get_user_show_stats) {
         $user_shows = array("data" => $user_stats["shows"], "message" => "Success. User show-stats are loaded.", "error" => False);
     } else {
         $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
-    if($config->get_user_show_stats) {
+    // Select the retrieved dataset if music are configured for users.
+    if($config->get_user_music_stats) {
         $user_music = array("data" => $user_stats["music"], "message" => "Success. User music-stats are loaded.", "error" => False);
     } else {
         $user_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
+    // Select the retrieved dataset if movies are configured for the server.
     if($config->get_year_stats_movies) {
         $year_movies = array("data" => $user_stats["year_movies"], "message" => "Success. User movie-year-stats are loaded.", "error" => False);
     } else {
         $year_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
+    // Select the retrieved dataset if movies are configured for the server.
     if($config->get_year_stats_shows) {
         $year_shows = array("data" => $user_stats["year_shows"], "message" => "Success. User show-year-stats are loaded.", "error" => False);
     } else {
         $year_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
+    // Select the retrieved dataset if shows are configured for the server.
     if($config->get_year_stats_music) {
         $year_music = array("data" => $user_stats["year_music"], "message" => "Success. User music-year-stats are loaded.", "error" => False);
     } else {
         $year_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
+    // Select the retrieved dataset if music are configured for the server.
     if(($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) && $config->get_year_stats_leaderboard ) {
         $year_users = array("data" => $user_stats["year_users"], "message" => "Success. User year-stats are loaded.", "error" => False);
     } else {
@@ -207,6 +218,10 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
     }
 
 } else {
+    // Log updating cache
+    log_activity($id, "No options, creating empty dataset.");
+
+    // No options selected, empty datasets being configured
     $user_movies = array("error" => True, "message" => "Disabled in config.", "data" => array());
     $user_shows = array("error" => True, "message" => "Disabled in config.", "data" => array());
     $user_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
@@ -216,21 +231,26 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
     $year_users = array("error" => True, "message" => "Disabled in config.", "data" => array());
 }
 
-//GET SHOW BUDDY
+// Get show buddy if enabled, shows are not empty, and shows is enabled.
 if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_shows["data"]["shows"]) > 0) {
-	log_activity($id, "Getting show buddy");
+    // Log show-buddy action
+    log_activity($id, "Getting show-buddy.");
+    
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows"][0]["title"], $tautulli_data));
 } else {
+    // Log show-buddy action
+    log_activity($id, "Show-buddy disabled.");
+
 	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => array("message" => "Disabled in config.", "error" => True));
 }
 
-//GET CURRENT DATE
+// Get the current date
 $now = new DateTime('NOW');
 
 // Log wrapped create
 log_activity($id, "Printing wrapped data");
 
-// Print results
+// Print results on page
 $result = json_encode(array("error" => False,
                             "date" => $now->format('Y-m-d'),
                             "message" => "Data processed.",
@@ -255,28 +275,33 @@ exit(0);
 
 function create_url() {
     global $config;
-    //creating url
+    // Creating URL for API calls to Tautulli
 
+    // If root string is not empty, add it with a '/'
     if($config->tautulli_root != "") {
         $root = "/" . $config->tautulli_root;
     } else {
         $root = $config->tautulli_root;
     }
 
+    // If port string is not empty, add it with a ':'
     if($config->tautulli_port != "") {
         $port = ":" . $config->tautulli_port;
     } else {
         $port = "";
     }
 
+    // IP or domain added
     $ip = $config->tautulli_ip;
 
+    // SSL means 'https', not means 'http'
     if($config->ssl) {
         $base = "https://";
     } else {
         $base = "http://";
     }
 
+    // Return the URL
     return $base . $ip . $port . $root;
 }
 
@@ -430,6 +455,7 @@ function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
             continue;
         }
 
+        // Log that we are downoading a new day
         log_activity($id, "Downloading day: " . $current_loop_date);
 
         $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_history&order_column=date&order_dir=desc&include_activity=0&length=" . $config->tautulli_length . "&start_date=" . $current_loop_date;
@@ -439,7 +465,8 @@ function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
         } else {
             $response = json_decode(file_get_contents($url), True);
         }
-
+        
+        // Filter data by content type. Movie, episode or track.
         $temp = $response["response"]["data"]["data"];
         $temp_clean = array();
         for($j = 0; $j < count($temp); $j++) {
@@ -448,7 +475,8 @@ function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
 				array_push($temp_clean, $temp2);
 			}
         }
-
+        
+        // If the date is today, then the data might not be complete. 
         if($now->format('Y-m-d') == $then->format('Y-m-d')) {
             $complete = False;
         } else {
@@ -473,6 +501,7 @@ function tautulli_get_wrapped_dates($id, $array, $loop_interval) {
     $date = array_column($array, 'date');
     array_multisort($date, SORT_ASC, $array);
 
+    // End time and calcualte total duration.
     $time_end = microtime(true);
     $execution_time = ($time_end - $time_start);
     log_activity($id, 'Refresh execution: '.$execution_time.' Seconds');
@@ -527,7 +556,7 @@ function data_get_user_stats_loop($id, $array) {
 					continue;
 				}
 				
-                // If movie play duration is < 300 seconds, use in array to calcualte average movie completion
+                // If movie play duration is more than 300 seconds, use in array to calcualte average movie completion
 				if($duration > 300) {
                     array_push($movies_percent_complete, $percent_complete);
                 }
