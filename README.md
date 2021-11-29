@@ -49,7 +49,7 @@ You need to give PHP permission to read and write to files in the directory call
 
 The directory contains sensitive information that must be only accessed by the PHP scripts! There is an .htaccess file included that blocks traffic to the folder, but that is effective with Apache. If you are using Nginx you must add a directory deny in your Nginx configuration!
 
-In Windows I never had to change permissions for the folder, PHP could access it by defult. In Linux I had go give read/write access by using chmod. In the example below I change the config directory folder permissions recursivly. 
+In Windows I never had to change permissions for the folder, PHP could access it by defult. In Linux I had go give read/write access by using chmod. In the example below I change the config directory folder permissions recursively. 
 
 ```
 $ sudo chmod -R 0777 /var/www/html/config
