@@ -712,7 +712,7 @@ function load_outro() {
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
             text += "<div class='boks2' style='margin-top:5em;'>";
-                text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodybye.</h4>";
+                text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodbye.</h4>";
             text += "</div>";
         text += "</div>";
     text += "</div>";
