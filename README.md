@@ -59,7 +59,7 @@ $ sudo chmod -R 0777 /var/www/html/config
 Everything should now work, and the rest of the setup should be done on the admin page, followed up by a pre-caching on the caching page. You might have to refer to PHP configuration section below if PHP is acting up. 
 
 ### Docker
-Docker sets up the environment, but I recommend reading the start of these instructions sections for an explanation of functionality! You might have to refer to the PHP configuration section below if PHP is acting up.
+Docker sets up the environment, but I recommend reading the start of the 'Instructions' section for an explanation of functionality! You might have to refer to the 'PHP Configuration' section below if PHP is acting up.
 
 Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/plex-wrapped) of Plex-Wrapped, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
 
