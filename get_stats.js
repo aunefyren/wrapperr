@@ -501,7 +501,7 @@ function load_longest_episode(array) {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "Your really liked the episode <b>" + array.title + "</b> from " + array.grandparent_title + "<br>";
+            html += "You really liked the episode <b>" + array.title + "</b> from " + array.grandparent_title + "<br>";
 			html += "<br>It recieved " + play_plays(array.plays) + " and was endured for " + seconds_to_time(array.duration, false) + "";
         html += "</div>";
     html += "</div>";
@@ -712,7 +712,7 @@ function load_outro() {
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
             text += "<div class='boks2' style='margin-top:5em;'>";
-                text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodybye.</h4>";
+                text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodbye.</h4>";
             text += "</div>";
         text += "</div>";
     text += "</div>";
