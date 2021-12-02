@@ -1026,7 +1026,7 @@ function data_get_user_stats_loop($id, $array) {
     }
 
     // Choose return value based on if function is enabled
-    if(($config->get_year_stats_shows || $config->get_year_stats_shows || $config->get_year_stats_shows) && $config->get_year_stats_leaderboard) {
+    if(($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) && $config->get_year_stats_leaderboard) {
         $return_year_users = array_slice($year_users, 0, 10);
     } else {
         $return_year_users = array();
