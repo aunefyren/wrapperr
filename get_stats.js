@@ -635,8 +635,8 @@ function load_users() {
                 var time_movies = seconds_to_time(results.year_stats.year_movies.data.movie_duration, false);
                 var time_shows = seconds_to_time(results.year_stats.year_shows.data.show_duration, false);
                 var time_artists = seconds_to_time(results.year_stats.year_music.data.music_duration, false);
-                var time_all = seconds_to_time(Math.floor(results.year_stats.year_movies.data.movie_duration + results.year_stats.year_shows.data.show_duration + results.year_stats.year_music.data.music_duration), false);
 				var function_sum = 0;
+                var time = 0;
 
                 text += "<div class='boks2'>";
                     text += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
@@ -647,6 +647,7 @@ function load_users() {
                                 text += "<br>watching movies.";
                                 text += "<br><br>";
 								function_sum += 1;
+                                time += results.year_stats.year_movies.data.movie_duration;
                             }
 
                             if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
@@ -654,6 +655,7 @@ function load_users() {
                                 text += "<br>watching shows.";
                                 text += "<br><br>";
 								function_sum += 1;
+                                time += results.year_stats.year_shows.data.show_duration;
                             }
 
                             if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
@@ -661,9 +663,11 @@ function load_users() {
                                 text += "<br>listening to artists.";
                                 text += "<br><br>";
 								function_sum += 1;
+                                time += results.year_stats.year_music.data.music_duration;
                             }
 
                             if(function_sum > 1) {
+                                var time_all = seconds_to_time(Math.floor(time), false);
                                 text += "That is<br><b>" + time_all + "</b><br>of content!";
                             }
 
