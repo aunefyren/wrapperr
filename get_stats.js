@@ -1,12 +1,11 @@
+var loaded = false;
+
 function get_stats() {
-    var results;
-    var functions;
+
     var loading_icon = document.getElementById("loading_icon");
 
-    var p_identity = document.getElementById("p_identity").value;
-
     stats_form = {
-                        "p_identity" : p_identity.trim(),
+                        "cookie" : cookie,
 						"caching" : false
                    };
 
@@ -17,20 +16,27 @@ function get_stats() {
         if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
 			try {
 				var result= JSON.parse(this.responseText);
-				document.getElementById('snowflakes').style.display = 'none';
 			} catch(error) {
-				document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + "API response can't be parsed." + '</p>';
 				console.log('Error: ' + error);
 				console.log(this.responseText);
 				loading_icon.style.display = "none";
+                document.getElementById("search_wrapped_button").disabled = false;
+                document.getElementById("search_wrapped_button").style.opacity = '1';
+                document.getElementById("plex_signout_button").disabled = false;
+                document.getElementById("plex_signout_button").style.opacity = '1';
+                document.getElementById('results_error').innerHTML = "API response can't be parsed.";
 			}
             if(result.error) {
                 loading_icon.style.display = "none";
-                search_button("SEARCH");
-                document.getElementById('results_error').innerHTML = '<p style="color:inherit; text-shadow: none;">' + result.message + '</p>';
+                document.getElementById("search_wrapped_button").disabled = false;
+                document.getElementById("search_wrapped_button").style.opacity = '1';
+                document.getElementById("plex_signout_button").disabled = false;
+                document.getElementById("plex_signout_button").style.opacity = '1';
+                document.getElementById('results_error').innerHTML = result.message;
 
-            } else {
-                load_page(this.responseText);
+            } else {    
+                results = result;
+                load_page(results);
             }
         }
     };
@@ -42,7 +48,12 @@ function get_stats() {
 }
 
 function load_page(data){
-    results = JSON.parse(data);
+
+    // Remove snow
+    document.getElementById('snowflakes').style.display = 'none';
+    
+    // Enable changing background colors JS
+    loaded = true;
 
     if(results.error) {
         $('#results_error').html(results.message);
@@ -51,6 +62,7 @@ function load_page(data){
         return
     }
 
+    // Find HTML elements and hide them
     var search_box = document.getElementById("search_input");
     var login_content = document.getElementById("login_content");
     var footer = document.getElementById("footer");
@@ -58,8 +70,13 @@ function load_page(data){
     login_content.style.display = "none";
     footer.style.display = "none";
 
+    // Set body background color to introduction
+    document.getElementById("body").classList.add('color-pink');
+
+    // Load the introduction
     load_introduction();
 
+    // Load the segments based on configuration
     if(!results.user.user_movies.error && functions.get_user_movie_stats) {
         load_movies();
     }
@@ -76,12 +93,14 @@ function load_page(data){
         load_users();
     }
 
+    // Load the outro
     load_outro();
 }
+
 //INTRODUCTION
 function load_introduction() {
     var text = "";
-    text += "<div class='boks' style='width: 100%; padding-bottom: 15em; padding-top: 15em; height:auto; background-color:#D2A3A4;'>";
+    text += "<div class='boks' data-color='pink' style='width: 100%; padding-bottom: 15em; padding-top: 15em; height:auto; background-color:none'>";
 
         text += "<div class='boks3'>";
 
@@ -109,7 +128,7 @@ function load_movies() {
 
     if(results.user.user_movies.data.movie_plays > 1) {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
+        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Movies!</h1>";
@@ -152,7 +171,7 @@ function load_movies() {
 
     } else if(results.user.user_movies.data.movie_plays == 1) {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
+        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Movies!</h1>";
@@ -184,7 +203,7 @@ function load_movies() {
 
     } else {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#B9A3D2;'>";
+        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
@@ -207,7 +226,7 @@ function load_shows() {
     var text = "";
 
     if(results.user.user_shows.data.show_plays > 1) {
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
+        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Shows!</h1>";
@@ -245,7 +264,7 @@ function load_shows() {
 
     } else if(results.user.user_shows.data.show_plays == 1) {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
+        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Shows!</h1>";
@@ -275,7 +294,7 @@ function load_shows() {
 
     } else {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#BBD2A3;'>";
+        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
@@ -299,7 +318,7 @@ function load_music() {
 	var text = "";
 
     if(results.user.user_music.data.track_plays > 1) {
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+        text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Music!</h1>";
@@ -339,7 +358,7 @@ function load_music() {
 
     } else if(results.user.user_music.data.track_plays == 1) {
 
-        text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+        text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
                 text += "<h1>Music!</h1>";
@@ -356,7 +375,7 @@ function load_music() {
 
         } else {
 
-            text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:#CFA38C;'>";
+            text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
                 text += "<div class='boks3'>";
 					text += "<div class='boks2'>";
@@ -512,14 +531,18 @@ function load_longest_episode(array) {
 function you_spent(time, category, verb) {
     var html = "";
 
-    var time = seconds_to_time(time, false);
+    var time_str = seconds_to_time(time, false);
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "You spent <b>" + time + "</b>";
+            html += "You spent <b>" + time_str + "</b>";
             html += " " + verb + " ";
             html += category;
             if(category == 'music') {
+                if(time > 3600) {
+                    var time_min = Math.floor(time / 60);
+                    html += '<br><br>That\'s ' + time_min + ' minutes!';
+                }
                 html += '<br><img src="assets/img/music.svg" style="margin: auto; display: block; width: 15em;">';
             } else {
                 html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
@@ -619,7 +642,7 @@ function top_list_names(array, title) {
 function load_users() {
     var text = "";
 
-    text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:	#a2d1d0;'>";
+    text += "<div class='boks' data-color='blue' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
         text += "<h1>Server-wide statistics!</h1>";
         text += "<br><br><br><br><h2>It's okay to feel shame if you are on the list.</h2><p>(or missing from it...)</p>"
         text += "<br><br>";
@@ -710,18 +733,94 @@ function load_users() {
 function load_outro() {
     var text = "";
 
-    text += "<div class='boks' style='height: auto !important; width: 100%; padding-bottom: 15em; padding-top: 15em; height:10em; background-color:#39393A;'>";
+    text += "<div class='boks' data-color='black' style='height: auto !important; width: 100%; padding-bottom: 15em; padding-top: 15em; height:10em; background-color:none;'>";
         text += "<div class='boks3'>";
+            
             text += "<div class='boks2'>";
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
+
             text += "<div class='boks2' style='margin-top:5em;'>";
                 text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodbye.</h4>";
             text += "</div>";
+        
+        text += "</div>";
+        text += "<div class='boks3'>";
+
+            text += "<div class='boks2' style='margin-top:5em;'>";
+                
+                if(!link_mode && functions.create_share_links) {
+
+                    text += "<div class='form-group' id='share_wrapped_div' style=''>";
+                        text += "<button class='form-control btn' name='share_wrapped_button' id='share_wrapped_button' onclick='create_wrapped_link()'>";
+                            text += "<img src='assets/share.svg' class='btn_logo'>";
+                            text += "<p2 id='share_wrapped_button_text'>Share wrapped page</p2>";
+                        text += "</button>";
+
+                        text += "<div class='form-group' id='share_wrapped_results_div' style='display: none; margin: 0.5em 0;'>";
+                            text += "<div><p>This URL is valid for 7 days:</p></div>";
+                            text += "<div id='share_wrapped_results_url' style='padding: 0.25em; background-color: white; border-radius: 0.25em; overflow: auto;'></div>";
+                        text += "</div>";
+
+                    text += "</div>";
+
+                }
+                
+                var url_home = window.location.href.split('?')[0];
+
+                text += "<div class='form-group' id='return_home_div' style=''>";
+                    text += `<button class='form-control btn' name='return_home_button' id='return_home_button' onclick='window.location.href = "` + url_home + `";'>`;
+                        text += "<img src='assets/restart.svg' class='btn_logo'>";
+                        text += "<p2 id='return_home_text'>Return</p2>";
+                    text += "</button>";
+                text += "</div>";
+
+            text += "</div>";
+
         text += "</div>";
     text += "</div>";
 
     document.getElementById("search_results").innerHTML += text;
+}
+
+function create_wrapped_link() {
+
+    document.getElementById("share_wrapped_button").disabled = true;
+    document.getElementById("share_wrapped_button").style.opacity = '0.5';
+
+    wrapped_form = {
+                        "cookie" : get_cookie('plex-wrapped'),
+                        "data" : results
+                    };
+
+    var wrapped_data = JSON.stringify(wrapped_form);
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
+        try {
+            var result= JSON.parse(this.responseText);
+        } catch(error) {
+            alert("API response can't be parsed.");
+            console.log('Error: ' + error);
+            console.log(this.responseText);
+            document.getElementById("share_wrapped_button").disabled = false;
+            document.getElementById("share_wrapped_button").style.opacity = '1';
+        }
+        if(result.error) {
+            alert(result.message);
+
+        } else {
+            document.getElementById('share_wrapped_results_url').innerHTML = '<span style="white-space: nowrap;">' + window.location.href.split('?')[0] + result.url + '</span>';
+            document.getElementById('share_wrapped_results_div').style.display = 'inline-block';
+            document.getElementById("share_wrapped_button").disabled = false;
+            document.getElementById("share_wrapped_button").style.opacity = '1';
+        }
+    }
+    };
+    xhttp.withCredentials = true;
+    xhttp.open("post", "api/create_link.php");
+    xhttp.send(wrapped_data);
 }
 
 function play_plays(plays) {
@@ -883,3 +982,38 @@ function seconds_to_seconds(seconds) {
 
     return second_string;
 }
+
+// Change background color for each category
+$(window).scroll(function() {
+    
+    if(loaded) {
+
+        // Select the window, body and elements containing stats
+        var $window = $(window),
+            $body = $('body'),
+            $panel = $('.boks');
+        
+        // Change 33% earlier than scroll position so colour is there when you arrive
+        var scroll = $window.scrollTop() + ($window.height() / 3);
+    
+        $panel.each(function () {
+            var $this = $(this);
+
+            // If position is within range of this panel.
+            // So position of (position of top of div <= scroll position) && (position of bottom of div > scroll position).
+            // Remember we set the scroll to 33% earlier in scroll var.
+            if ($this.position().top <= scroll && $this.position().top + $this.height() > scroll) {
+
+            // Remove all classes on body with color-
+            $body.removeClass(function (index, css) {
+                return (css.match (/(^|\s)color-\S+/g) || []).join(' ');
+            });
+
+            // Add class of currently active div
+            $body.addClass('color-' + $(this).data('color'));
+            }
+        });    
+
+    }
+    
+  }).scroll();

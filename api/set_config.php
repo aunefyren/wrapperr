@@ -1,90 +1,84 @@
 <?php
-$path = "../config/config.json";
-$path2 = "../config/cache.json";
+// Required headers
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Max-Age: 3600");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
+// Files needed to use objects
+require(dirname(__FILE__) . '/objects/config.php');
+require(dirname(__FILE__) . '/objects/log.php');
+
+// Create variables
+$config = new Config();
+$log = new Log();
 $data = json_decode(file_get_contents("php://input"));
 
-if(!file_exists($path)) {
-	fopen($path, "w");
-}	
-$config = json_decode(file_get_contents($path));
+// If POST data is empty
+if(empty($data)) {
 
-if(!empty($data)) {
-    $config_data = $data->data;
-} else {
+	// Log use
+	$log->log_activity('set_config.php', 'unknown', 'No admin login input provided.');
+
     echo json_encode(array("error" => true, "message" => "No input provided."));
     exit(0);
 }
+
+// Remove potential harmfull input
 $password = htmlspecialchars($data->password);
 $username = htmlspecialchars($data->username);
 
-if(empty($config->password)) {
-    save_config();
-    exit(0);
-}
+// Verify password and username combination
+if(!$config->is_configured()) {
 
-if(password_verify($password, $config->password) && $username == $config->username) {
-	// Log API request if enabled
-	if($config->use_logs) {
-		if(!log_activity()) {
-			echo json_encode(array("message" => "Failed to log event.", "error" => true));
-			exit(0);
-		}
-	}
+    // Log use
+	$log->log_activity('set_config.php', 'unknown', 'Not configured before, saving first-time configuration.');
+
+    // Call save function
+    save_config($data->data, $data->clear_cache);
+    
+} else if($config->verify_wrapped_admin($username, $password)) {
 	
-    save_config();
-    exit(0);
+	// Log use
+	$log->log_activity('set_config.php', 'unknown', 'Admin login verified.');
+
+    // Call save function
+    save_config($data->data, $data->clear_cache);
+
+// If input was given, but is empty
 } else {
-    echo json_encode(array("error" => true, "message" => "Password and username combination not accepted.", "password" => true));
+
+	// Log use
+	$log->log_activity('set_config.php', 'unknown', 'Wrong admin password/username combination.');
+
+    echo json_encode(array("error" => true, "message" => "Username and password combination not accepted.", "password" => true, "data" => array()));
     exit(0);
+
 }
 
-function save_config() {
-    global $data;
-    global $config_data;
+// Retrieve data and save it
+function save_config($data, $clear_cache) {
+
     global $config;
-    global $path;
-    global $path2;
+    global $log;
 
-    if(!empty($config_data->password)) {
-        $hash = password_hash($config_data->password, PASSWORD_DEFAULT);
-        $config_data->password = $hash;
-    } else {
-        $config_data->password = $config->password;
-    }
+    // Call function to save data
+    if($config->save_config($data, $clear_cache)) {
 
-    if(file_put_contents($path, json_encode($config_data))) {
-
-        if($data->clear_cache) {
-            file_put_contents($path2, "");
-        }
+        // Log use
+	    $log->log_activity('set_config.php', 'unknown', 'New config was saved.');
 
         echo json_encode(array("error" => false, "message" => "Changes saved."));
         exit(0);
 
     } else {
-        echo json_encode(array("error" => true, "message" => "Changes were not saved."));
+
+        // Log use
+	    $log->log_activity('set_config.php', 'unknown', 'New login was not saved.');
+
+        echo json_encode(array("error" => true, "message" => "Changes were not saved. Is the directory 'config' writable?"));
         exit(0);
     }
-}
-
-function log_activity() {
-	$date = date('Y-m-d H:i:s');
-	
-	$path = "../config/wrapped.log";
-	if(!file_exists($path)) {
-		$temp = fopen($path, "w");
-		fwrite($temp, 'Plex Wrapped');
-		fclose($temp);
-	}	
-	
-	$log_file = fopen($path, 'a');
-	fwrite($log_file, PHP_EOL . $date . ' - set_config.php');   
-	
-	if(fclose($log_file)) {
-		return True;
-	}
-	
-	return False;
 }
 ?>

@@ -52,7 +52,7 @@
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../">Wrapped</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../admin">Admin</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../caching">Caching</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub</a>
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub</a>
 </div>
 
 <div class="content" id="search_results">
@@ -64,11 +64,14 @@ var root = "../";
 
 var first_time = false;
 
+var plex_wrapped_version = "";
+
 var tautulli_apikey = "";
 var tautulli_ip = "";
 var tautulli_port = "";
 var tautulli_length = 5000;
 var tautulli_root = "";
+var tautulli_libraries = "";
 
 var ssl = false;
 
@@ -82,6 +85,8 @@ wrapped_start.setUTCSeconds(1609455600);
 
 var wrapped_end = new Date(0);
 wrapped_end.setUTCSeconds(1640991540);
+
+var create_share_links = true;
 
 var get_user_movie_stats = true;
 var get_user_show_stats = true;
@@ -102,7 +107,12 @@ var current_username = "";
 
 var stats_intro = "New year, new page of statistics...";
 
+var client_id = "";
+var plex_wrapped_root = "";
+
 $(document).ready(function() {
+
+    get_plex_wrapped_version();
 
     get_config_initial("../");
 

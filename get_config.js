@@ -11,12 +11,14 @@ function get_config_initial() {
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
             var result = JSON.parse(this.responseText);
-            if(result.password) {
-                login_menu();
-            } else {
-                first_time = true;
+            if(result.error) { 
+                if(!result.password) {
+                    first_time = true;
 
-                set_password();
+                    set_password();
+                } else {
+                    login_menu();
+                }
             }
         }
     };
@@ -51,6 +53,7 @@ function get_config() {
                 tautulli_port = result.data.tautulli_port;
                 tautulli_length = result.data.tautulli_length;
                 tautulli_root = result.data.tautulli_root;
+                tautulli_libraries = result.data.tautulli_libraries;
 
                 ssl = result.data.ssl;
 
@@ -66,7 +69,7 @@ function get_config() {
                 wrapped_end.setUTCSeconds(result.data.wrapped_end);
 
                 stats_intro = result.data.stats_intro;
-
+                create_share_links = result.data.create_share_links;
                 get_user_movie_stats = result.data.get_user_movie_stats;
                 get_user_show_stats = result.data.get_user_show_stats;
                 get_user_show_buddy = result.data.get_user_show_buddy;
@@ -79,6 +82,9 @@ function get_config() {
 
                 use_cache = result.data.use_cache;
 				use_logs = result.data.use_logs;
+
+                clientID = result.data.clientID;
+                plex_wrapped_root = result.data.plex_wrapped_root;
 
                 set_tautulli(true);
             }

@@ -31,7 +31,7 @@
 
                 <div class="stats_tekst" style="height: auto;">
                     <p>
-                    If you want to decrease loadtime for your users you can pre-cache results.
+                    Caching decreases loadtime for users and reduces PHP induced errors.
                     <br><br><a href="../admin">Remember to configure the system first.</a>
                     </p>
                 </div>
@@ -59,15 +59,18 @@
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../">Wrapped</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../admin">Admin</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../caching">Caching</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub</a>
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub (v2.1.0)</a>
 </div>
 
 
 <script type="text/javascript">
 
     var root = "../";
+    var cookie;
 
     $(document).ready(function() {
+        
+        get_plex_wrapped_version();
 
         get_config_cache();
 

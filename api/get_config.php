@@ -1,59 +1,61 @@
 <?php
+// Required headers
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
+header("Access-Control-Max-Age: 3600");
+header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+
+// Files needed to use objects
+require(dirname(__FILE__) . '/objects/config.php');
+require(dirname(__FILE__) . '/objects/log.php');
+
+// Create variables
+$config = new Config();
+$log = new Log();
 $data = json_decode(file_get_contents("php://input"));
 
-$path = "../config/config.json";
-if(!file_exists($path)) {
-	fopen($path, "w");
-}	
-$config = json_decode(file_get_contents($path));
-
+// If POST data is empty
 if(empty($data)) {
+
+	// Log use
+	$log->log_activity('get_config.php', 'unknown', 'No admin login input provided.');
+
     echo json_encode(array("error" => true, "message" => "No input provided."));
     exit(0);
+	
 }
 
-if(empty($config->password) || empty($config->username)) {
-    echo json_encode(array("error" => false, "message" => "Password and/or username not set.", "password" => false, "data" => array()));
-    exit(0);
-}
-
+// Remove potential harmfull input
 $password = htmlspecialchars($data->password);
 $username = htmlspecialchars($data->username);
 
-if(password_verify($password, $config->password) && $username == $config->username) {
+// Check if confgiured
+if(!$config->is_configured()) {
+
+	// Log use
+	$log->log_activity('get_config.php', 'unknown', 'Plex-Wrapped is not configured.');
+
+    echo json_encode(array("error" => true, "message" => "Plex-Wrapped is not configured.", "password" => false, "data" => array()));
+    exit(0);
+
+// Verify password and username combination
+} else if($config->verify_wrapped_admin($username, $password)) {
 	
-	// Log API request if enabled
-	if($config->use_logs) {
-		if(!log_activity()) {
-			echo json_encode(array("message" => "Failed to log event.", "error" => true));
-			exit(0);
-		}
-	}
-	
+	// Log use
+	$log->log_activity('get_config.php', 'unknown', 'Retrieved Plex-Wrapped configuraton.');
+
     echo json_encode(array("error" => false, "message" => "Login successful.", "password" => true, "data" => $config));
     exit(0);
+
+// If input was given, but is empty
 } else {
+
+	// Log use
+	$log->log_activity('get_config.php', 'unknown', 'Wrong admin password/username combination.');
+
     echo json_encode(array("error" => true, "message" => "Username and password combination not accepted.", "password" => true, "data" => array()));
     exit(0);
-}
 
-function log_activity() {
-	$date = date('Y-m-d H:i:s');
-	
-	$path = "../config/wrapped.log";
-	if(!file_exists($path)) {
-		$temp = fopen($path, "w");
-		fwrite($temp, 'Plex Wrapped');
-		fclose($temp);
-	}	
-	
-	$log_file = fopen($path, 'a');
-	fwrite($log_file, PHP_EOL . $date . ' - get_config.php');   
-	
-	if(fclose($log_file)) {
-		return True;
-	}
-	
-	return False;
 }
 ?>
