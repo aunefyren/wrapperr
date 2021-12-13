@@ -1,7 +1,7 @@
 # Wrapperr
 ## Introduction - What is this?
 
-A website-based platform and API for collecting Plex user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
+A website-based platform and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
 
 <br>
 <br>
@@ -100,7 +100,7 @@ Docker sets up the environment, but I recommend reading the start of the 'Instru
 Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
 
 ```
-$ docker run -p '80:80' --name 'plex-wrapped' aunefyren/plex-wrapped:latest
+$ docker run -p '80:80' --name 'wrapperr' aunefyren/wrapperr:latest
 ```
 
 It should now be accessable on: ```http://localhost```
@@ -110,11 +110,11 @@ If you use Docker Compose you could do something like this in your docker-compos
 ```
 version: '3.3'
 services:
-    plex-wrapped:
+    wrapperr:
         ports:
             - '80:80'
-        container_name: plex-wrapped
-        image: 'aunefyren/plex-wrapped'
+        container_name: wrapperr
+        image: 'aunefyren/wrapperr:latest'
 ```
 
 And launch the file with:
@@ -129,11 +129,11 @@ If you want to mount a volume for the config folder, you can do something like t
 ```
 version: '3.3'
 services:
-    plex-wrapped:
+    wrapperr:
         ports:
             - '80:80'
-        container_name: plex-wrapped
-        image: 'aunefyren/plex-wrapped'
+        container_name: wrapperr
+        image: 'aunefyren/wrapperr:latest'
         volumes:
             - './my-folder:/var/www/html/config'
 ```
