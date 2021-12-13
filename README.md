@@ -1,4 +1,4 @@
-# Plex Wrapped
+# Wrapperr
 ## Introduction - What is this?
 
 A website-based platform and API for collecting Plex user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
@@ -6,7 +6,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 <br>
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_01.PNG?raw=true)
+![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_01.PNG?raw=true)
 
 <br>
 <br>
@@ -25,7 +25,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 <br>
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_02.PNG?raw=true)
+![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_02.PNG?raw=true)
 
 <br>
 <br>
@@ -39,7 +39,7 @@ A website-based platform and API for collecting Plex user stats within a set tim
 <br>
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/Plex-Wrapped/main/assets/img/example_03.PNG?raw=true)
+![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_03.PNG?raw=true)
 
 <br>
 <br>
@@ -70,7 +70,7 @@ XAMPP is a completely free, easy to install Apache distribution containing Maria
 
 Install XAMPP thorugh the installer and open up the GUI. From there you can start the Apache webserver with a single button. We don't need any of the other tools included, but make sure the status of the module is green. PHP should be pre-configured by XAMPP.
 
-### Install Plex-Wrapped
+### Install Wrapperr
 Download this repository and place the files inside the document-root of XAMPPs apache server. This is typically ```C:\xampp\htdocs``` on Windows, but this will change depending on your system and configuration of XAMPP during installation. 
 
 For instance, I placed this repository in a folder inside the document-root, so my location of XAMPP, with that folder, makes the location: ```C:\xampp\htdocs\plex-wrapped```, which in turn makes the files accessable on ```http://localhost/plex-wrapped```. Notice how my folder inside the document-root altered the URL. If I placed the files directly into ```C:\xampp\htdocs``` the URL would be: ```http://localhost```.
@@ -97,7 +97,7 @@ Everything should now be prepared, and the rest of the setup should be done on t
 ## Docker
 Docker sets up the environment, but I recommend reading the start of the 'Instructions' section for an explanation of functionality! You might have to refer to the 'PHP Configuration' section below if PHP is acting up.
 
-Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/plex-wrapped) of Plex-Wrapped, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
+Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
 
 ```
 $ docker run -p '80:80' --name 'plex-wrapped' aunefyren/plex-wrapped:latest
