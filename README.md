@@ -4,11 +4,9 @@
 A website-based platform and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
 
 <br>
-<br>
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_01.PNG?raw=true)
 
-<br>
 <br>
 
 ### Features
@@ -21,13 +19,12 @@ A website-based platform and API for collecting user stats within a set timefram
 - Email and username search
 - Admin page with authentication for settings
 - Pre-caching of data
+- Shareable links
 
-<br>
 <br>
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_02.PNG?raw=true)
 
-<br>
 <br>
 
 ### Credit
@@ -37,11 +34,9 @@ A website-based platform and API for collecting user stats within a set timefram
 - Splendid web icons from [icons8](https://icons8.com/icon/set/popular/material-rounded)
 
 <br>
-<br>
 
 ![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_03.PNG?raw=true)
 
-<br>
 <br>
 
 ## Instructions - How do I use this?
