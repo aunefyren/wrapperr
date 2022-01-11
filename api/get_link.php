@@ -34,9 +34,9 @@ if(empty($data) || !isset($data->hash)) {
 if(!$config->is_configured()) {
 
 	// Log use
-	$log->log_activity('get_link.php', 'unknown', 'Plex-Wrapped is not configured.');
+	$log->log_activity('get_link.php', 'unknown', 'Wrapperr is not configured.');
 
-    echo json_encode(array("error" => true, "message" => "Plex-Wrapped is not configured.", "password" => false, "data" => array()));
+    echo json_encode(array("error" => true, "message" => "Wrapperr is not configured.", "password" => false, "data" => array()));
     exit(0);
 
 }
@@ -45,9 +45,9 @@ if(!$config->is_configured()) {
 if(!$config->create_share_links) {
 
 	// Log use
-	$log->log_activity('get_link.php', 'unknown', 'Plex-Wrapped does not allow link creation in config.');
+	$log->log_activity('get_link.php', 'unknown', 'Wrapperr does not allow link creation in config.');
 
-    echo json_encode(array("error" => true, "message" => "Plex-Wrapped option for link creation not enabled."));
+    echo json_encode(array("error" => true, "message" => "Wrapperr option for link creation not enabled."));
     exit(0);
 
 }
@@ -58,9 +58,9 @@ $hash_input = explode('-', htmlspecialchars($data->hash));
 if(count($hash_input) !== 2) {
 
     // Log use
-	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapped link. Can\'t parse input.');
+	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapperr link. Can\'t parse input.');
 
-    echo json_encode(array("error" => true, "message" => "Wrapped link is either wrong or expired."));
+    echo json_encode(array("error" => true, "message" => "Wrapperr link is either wrong or expired."));
     exit(0);
 
 }
@@ -82,9 +82,9 @@ $content = $link->open_link($id);
 if(!$content) {
 
 	// Log use
-	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapped link. File not found.');
+	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapperr link. File not found.');
 
-    echo json_encode(array("error" => true, "message" => "There was an error fetching this Wrapped page. Could the link have expired?"));
+    echo json_encode(array("error" => true, "message" => "There was an error fetching this Wrapperr page. Could the link have expired?"));
     exit(0);
 
 }
@@ -95,9 +95,9 @@ $link_data = json_decode($content);
 if($link_data->url_hash !== $data->hash) {
 
 	// Log use
-	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapped link. Hash did not match.');
+	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapperr link. Hash did not match.');
 
-    echo json_encode(array("error" => true, "message" => "There was an error fetching this Wrapped page. Could the link have expired?"));
+    echo json_encode(array("error" => true, "message" => "There was an error fetching this Wrapperr page. Could the link have expired?"));
     exit(0);
 
 }
@@ -109,22 +109,37 @@ $diff = (array) date_diff($now, $then);
 if($diff['days'] > 7) {
 
     // Log use
-	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapped link for ID: ' . $id . '. It has expired. Deleting file.');
+	$log->log_activity('get_link.php', 'unknown', 'Failed to get Wrapperr link for ID: ' . $id . '. It has expired. Deleting file.');
 
     // Delete expired content
     if(!$link->delete_link($id)) {
         $log->log_activity('get_link.php', 'unknown', 'Failed to delete link for ID: ' . $id . '.');
     }
 
-    echo json_encode(array("error" => true, "message" => "This Wrapped link has expired."));
+    echo json_encode(array("error" => true, "message" => "This Wrapperr link has expired."));
+    exit(0);
+
+}
+
+if($link_data->wrapperr_version !== $config->wrapperr_version) {
+
+    // Log use
+	$log->log_activity('get_link.php', 'unknown', 'Wrapperr link for ID: ' . $id . ' is made for version: ' . $link_data->wrapperr_version . '. Deleting file.');
+
+    // Delete expired content
+    if(!$link->delete_link($id)) {
+        $log->log_activity('get_link.php', 'unknown', 'Failed to delete link for ID: ' . $id . '.');
+    }
+
+    echo json_encode(array("error" => true, "message" => "This Wrapperr link is made for another Wrapperr version. Create a new link on the current version."));
     exit(0);
 
 }
 
 // Log use
-$log->log_activity('get_link.php', 'unknown', 'Retrieved Wrapped link for ID: ' . $id . '.');
+$log->log_activity('get_link.php', 'unknown', 'Retrieved Wrapperr link for ID: ' . $id . '.');
 
 // Return URL generated
-echo json_encode(array("error" => false, "message" => "Link retrieved.", "data" => $link_data->data));
+echo json_encode(array("error" => false, "message" => "Link retrieved.", "data" => $link_data->data, "functions" => $link_data->functions));
 exit(0);
 ?>

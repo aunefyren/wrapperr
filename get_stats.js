@@ -17,14 +17,24 @@ function get_stats() {
 			try {
 				var result= JSON.parse(this.responseText);
 			} catch(error) {
-				console.log('Error: ' + error);
-				console.log(this.responseText);
-				loading_icon.style.display = "none";
-                document.getElementById("search_wrapped_button").disabled = false;
-                document.getElementById("search_wrapped_button").style.opacity = '1';
-                document.getElementById("plex_signout_button").disabled = false;
-                document.getElementById("plex_signout_button").style.opacity = '1';
-                document.getElementById('results_error').innerHTML = "API response can't be parsed.";
+                if(this.responseText.includes('Maximum execution time of')) {
+                    loading_icon.style.display = "none";
+                    document.getElementById("search_wrapped_button").disabled = false;
+                    document.getElementById("search_wrapped_button").style.opacity = '1';
+                    document.getElementById("plex_signout_button").disabled = false;
+                    document.getElementById("plex_signout_button").style.opacity = '1';
+                    document.getElementById('results_error').innerHTML = 'PHP runtime exceeded and stopped execution. Admin must shorten wrapped period or perform caching.';
+                } else {
+                    console.log('Error: ' + error);
+                    console.log(this.responseText);
+                    loading_icon.style.display = "none";
+                    document.getElementById("search_wrapped_button").disabled = false;
+                    document.getElementById("search_wrapped_button").style.opacity = '1';
+                    document.getElementById("plex_signout_button").disabled = false;
+                    document.getElementById("plex_signout_button").style.opacity = '1';
+                    document.getElementById('results_error').innerHTML = "API response can't be parsed.";
+                }
+                return;
 			}
             if(result.error) {
                 loading_icon.style.display = "none";
@@ -51,6 +61,9 @@ function load_page(data){
 
     // Remove snow
     document.getElementById('snowflakes').style.display = 'none';
+
+    // Set body background color to introduction
+    document.getElementById("body").classList.add('color-red');
     
     // Enable changing background colors JS
     loaded = true;
@@ -69,9 +82,6 @@ function load_page(data){
     search_box.style.display = "none";
     login_content.style.display = "none";
     footer.style.display = "none";
-
-    // Set body background color to introduction
-    document.getElementById("body").classList.add('color-pink');
 
     // Load the introduction
     load_introduction();
@@ -100,7 +110,7 @@ function load_page(data){
 //INTRODUCTION
 function load_introduction() {
     var text = "";
-    text += "<div class='boks' data-color='pink' style='width: 100%; padding-bottom: 15em; padding-top: 15em; height:auto; background-color:none'>";
+    text += "<div class='boks' data-color='red' style='width: 100%; padding-bottom: 15em; padding-top: 15em; height:auto; background-color:none'>";
 
         text += "<div class='boks3'>";
 
@@ -108,11 +118,8 @@ function load_introduction() {
                 text += '<img src="assets/img/finished-illustration.svg" style="width:100%; ">';
             text += "</div>";
 
-            text += "<div class='boks2'>";
-                text += "<br>";
-                text += "<h1 style='font-size:3em; display: block;'>Hey there, " + results.user.name + "!</h1>";
-                text += "<br><br><br><br>";
-                text += "<h2>" + functions.stats_intro + "</h2>";
+            text += "<div class='boks2' style='margin: auto 0;'>";
+                text += functions.stats_intro.replaceAll('{user}', results.user.name)
             text += "</div>";
 
         text += "</div>";
@@ -122,46 +129,73 @@ function load_introduction() {
     document.getElementById("search_results").innerHTML += text;
 }
 
+// Toggle list to plays or duration
+function top_list_sort_by(array, title, music, year, div_id, button_id, functions_data) {
+    document.getElementById(div_id).outerHTML = top_list(array, title, music, year, div_id);
+
+    var button_text = document.getElementById(button_id + '_text');
+    if(button_text.innerHTML.includes(functions_data.wrapperr_sort_plays)) {
+        button_text.innerHTML = functions_data.wrapperr_sort_duration;
+    } else {
+        button_text.innerHTML = functions_data.wrapperr_sort_plays;
+    }
+
+    var button = document.getElementById(button_id);
+    if(button.getAttribute('onclick').includes('_duration')) {
+        button.setAttribute( "onclick", button.getAttribute('onclick').replaceAll('_duration', '_plays'));
+    } else {
+        button.setAttribute( "onclick", button.getAttribute('onclick').replaceAll('_plays', '_duration'));
+    }
+}
+
 //MOVIES
 function load_movies() {
     var text = "";
 
     if(results.user.user_movies.data.movie_plays > 1) {
 
-        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
+        text += "<div class='boks' data-color='orangered' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
 
+            // Get custom text fron functions
             text += "<div class='boks3'>";
-                text += "<h1>Movies!</h1>";
-                text += "<br><br><br>";
-                text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movies. That's a lot of movies!</h2><p>(or not, I am pre-programmed to say that)</p>"
+                text += "<h1>" + functions.get_user_movie_stats_title + "</h1>";
+            text += "</div>";
 
-                text += "<br><br>";
+            // Replace custom string with movie plays
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_movie_stats_subtitle.replaceAll('{movie_count}', results.user.user_movies.data.movie_plays) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_movie_stats_subsubtitle + "</p>";
+            text += "</div>";
+
+            // Place stats
+            text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_movies.data.movies, "Your top movies", false, true);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_movies_data_movies_button" id="user_movies_data_movies_button" onclick="top_list_sort_by(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, \'user_movies_data_movies\', \'user_movies_data_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_movies_data_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.user.user_movies.data.movies_duration, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
 
                     text += "<div class='boks2'>";
-                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, false);
+                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, false, functions);
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, false);
+                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, false, functions);
                     text += "</div>";
 
                     if(!results.user.user_movies.data.user_movie_oldest.error) {
                         text += "<div class='boks2'>";
-                            text += oldest_movie(results.user.user_movies.data.user_movie_oldest);
+                            text += oldest_movie(results.user.user_movies.data.user_movie_oldest, functions);
                         text += "</div>";
                     }
 
                     text += "<div class='boks2'>";
-                        text += you_spent(results.user.user_movies.data.movie_duration, 'movies', 'watching');
+                        text += you_spent(results.user.user_movies.data.movie_duration, 'movies', functions);
                     text += "</div>";
 
                 text += "</div>";
@@ -171,29 +205,34 @@ function load_movies() {
 
     } else if(results.user.user_movies.data.movie_plays == 1) {
 
-        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='orangered' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Movies!</h1>";
-                text += "<br><br><br>";
-                text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movie. You know what you like!</h2><p>(at least you tried it out)</p>";
-                text += "<br><br>";
+                text += "<h1>" + functions.get_user_movie_stats_title + "</h1>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_movie_stats_subtitle_one + "</h2>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_movie_stats_subsubtitle_one + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_movies.data.movies, "Your movie", false, true);
+                    text += top_list(results.user.user_movies.data.movies_duration, functions.get_user_movie_stats_top_movie, false, true);
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
 
                     text += "<div class='boks2'>";
-                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, true);
+                        text += completion_movie(results.user.user_movies.data.user_movie_finishing_percent, true, functions);
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true);
+                        text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true, functions);
                     text += "</div>";
 
                 text += "</div>";
@@ -203,14 +242,14 @@ function load_movies() {
 
     } else {
 
-        text += "<div class='boks' data-color='purple' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='orangered' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
 					text += "<div class='status'>";
-						text += "<h1>Movies!</h1>";
-						text += "<br><br><br>";
-						text += "<h2>You watched " + results.user.user_movies.data.movie_plays + " movies. That's impressive in itself!</h2><p>(might wanna try it)</p>"
+						text += "<h1>" + functions.get_user_movie_stats_title + "</h1>";
+						text += "<h2>" + functions.get_user_movie_stats_subtitle_none + "</h2>";
+                        text += "<p>" + functions.get_user_movie_stats_subsubtitle_none + "</p>";
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -226,35 +265,43 @@ function load_shows() {
     var text = "";
 
     if(results.user.user_shows.data.show_plays > 1) {
-        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='orangeyellow' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Shows!</h1>";
-                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.show_plays + " different shows.</h2><p>(No, watching The Office twice doesn't count as two shows)</p>"
+                text += "<h1>" + functions.get_user_show_stats_title + "</h1>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_show_stats_subtitle.replaceAll('{show_count}', results.user.user_shows.data.show_plays) + "</h2>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_show_stats_subsubtitle + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_shows.data.shows, "Your top shows", false, true);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_shows_data_shows_button" id="user_shows_data_shows_button" onclick="top_list_sort_by(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, \'user_shows_data_shows\', \'user_shows_data_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_shows_data_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.user.user_shows.data.shows_duration, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
 
-                    if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
+                    if(results.user.user_shows.data.shows_duration.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_stats_buddy) {
                         text += "<div class='boks2'>";
-                            text += load_showbuddy();
+                            text += load_showbuddy(results.user.user_shows.data.show_buddy, results.user.user_shows.data.shows_duration[0], functions);
                         text += "</div>";
                     }
 					
 					if(results.user.user_shows.data.episode_duration_longest.plays != 0 && results.user.user_shows.data.episode_duration_longest.duration != 0) {
                         text += "<div class='boks2'>";
-                            text += load_longest_episode(results.user.user_shows.data.episode_duration_longest);
+                            text += load_longest_episode(results.user.user_shows.data.episode_duration_longest, functions);
                         text += "</div>";
                     }
 
                     text += "<div class='boks2'>";
-                        text += you_spent(results.user.user_shows.data.show_duration, 'shows', 'watching');
+                        text += you_spent(results.user.user_shows.data.show_duration, 'shows', functions);
                     text += "</div>";
 
                 text += "</div>";
@@ -264,28 +311,35 @@ function load_shows() {
 
     } else if(results.user.user_shows.data.show_plays == 1) {
 
-        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='orangeyellow' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Shows!</h1>";
-                text += "<br><br><br><h2>You watched " + results.user.user_shows.data.show_plays + " show.</h2><p>(Better not be that same one again...)</p>"
+                text += "<h1>" + functions.get_user_show_stats_title + "</h1>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_show_stats_subtitle_one + "</h2>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_show_stats_subsubtitle_one + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_shows.data.shows, "Your show", false, true);
+                    text += top_list(results.user.user_shows.data.shows_duration, functions.get_user_show_stats_top_show, false, true);
                 text += "</div>";
 
-                if(results.user.user_shows.data.shows.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_buddy) {
+                if(results.user.user_shows.data.shows_duration.length > 0 && !results.user.user_shows.data.show_buddy.error && functions.get_user_show_stats_buddy) {
                     text += "<div class='boks2'>";
-                        text += load_showbuddy();
+                        text += load_showbuddy(results.user.user_shows.data.show_buddy, results.user.user_shows.data.shows_duration[0], functions);
                     text += "</div>";
                 }
 				
 				if(results.user.user_shows.data.episode_duration_longest.plays != 0 && results.user.user_shows.data.episode_duration_longest.duration != 0) {
 					text += "<div class='boks2'>";
-						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest);
+						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest, functions);
 					text += "</div>";
 				}
 
@@ -294,14 +348,14 @@ function load_shows() {
 
     } else {
 
-        text += "<div class='boks' data-color='green' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='orangeyellow' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
 					text += "<div class='status'>";
-						text += "<h1>Shows!</h1>";
-						text += "<br><br><br>";
-						text += "<h2>You watched " + results.user.user_shows.data.show_plays + " shows. I get it, it's not for everyone!</h2><p>(might wanna try it)</p>"
+                        text += "<h1>" + functions.get_user_show_stats_title + "</h1>";
+						text += "<h2>" + functions.get_user_show_stats_subtitle_none + "</h2>";
+                        text += "<p>" + functions.get_user_show_stats_subsubtitle_none + "</p>";
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -318,37 +372,51 @@ function load_music() {
 	var text = "";
 
     if(results.user.user_music.data.track_plays > 1) {
-        text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='mango' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Music!</h1>";
-                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.track_plays + ' different tracks.</h2><p>(If you can call your taste "music"...)</p>'
+                text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_music_stats_subtitle.replaceAll('{track_count}', results.user.user_music.data.track_plays) + "</h2>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_music_stats_subsubtitle + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_music.data.tracks, "Your top tracks", "track", false);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_tracks_button" id="user_music_data_tracks_button" onclick="top_list_sort_by(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, \'track\', false, \'user_music_data_tracks\', \'user_music_data_tracks_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_tracks_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.user.user_music.data.tracks_duration, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += top_list(results.user.user_music.data.albums, "Your top albums", "album", false);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_albums_button" id="user_music_data_albums_button" onclick="top_list_sort_by(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, \'album\', false, \'user_music_data_albums\', \'user_music_data_albums_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_albums_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.user.user_music.data.albums_duration, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += top_list(results.user.user_music.data.artists, "Your top artists", "artist", false);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_artists_button" id="user_music_data_artists_button" onclick="top_list_sort_by(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, \'artist\', false, \'user_music_data_artists\', \'user_music_data_artists_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_artists_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.user.user_music.data.artists_duration, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
                 text += "</div>";
+
+            text += "</div>";
+
+            text += "<div class='boks3'>";
 				
 				text += "<div class='boks2' style='padding: 0;'>";
 
                     if(!results.user.user_music.data.user_album_oldest.error) {
                         text += "<div class='boks2'>";
-                            text += oldest_album(results.user.user_music.data.user_album_oldest);
+                            text += oldest_album(results.user.user_music.data.user_album_oldest, functions);
                         text += "</div>";
 					}
 
 					text += "<div class='boks2'>";
-						text += you_spent(results.user.user_music.data.track_duration, 'music', 'listening');
+						text += you_spent(results.user.user_music.data.track_duration, 'music', functions);
 					text += "</div>";
 				
 				text += "</div>";
@@ -358,16 +426,23 @@ function load_music() {
 
     } else if(results.user.user_music.data.track_plays == 1) {
 
-        text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+        text += "<div class='boks' data-color='mango' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>Music!</h1>";
-                text += "<br><br><br><h2>You listened to " + results.user.user_music.data.track_plays + " track.</h2><p>(Whatever floats your boat...)</p>"
+                text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<h2>" + functions.get_user_music_stats_subtitle_one + "</h2>";
+            text += "</div>";
+
+            text += "<div class='boks3'>";
+                text += "<p>" + functions.get_user_music_stats_subsubtitle_one + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
                 text += "<div class='boks2'>";
-                    text += top_list(results.user.user_music.data.music, "Your track", true, false);
+                    text += top_list(results.user.user_music.data.tracks_duration, functions.get_user_music_stats_top_track, true, false);
                 text += "</div>";
             text += "</div>";
 
@@ -375,14 +450,14 @@ function load_music() {
 
         } else {
 
-            text += "<div class='boks' data-color='brown' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
+            text += "<div class='boks' data-color='mango' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
                 text += "<div class='boks3'>";
 					text += "<div class='boks2'>";
 						text += "<div class='status'>";
-							text += "<h1>Music!</h1>";
-							text += "<br><br><br>";
-							text += "<h2>You listened to " + results.user.user_music.data.track_plays + " tracks. No speakers, huh?</h2><p>(might wanna try it)</p>"
+							text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
+							text += "<h2>" + functions.get_user_music_stats_subtitle_none + "</h2>";
+                            text += "<p>" + functions.get_user_music_stats_subsubtitle_none + "</p>";
 							text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 						text += "</div>";
 					text += "</div>";
@@ -394,39 +469,42 @@ function load_music() {
 	document.getElementById("search_results").innerHTML += text;
 }
 
-function oldest_movie(array) {
+function oldest_movie(array, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "The oldest movie you watched was <br><b>" + array.title + " (" + array.year + ")</b><br>";
+            html += functions_data.get_user_movie_stats_oldest_title.replaceAll('{movie_title}', '<b>' + array.title + "</b> (" + array.year + ")");
+            
+            html += '<br>';
+            html += '<br>';
+
             if(array.year < 1950) {
-                html += "<br>I didn't even know they made movies back then.";
-                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_1950;
             } else if(array.year < 1975) {
-                html += "<br>Did it even have color?";
-                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_1975;
             } else if(array.year < 2000) {
-                html += "<br>Was it a 4K, UHD, 3D, Dolby Atmos remaster?";
-                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_2000;
             } else {
-                html += "<br>Enjoying the classics, huh?";
-                html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+                html += functions_data.get_user_movie_stats_oldest_subtitle;
             }
+
+            html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
         html += "</div>";
     html += "</div>";
 
     return html;
 }
 
-function oldest_album(album) {
+function oldest_album(album, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "The oldest album you listened to was <br><b>" + album.parent_title + " (" + album.year + ")</b> by " + album.grandparent_title + "<br>";
-			html += "<br>Maybe get the vinyl release?";
-			html += '<br><br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            html += functions_data.get_user_music_stats_oldest_album_title.replaceAll('{album_title}', '<b>' + album.parent_title + "</b> (" + album.year + ")</b>").replaceAll('{album_artist}', album.grandparent_title);
+			html += "<br><br>";
+            html += functions_data.get_user_music_stats_oldest_album_subtitle; 
+			html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             
         html += "</div>";
     html += "</div>";
@@ -434,29 +512,39 @@ function oldest_album(album) {
     return html;
 }
 
-function completion_movie(user_movie_finishing_percent, single) {
+function completion_movie(user_movie_finishing_percent, single, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
             var str = JSON.stringify(user_movie_finishing_percent);
-            var percent = str.split('.');
-            if(!single) {
-                html += "<b>Your average movie finishing percentage was " + percent[0] + "%</b>";
+
+            if(str.includes('.')) {
+                var percent = str.split('.');
+                percent = percent[0] + '.' + percent[1].slice(0, 2);
             } else {
-                html += "<b>Your saw " + percent[0] + "%</b>";
+                var percent = str;
             }
-            if(percent[0] > 89) {
-                html += '<br><br><img src="assets/img/champion.svg" style="margin: auto; display: block; width: 15em;">';
+
+            if(!single) {
+                html += "<b>" + functions_data.get_user_movie_stats_movie_completion_title_plural.replaceAll('{movie_finish_percent}', percent) + "</b>";
+            } else {
+                html += "<b>" + functions_data.get_user_movie_stats_movie_completion_title.replaceAll('{movie_finish_percent}', percent) + "</b>";
             }
-            html += "<br><br>You're not watching the credits like a nerd, are you?";
+            
+            if(user_movie_finishing_percent >= 90.0) {
+                html += '<img src="assets/img/champion.svg" style="margin: 1em auto; display: block; width: 15em;">';
+            } else {
+                html += '<br><br>';
+            }
+            html += functions_data.get_user_movie_stats_movie_completion_subtitle;
         html += "</div>";
     html += "</div>";
 
     return html;
 }
 
-function paused_movie(array, single) {
+function paused_movie(array, single, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
@@ -464,25 +552,25 @@ function paused_movie(array, single) {
             var pause_time = seconds_to_time(array.paused_counter, false);
             if(!single) {
                 html += "<div class='stats'>";
-                    html += "Your longest movie pause was watching <br><b>" + array.title;
-                    if(typeof array.year !== 'undefined' && array.year !== "" && array.year > 1000) {
-                        html += " (" + array.year + ")</b>";
-                    } else {
-                        html += "</b>";
-                    }
-                    html += "<br><br>It was paused for " + pause_time + "...";
+                    html += functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')');
+                    html += "<br>";
+                    html += "<br>";
+                    html += functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time);
                 html += "</div>";
             } else {
                 html += "<div class='stats'>";
-                    html += "One movie, but you still paused it<br>";
-                    html += "<br><br>It was paused for " + pause_time + "...";
+                    html += functions_data.get_user_movie_stats_pause_title_one;
+                    html += "<br>";
+                    html += "<br>";
+                    html += functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time);
                 html += "</div>";
             }
         } else {
             html += "<div class='stats'>";
-                html += "<b>Bladder of steel</b>";
-                html += '<br><br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
-                html += "<br>You never paused a single movie.";
+                html += '<b>' + functions_data.get_user_movie_stats_pause_title_none + '</b>';
+                html += '<br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
+                html += "<br>";
+                html += functions_data.get_user_movie_stats_pause_subtitle_none;
             html += "</div>";
         }
     html += "</div>";
@@ -490,23 +578,22 @@ function paused_movie(array, single) {
     return html;
 }
 
-function load_showbuddy() {
+function load_showbuddy(buddy_object, top_show, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "<b>Your top show was " + results.user.user_shows.data.shows[0].title + "</b><br>";
-            if(!results.user.user_shows.data.show_buddy.error) {
-                if(!results.user.user_shows.data.show_buddy.found) {
-                    html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
-                    html += "<br>That means you dared to explore where no one else would, because you are the only viewer of that show";
+            if(!buddy_object.error) {
+                if(!buddy_object.found) {
+                    html += functions_data.get_user_show_stats_buddy_title_none.replaceAll('{top_show_title}', '<b>' + top_show.title + '</b>');
+                    html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;"><br>';
+                    html += functions_data.get_user_show_stats_buddy_subtitle_none;
                 } else {
-                    html += "And you're not alone! Your " + results.user.user_shows.data.shows[0].title + "-buddy is ";
-                    html += "<b>" + results.user.user_shows.data.show_buddy.friendly_name + "!</b><br><br>";
-                    var combined = results.user.user_shows.data.show_buddy.duration + parseInt(results.user.user_shows.data.shows[0].duration);
+                    html += functions_data.get_user_show_stats_buddy_title.replaceAll('{top_show_title}', '<b>' + top_show.title + '</b>').replaceAll('{buddy_username}', buddy_object.friendly_name);
+                    var combined = results.user.user_shows.data.show_buddy.duration + parseInt(results.user.user_shows.data.shows_duration[0].duration);
                     var combined_2 = seconds_to_time(combined);
                     html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
-                    html += "<br>Your combined efforts resulted in <b>" + combined_2 + "</b> of " + results.user.user_shows.data.shows[0].title + "!</b>";
+                    html += functions_data.get_user_show_stats_buddy_subtitle.replaceAll('{buddy_duration_sum}', combined_2).replaceAll('{top_show_title}', top_show.title);
                 }
             }
         html += "</div>";
@@ -515,48 +602,69 @@ function load_showbuddy() {
     return html;
 }
 
-function load_longest_episode(array) {
+function load_longest_episode(array, functions_data) {
     var html = "";
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += "You really liked the episode <b>" + array.title + "</b> from " + array.grandparent_title + "<br>";
-			html += "<br>It recieved " + play_plays(array.plays) + " and was endured for " + seconds_to_time(array.duration, false) + "";
+            html += functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title);
+			html += '<br><br>';
+            html += functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false));
         html += "</div>";
     html += "</div>";
 
     return html;
 }
 
-function you_spent(time, category, verb) {
+function you_spent(time, category, functions_data) {
     var html = "";
 
     var time_str = seconds_to_time(time, false);
 
-    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-        html += "<div class='stats'>";
-            html += "You spent <b>" + time_str + "</b>";
-            html += " " + verb + " ";
-            html += category;
-            if(category == 'music') {
+    if(category === 'movies') {
+        html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+            html += "<div class='stats'>";
+
+                html += functions_data.get_user_movie_stats_spent_title.replaceAll('{movie_sum_duration}', time_str);
+
+                html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
+
+            html += "</div>";
+        html += "</div>";
+    } else if(category === 'shows') {
+        html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+            
+            html += functions_data.get_user_show_stats_spent_title.replaceAll('{show_sum_duration}', time_str);
+
+            html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
+
+        html += "</div>";
+    } else if(category === 'music') {
+        html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+            html += "<div class='stats'>";
+                html += functions_data.get_user_music_stats_spent_title.replaceAll('{music_sum_duration}', time_str);
                 if(time > 3600) {
                     var time_min = Math.floor(time / 60);
-                    html += '<br><br>That\'s ' + time_min + ' minutes!';
+                    var time_str = time_min + ' ' + functions.wrapperr_minute_plural;
+                    html += '<br><br>';
+                    html += functions_data.get_user_music_stats_spent_subtitle.replaceAll('{music_sum_minutes}', number_with_spaces(time_str));
                 }
                 html += '<br><img src="assets/img/music.svg" style="margin: auto; display: block; width: 15em;">';
-            } else {
-                html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
-            }
+                html += "</div>";
         html += "</div>";
-    html += "</div>";
+    } else {
+        html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+            html += "Unknown category.";
+        html += "</div>";
+    }
 
     return html;
 }
 
-function top_list(array, title, music, year) {
+function top_list(array, title, music, year, div_id) {
     var html = "";
-	
-    html += "<div class='status' id='list3'>";
+
+    html += "<div class='status' id='" + div_id + "'>";
         html += "<div class='stats'>";
             html += "<div class='status-title'>" + title + "</div>";
             html += "<div class='stats-list'>";
@@ -599,10 +707,10 @@ function top_list(array, title, music, year) {
     return html;
 }
 
-function top_list_names(array, title) {
+function top_list_names(array, title, div_id) {
     var html = "";
 
-    html += "<div class='status' id='list3'>";
+    html += "<div class='status' id='" + div_id + "'>";
         html += "<div class='stats'>";
             html += "<div class='status-title'>" + title + "</div>";
             html += "<div class='stats-list'>";
@@ -638,21 +746,41 @@ function top_list_names(array, title) {
     return html;
 }
 
+// Toggle names list to plays or duration
+function top_list_names_sort_by(array, title, div_id, button_id, functions_data) {
+    document.getElementById(div_id).outerHTML = top_list_names(array, title, div_id);
+
+    var button_text = document.getElementById(button_id + '_text');
+    if(button_text.innerHTML.includes(functions_data.wrapperr_sort_plays)) {
+        button_text.innerHTML = button_text.innerHTML = functions_data.wrapperr_sort_duration;
+    } else {
+        button_text.innerHTML = button_text.innerHTML = functions_data.wrapperr_sort_plays;
+    }
+
+    var button = document.getElementById(button_id);
+    if(button.getAttribute('onclick').includes('_duration')) {
+        button.setAttribute( "onclick", button.getAttribute('onclick').replaceAll('_duration', '_plays'));
+    } else {
+        button.setAttribute( "onclick", button.getAttribute('onclick').replaceAll('_plays', '_duration'));
+    }
+}
+
 //TOP USERS
 function load_users() {
     var text = "";
 
-    text += "<div class='boks' data-color='blue' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
-        text += "<h1>Server-wide statistics!</h1>";
-        text += "<br><br><br><br><h2>It's okay to feel shame if you are on the list.</h2><p>(or missing from it...)</p>"
-        text += "<br><br>";
+    text += "<div class='boks' data-color='pistach' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
+        text += "<h1>" + functions.get_year_stats_title + "</h1>";
+        text += "<h2>" + functions.get_year_stats_subtitle + "</h2>";
+        text += "<p>" + functions.get_year_stats_subsubtitle + "</p>";
 
         text += "<div class='boks3'>";
 
             if(functions.get_year_stats_leaderboard) {
 
                 text += "<div class='boks2'>";
-                    text += top_list_names(results.year_stats.year_users.data, 'Top users');
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_users_button" id="year_stats_year_users_button" onclick="top_list_names_sort_by(results.year_stats.year_users.data.users_plays, \'Top users\', \'year_stats_year_users\', \'year_stats_year_users_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_users_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list_names(results.year_stats.year_users.data.users_duration, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
                 text += "</div>";
 
                 var time_movies = seconds_to_time(results.year_stats.year_movies.data.movie_duration, false);
@@ -666,24 +794,21 @@ function load_users() {
                         text += "<div class='stats'>";
 
                             if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
-                                text += "All the different users combined spent<br><b>" + time_movies + "</b>";
-                                text += "<br>watching movies.";
+                                text += functions.get_year_stats_movies_duration_title.replaceAll('{movie_duration_sum}', '<b>' + time_movies + '</b>');
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_movies.data.movie_duration;
                             }
 
                             if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
-                                text += "All the different users combined spent<br><b>" + time_shows + "</b>";
-                                text += "<br>watching shows.";
+                                text += functions.get_year_stats_shows_duration_title.replaceAll('{show_duration_sum}', '<b>' + time_shows + '</b>');
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_shows.data.show_duration;
                             }
 
                             if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
-                                text += "All the different users combined spent<br><b>" + time_artists + "</b>";
-                                text += "<br>listening to artists.";
+                                text += functions.get_year_stats_music_duration_title.replaceAll('{music_duration_sum}', '<b>' + time_artists + '</b>');
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_music.data.music_duration;
@@ -691,7 +816,7 @@ function load_users() {
 
                             if(function_sum > 1) {
                                 var time_all = seconds_to_time(Math.floor(time), false);
-                                text += "That is<br><b>" + time_all + "</b><br>of content!";
+                                text += functions.get_year_stats_duration_sum_title.replaceAll('{all_duration_sum}', '<b>' + time_all + '</b>');
                             }
 
                             text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
@@ -707,19 +832,22 @@ function load_users() {
 
             if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.year_movies.data.movies, "Top movies", false, true);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_movies_button" id="year_stats_year_movies_button" onclick="top_list_sort_by(results.year_stats.year_movies.data.movies_plays, \'Top movies\', false, true, \'year_stats_year_movies\', \'year_stats_year_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.year_stats.year_movies.data.movies_duration, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
                 text += "</div>";
             }
 
             if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.year_shows.data.shows, "Top shows", false, false);
+                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_shows_button" id="year_stats_year_shows_button" onclick="top_list_sort_by(results.year_stats.year_shows.data.shows_plays, \'Top shows\', false, false, \'year_stats_year_shows\', \'year_stats_year_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.year_stats.year_shows.data.shows_duration, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
                 text += "</div>";
             }
 
             if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += top_list(results.year_stats.year_music.data.artists, "Top artists", "artist", false);
+                text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_music_button" id="year_stats_year_music_button" onclick="top_list_sort_by(results.year_stats.year_music.data.artists_plays, \'Top artists\', \'artist\', false, \'year_stats_year_music\', \'year_stats_year_music_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_music_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    text += top_list(results.year_stats.year_music.data.artists_duration, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
                 text += "</div>";
             }
 
@@ -733,15 +861,15 @@ function load_users() {
 function load_outro() {
     var text = "";
 
-    text += "<div class='boks' data-color='black' style='height: auto !important; width: 100%; padding-bottom: 15em; padding-top: 15em; height:10em; background-color:none;'>";
+    text += "<div class='boks' data-color='charcoal' style='height: auto !important; width: 100%; padding-bottom: 15em; padding-top: 15em; height:10em; background-color:none;'>";
         text += "<div class='boks3'>";
             
-            text += "<div class='boks2'>";
+            text += "<div class='boks2' style='margin: auto 0;'>";
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
 
             text += "<div class='boks2' style='margin-top:5em;'>";
-                text += "<h1>Hope you are staying safe!</h1><br><br><h4>Goodbye.</h4>";
+                text += functions.stats_outro;
             text += "</div>";
         
         text += "</div>";
@@ -759,7 +887,7 @@ function load_outro() {
 
                         text += "<div class='form-group' id='share_wrapped_results_div' style='display: none; margin: 0.5em 0;'>";
                             text += "<div><p>This URL is valid for 7 days:</p></div>";
-                            text += "<div id='share_wrapped_results_url' style='padding: 0.25em; background-color: white; border-radius: 0.25em; overflow: auto;'></div>";
+                            text += "<div id='share_wrapped_results_url' style='padding: 0.25em; background-color: var(--white); border-radius: 0.25em; overflow: auto;'></div>";
                         text += "</div>";
 
                     text += "</div>";
@@ -789,8 +917,9 @@ function create_wrapped_link() {
     document.getElementById("share_wrapped_button").style.opacity = '0.5';
 
     wrapped_form = {
-                        "cookie" : get_cookie('plex-wrapped'),
-                        "data" : results
+                        "cookie" : get_cookie('wrapperr-user'),
+                        "data" : results,
+                        "functions" : functions
                     };
 
     var wrapped_data = JSON.stringify(wrapped_form);
@@ -809,6 +938,8 @@ function create_wrapped_link() {
         }
         if(result.error) {
             alert(result.message);
+            document.getElementById("share_wrapped_button").disabled = false;
+            document.getElementById("share_wrapped_button").style.opacity = '1';
 
         } else {
             document.getElementById('share_wrapped_results_url').innerHTML = '<span style="white-space: nowrap;">' + window.location.href.split('?')[0] + result.url + '</span>';
@@ -823,18 +954,6 @@ function create_wrapped_link() {
     xhttp.send(wrapped_data);
 }
 
-function play_plays(plays) {
-    plays = parseInt(plays);
-
-    if(plays == 1) {
-        var play_string = plays + ' play';
-    } else {
-        var play_string = plays + ' plays';
-    }
-
-    return play_string;
-}
-
 //Converting seconds to time in string
 var seconds_in_day = 86400;
 var seconds_in_hour = 3600;
@@ -843,144 +962,16 @@ var seconds_in_minute = 60;
 function seconds_to_time(seconds, comma) {
 
     if(seconds >= seconds_in_day) {
-        var time = seconds_to_days(seconds, comma);
+        var time = seconds_to_days(seconds, comma, functions);
     } else if(seconds >= seconds_in_hour) {
-        var time = seconds_to_hours(seconds, comma);
+        var time = seconds_to_hours(seconds, comma, functions);
     } else if(seconds >= seconds_in_minute) {
-        var time = seconds_to_minutes(seconds, comma);
+        var time = seconds_to_minutes(seconds, comma, functions);
     } else {
-        var time = seconds_to_seconds(seconds);
+        var time = seconds_to_seconds(seconds, functions);
     }
 
     return time;
-}
-
-function seconds_to_days(seconds, comma) {
-    var day = Math.floor(seconds / seconds_in_day);
-    var rest = Math.floor(seconds % seconds_in_day);
-
-    var hour = Math.floor(rest / seconds_in_hour);
-    rest = Math.floor(rest % seconds_in_hour);
-
-    var minute = Math.floor(rest / seconds_in_minute);
-    rest = Math.floor(rest % seconds_in_minute);
-
-    var day_string = '';
-    var hour_string = '';
-    var minute_string = '';
-
-    if(day == 1) {
-        day_string += day + ' day';
-    } else {
-        day_string += day + ' days';
-    }
-
-    if(hour == 1) {
-        hour_string += hour + ' hour';
-    } else {
-        hour_string += hour + ' hours';
-    }
-
-    if(minute == 1) {
-        minute_string += minute + ' minute';
-    } else {
-        minute_string += minute + ' minutes';
-    }
-
-    if(hour >= 1) {
-        if(minute >= 1) {
-            if(comma) {
-                return day_string + ', ' + hour_string + ', ' + minute_string;
-            } else {
-                return day_string + ', ' + hour_string + ' and ' + minute_string;
-            }
-        } else {
-            if(comma) {
-                return day_string + ', ' + hour_string;
-            } else {
-                return day_string + ' and ' + hour_string;
-            }
-        }
-    } else {
-        return day_string;
-    }
-}
-
-function seconds_to_hours(seconds, comma) {
-    var hour = Math.floor(seconds / seconds_in_hour);
-    var rest = Math.floor(seconds % seconds_in_hour);
-
-    var minute = Math.floor(rest / seconds_in_minute);
-    rest = Math.floor(rest % seconds_in_minute);
-
-    var hour_string = '';
-    var minute_string = '';
-
-    if(hour == 1) {
-        hour_string += hour + ' hour';
-    } else {
-        hour_string += hour + ' hours';
-    }
-
-    if(minute == 1) {
-        minute_string += minute + ' minute';
-    } else {
-        minute_string += minute + ' minutes';
-    }
-
-    if(minute >= 1) {
-        if(comma) {
-            return hour_string + ', ' + minute_string;
-        } else {
-            return hour_string + ' and ' + minute_string;
-        }
-    } else {
-        return hour_string;
-    }
-}
-
-function seconds_to_minutes(seconds, comma) {
-    seconds = parseInt(seconds);
-
-    var minute = Math.floor(seconds / seconds_in_minute);
-    var rest = Math.floor(seconds % seconds_in_minute);
-
-    var minute_string = '';
-    var second_string = '';
-
-    if(minute == 1) {
-        minute_string += minute + ' minute';
-    } else {
-        minute_string += minute + ' minutes';
-    }
-
-    if(seconds == 1) {
-        second_string += rest + ' second';
-    } else {
-        second_string += rest + ' seconds';
-    }
-    
-    if(rest >= 1) {
-        if(comma) {
-            return minute_string + ', ' + second_string;
-        } else {
-            return minute_string + ' and ' + second_string;
-        }
-    } else {
-        return minute_string;
-    }
-}
-
-function seconds_to_seconds(seconds) {
-    var second_string = '';
-
-    if(seconds == 1) {
-        second_string += seconds + ' second';
-    } else {
-        second_string += seconds + ' seconds';
-    }
-
-    return second_string;
 }
 
 // Change background color for each category

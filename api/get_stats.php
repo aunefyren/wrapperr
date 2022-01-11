@@ -9,23 +9,25 @@ header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers
 // Files needed to use objects
 require(dirname(__FILE__) . '/objects/auth.php');
 require(dirname(__FILE__) . '/objects/config.php');
+require(dirname(__FILE__) . '/objects/admin.php');
 require(dirname(__FILE__) . '/objects/log.php');
 require(dirname(__FILE__) . '/objects/cache.php');
 
 // Create variables
 $config = new Config();
+$admin = new Admin();
 $auth = new Auth();
 $log = new Log();
 $cache = new Cache();
 $data = json_decode(file_get_contents("php://input"));
 
 // Check if configured
-if(!$config->is_configured()) {
+if(!$config->is_configured() || !$admin->is_configured()) {
 
     // Log activity
-    $log->log_activity('get_stats.php', 'unknown', 'Plex-Wrapped is not confgured..');
+    $log->log_activity('get_stats.php', 'unknown', 'Wrapperr is not confgured..');
 
-    echo json_encode(array("message" => "Plex-Wrapped is not confgured.", "error" => true));
+    echo json_encode(array("message" => "Wrapperr is not confgured.", "error" => true));
     exit(0);
 }
 
@@ -33,7 +35,7 @@ if(!$config->is_configured()) {
 date_default_timezone_set($config->timezone);
 
 // Set maximum run-time
-set_time_limit(300);
+set_time_limit(600);
 
 // Base-URL for connections to Tautulli API.
 $connection = create_url();
@@ -44,6 +46,9 @@ if(!empty($data) && isset($data->cookie)){
 } else if(isset($_GET["cookie"])) {
 	$cookie = htmlspecialchars(trim($_GET["cookie"]));
 } else {
+    // Log activity
+    $log->log_activity('get_stats.php', 'unknown', 'Invalid cookie input.');
+
     http_response_code(400);
     echo json_encode(array("message" => "Input error.", "error" => true));
     exit(0);
@@ -77,7 +82,7 @@ if($caching) {
     // Log activity
     $log->log_activity('get_stats.php', 'unknown', 'Starting caching mode.');
 
-    caching_mode($cache_limit);
+    caching_mode($cache_limit, $cookie);
 
 }
 
@@ -124,7 +129,7 @@ if(isset($token_object->data->friendlyName)) {
 }
 
 // Log use
-$log->log_activity('get_stats.php', $token_object->data->id, 'Plex-Wrapped login cookie accepted.');
+$log->log_activity('get_stats.php', $token_object->data->id, 'Wrapperr login cookie accepted.');
 
 // Get user name
 $name = tautulli_get_name($id);
@@ -236,11 +241,11 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
 }
 
 // Get show buddy if enabled, shows are not empty, and shows is enabled.
-if($config->get_year_stats_shows && $config->get_user_show_buddy && count($user_shows["data"]["shows"]) > 0) {
+if($config->get_year_stats_shows && $config->get_user_show_stats_buddy && count($user_shows["data"]["shows_duration"]) > 0) {
     // Log show-buddy action
     $log->log_activity('get_stats.php', $id, 'Getting show-buddy.');
     
-	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows"][0]["title"], $tautulli_data));
+	$user_shows["data"] = $user_shows["data"] + array("show_buddy" => data_get_user_show_buddy($id, $user_shows["data"]["shows_duration"][0]["title"], $tautulli_data));
 } else {
     // Log show-buddy action
     $log->log_activity('get_stats.php', $id, 'Show-buddy disabled.');
@@ -299,7 +304,7 @@ function create_url() {
     $ip = $config->tautulli_ip;
 
     // SSL means 'https', not means 'http'
-    if($config->ssl) {
+    if($config->https) {
         $base = "https://";
     } else {
         $base = "http://";
@@ -389,7 +394,7 @@ function tautulli_get_name($id) {
     global $arrContextOptions;
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_user_ips&user_id=" . $id;
 
-    if($config->ssl) {
+    if($config->https) {
         $response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
     } else {
         $response = json_decode(file_get_contents($url));
@@ -406,21 +411,39 @@ function tautulli_get_name($id) {
     }
 }
 
-function caching_mode($cache_limit) {
+function caching_mode($cache_limit, $cookie) {
     global $config;
+    global $admin;
     global $cache;
     global $log;
     global $cache_data;
     $id = "Caching mode";
 
     // Log caching mode
-	$log->log_activity('get_stats.php', $id, 'Tautulli connection test was successful.');
+	$log->log_activity('get_stats.php', $id, 'Caching mode initiated.');
 	
 	if(!$config->use_cache) {
+        // Log caching mode
+	    $log->log_activity('get_stats.php', $id, 'Caching is disabled in config. Caching mode can\'t proceed.');
+
         http_response_code(400);
-		echo json_encode(array("message" => "Caching is disabled.", "error" => true));
+		echo json_encode(array("message" => "Caching is disabled in configuration.", "error" => true));
 		exit(0);
 	}
+
+    // Decrypt cookie
+    $cookie_object = json_decode($admin->decrypt_cookie($cookie));
+
+    // Validate admin cookie
+    if(!$admin->validate_cookie($cookie_object)) {
+        
+        // Log use
+        $log->log_activity('get_stats.php', $id, 'Admin cookie not valid. Stopping caching mode.');
+
+        echo json_encode(array("error" => true, "message" => "Admin cookie not accepted. Can't proceed."));
+        exit(0);
+        
+    }
 	
 	// Log checking cache
 	$log->log_activity('get_stats.php', $id, 'Starting cache loop.');
@@ -949,9 +972,19 @@ function data_get_user_stats_loop($id, $array) {
     $duration = array_column($movies, 'duration');
     array_multisort($duration, SORT_DESC, $movies);
 
+    // Sort $movies by plays
+    $movies_plays = $movies;
+    $plays = array_column($movies_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $movies_plays);
+
     //Sort $shows by longest duration
     $duration = array_column($shows, 'duration');
     array_multisort($duration, SORT_DESC, $shows);
+
+    //Sort $shows by plays
+    $shows_plays = $shows;
+    $plays = array_column($shows_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $shows_plays);
 	
 	//Sort episodes by duration and find longest episode duration
     $duration = array_column($episodes, 'duration');
@@ -1026,29 +1059,64 @@ function data_get_user_stats_loop($id, $array) {
     $duration = array_column($tracks, 'duration');
     array_multisort($duration, SORT_DESC, $tracks);
 
+    // Sort $tracks by plays
+    $tracks_plays = $tracks;
+    $plays = array_column($tracks_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $tracks_plays);
+
     // Sort $albums by longest duration
     $duration = array_column($albums, 'duration');
     array_multisort($duration, SORT_DESC, $albums);
+
+    // Sort $albums by plays
+    $albums_plays = $albums;
+    $plays = array_column($albums_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $albums_plays);
 
     // Sort $artists by longest duration
     $duration = array_column($artists, 'duration');
     array_multisort($duration, SORT_DESC, $artists);
 
+    // Sort $artists by plays
+    $artists_plays = $artists;
+    $plays = array_column($artists_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $artists_plays);
+
     // Sort $year_movies by duration
     $duration = array_column($year_movies, 'duration');
     array_multisort($duration, SORT_DESC, $year_movies);
+
+    // Sort $year_movies by plays
+    $year_movies_plays = $year_movies;
+    $plays = array_column($year_movies_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $year_movies_plays);
 
     // Sort $year_shows by duration
     $duration = array_column($year_shows, 'duration');
     array_multisort($duration, SORT_DESC, $year_shows);
 
+    // Sort $year_show by plays
+    $year_shows_plays = $year_shows;
+    $plays = array_column($year_shows_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $year_shows_plays);
+
     // Sort $year_music by duration
     $duration = array_column($year_music, 'duration');
     array_multisort($duration, SORT_DESC, $year_music);
 
+    // Sort $year_music by plays
+    $year_music_plays = $year_music;
+    $plays = array_column($year_music_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $year_music_plays);
+
     // Sort users by combined duration
     $duration = array_column($year_users, 'duration');
     array_multisort($duration, SORT_DESC, $year_users);
+
+    // Sort users by combined plays
+    $year_users_plays = $year_users;
+    $plays = array_column($year_users_plays, 'plays');
+    array_multisort($plays, SORT_DESC, $year_users_plays);
 
     // Calculate average movie finishing percentage
     $sum = 0;
@@ -1063,7 +1131,8 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_user_movie_stats) {
-        $return_movies = array("movies" => array_slice($movies, 0, 10), "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
+        // Duration values
+        $return_movies = array("movies_duration" => array_slice($movies, 0, 10), "movies_plays" => array_slice($movies_plays, 0, 10), "user_movie_most_paused" => $movie_most_paused, "user_movie_finishing_percent" => $movie_percent_average, "user_movie_oldest" => $movie_oldest);
         $duration = 0;
         for($i = 0; $i < count($movies); $i++) {
             $duration += $movies[$i]["duration"];
@@ -1076,7 +1145,7 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_user_show_stats) {
-        $return_shows = array("shows" => array_slice($shows, 0, 10), "episode_duration_longest" => $episode_duration_longest);
+        $return_shows = array("shows_duration" => array_slice($shows, 0, 10), "shows_plays" => array_slice($shows_plays, 0, 10), "episode_duration_longest" => $episode_duration_longest);
         $duration = 0;
         for($i = 0; $i < count($shows); $i++) {
             $duration += $shows[$i]["duration"];
@@ -1089,7 +1158,7 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_user_music_stats) {
-        $return_music = array("tracks" => array_slice($tracks, 0, 10), "albums" => array_slice($albums, 0, 10), "user_album_oldest" => $album_oldest, "artists" => array_slice($artists, 0, 10));
+        $return_music = array("tracks_duration" => array_slice($tracks, 0, 10), "tracks_plays" => array_slice($tracks_plays, 0, 10), "albums_duration" => array_slice($albums, 0, 10), "albums_plays" => array_slice($albums_plays, 0, 10), "user_album_oldest" => $album_oldest, "artists_duration" => array_slice($artists, 0, 10), "artists_plays" => array_slice($artists_plays, 0, 10));
         $duration = 0;
         for($i = 0; $i < count($tracks); $i++) {
             $duration += $tracks[$i]["duration"];
@@ -1102,7 +1171,8 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_year_stats_movies) {
-        $return_year_movies["movies"] = array_slice($year_movies, 0, 10);
+        $return_year_movies["movies_duration"] = array_slice($year_movies, 0, 10);
+        $return_year_movies["movies_plays"] = array_slice($year_movies_plays, 0, 10);
         $duration = 0;
         for($i = 0; $i < count($year_movies); $i++) {
             $duration += $year_movies[$i]["duration"];
@@ -1115,7 +1185,8 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_year_stats_shows) {
-        $return_year_shows["shows"] = array_slice($year_shows, 0, 10);
+        $return_year_shows["shows_duration"] = array_slice($year_shows, 0, 10);
+        $return_year_shows["shows_plays"] = array_slice($year_shows_plays, 0, 10);
         $duration = 0;
         for($i = 0; $i < count($year_shows); $i++) {
             $duration += $year_shows[$i]["duration"];
@@ -1128,7 +1199,8 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if($config->get_year_stats_music) {
-        $return_year_music["artists"] = array_slice($year_music, 0, 10);
+        $return_year_music["artists_duration"] = array_slice($year_music, 0, 10);
+        $return_year_music["artists_plays"] = array_slice($year_music_plays, 0, 10);
         $duration = 0;
         for($i = 0; $i < count($year_music); $i++) {
             $duration += $year_music[$i]["duration"];
@@ -1141,9 +1213,11 @@ function data_get_user_stats_loop($id, $array) {
 
     // Choose return value based on if function is enabled
     if(($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) && $config->get_year_stats_leaderboard) {
-        $return_year_users = array_slice($year_users, 0, 10);
+        $return_year_users["users_duration"] = array_slice($year_users, 0, 10);
+        $return_year_users["users_plays"] = array_slice($year_users_plays, 0, 10);
     } else {
-        $return_year_users = array();
+        $return_year_users["users_duration"] = array();
+        $return_year_users["users_plays"] = array();
     }
 
     // Calculate and log execution time

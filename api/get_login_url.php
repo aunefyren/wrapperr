@@ -21,9 +21,9 @@ $config = new Config();
 if(!$config->is_configured()) {
 
     // Log activity
-    $log->log_activity('get_login_url.php', 'unknown', 'Plex-Wrapped is not confgured..');
+    $log->log_activity('get_login_url.php', 'unknown', 'Wrapperr is not confgured..');
 
-    echo json_encode(array("message" => "Plex-Wrapped is not confgured.", "error" => true));
+    echo json_encode(array("message" => "Wrapperr is not confgured.", "error" => true));
     exit(0);
 }
 
@@ -40,6 +40,17 @@ if(empty($data) || !isset($data->home_url)) {
 
 // Get code and pin from Plex
 $pin_object = json_decode($auth->get_pin(), true);
+
+if(!isset($pin_object['id']) || !isset($pin_object['code'])) {
+
+    // Log URL creation
+    $log->log_activity('get_login_url.php', 'unknown', 'Failed to get ID or Code from Plex Auth. Exiting.');
+
+    // Return URL for login
+    echo json_encode(array("message" => 'Failed to get ID or Code from Plex Auth.', "error" => true));
+    exit(0);
+
+}
 
 // Get URL using pin and code
 $url = $auth->get_login_url($pin_object['code'], $pin_object['id'], $data->home_url);

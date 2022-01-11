@@ -5,13 +5,14 @@
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <title>Plex Wrapped</title>
+        <title>Wrapperr</title>
 
         <!-- Bootstrap 4 CSS and custom CSS -->
         <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
         <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="./functions.js"></script>
         <script src="./index.js"></script>
         <script src="./get_stats.js"></script>
         <script src="./get_functions.js"></script>
@@ -23,11 +24,15 @@
 
     <div class="boks">
 
-        <div class="boks3" id="search_input" style="padding: 0 !important;">
+        <div class="boks3" id="" style="padding: 0 !important;">
 
             <div class="boks2" style="float: none !important; display: block; padding: 0; margin-top: 0em;">
                 <img src="assets/img/gift.svg" onclick="window.location.href = './';" style="width: 15em; cursor: pointer;">
             </div>
+        
+        </div>
+        
+        <div class="boks3" id="search_input" style="padding: 0 !important;">
 
             <div class="boks2" style="float: none !important; display: block; margin-top: 0em; padding-top: 0;">
 
@@ -42,7 +47,7 @@
 
                 <div class="status" id="stats" style="">
 
-                    <h1>Plex Wrapped</h1>
+                    <h1 id='application_name'>Wrapperr</h1>
 
                     <div class="search">
 
@@ -62,30 +67,51 @@
                             <div class="form-group" id='search_wrapped_div'>
                                 <button class='form-control btn' name="search_wrapped_button" id="search_wrapped_button" style='opacity: 0.5;' disabled>
                                     <img src='assets/done.svg' class='btn_logo'>
-                                    <p2 id='plex_login_button_text'>Plex Wrapped</p2>
+                                    <p2 id='search_wrapped_button_text'>Unwrap</p2>
+                                </button>
+                            </div>
+
+                            <div class="form-group" id='sign_out_div' style='display: none;'>
+                                <button class='form-control btn' name="plex_signout_button" id="plex_signout_button" onclick='sign_out()'>
+                                    <img src='assets/close.svg' class='btn_logo'>
+                                    <p2 id='plex_signout_button_text'>Sign Out</p2>
                                 </button>
                             </div>
 
                         </form>
 
-                        <div class="form-group" id='sign_out_div' style='display: none;'>
-                            <button class='form-control btn' name="plex_signout_button" id="plex_signout_button" onclick='sign_out()'>
-                                <img src='assets/close.svg' class='btn_logo'>
-                                <p2 id='plex_signout_button_text'>Sign Out</p2>
-                            </button>
-                        </div>
-
 
                     </div>
 
-                    <img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em;width: 4em; height: 4em; display:none; margin: 1em 0 0 0;">
+                    <img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em; display:none; margin: 1em 0 0 0;">
 
                     <div id="results">
-
+                    </div>
+                    
+                    <div class="form-group" id='results_error_div'>
+                        <div id="results_error" style="color: var(--red) !important;"></div>
+                    </div>
+                    
+                    <div class="form-group" id='share_wrapped_title_div' style='margin: 0; display: none;'>
+                            <h3 style='margin: 0'>Shareable link:</h3>
                     </div>
 
-
-                <div id="results_error" style="padding:0.5em; bottom:0; color: #ffbd55 !important;"></div>
+                    <div class="form-group" id='share_wrapped_div' style='  display: none;
+                                                                            flex-direction: row;
+                                                                            flex-wrap: wrap;
+                                                                            align-content: flex-start;
+                                                                            justify-content: center;
+                                                                            align-items: flex-start;
+                                                                            border-radius: 6px;
+                                                                            margin: 0 0 0.5em 0;
+                                                                            padding: 0.5em;
+                                                                        '>
+                        <div class='form-control btn' id="share_wrapped_delete_button" style='background-color: var(--white); cursor: default;'>
+                            <span id='share_wrapped_url' style=''></span>
+                            <img id='share_wrapped_copy' src='assets/external-link.svg' style='' onclick='copy_link_user();'>
+                            <img id='share_wrapped_delete' src='assets/trash.svg' style='' onclick='delete_link_user();'>
+                        </div>
+                    </div>
 
                 </div>
 
@@ -123,16 +149,16 @@
             <div class="snowflake">
                 ❄
             </div>
+
         </div>
 
     </div>
 </div>
 
 <div class="footer" id="footer">
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./">Wrapped</a> |
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./">Wrapperr</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./admin">Admin</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./caching">Caching</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub</a>
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/wrapperr" target="_blank">GitHub</a>
 </div>
 
 </div>
@@ -153,7 +179,7 @@
         var hash = url.searchParams.get("hash");
         var close_me = url.searchParams.get("close_me");
 
-        get_plex_wrapped_version();
+        get_wrapper_version();
         
         if(close_me !== null) {
             window.close();

@@ -16,11 +16,8 @@ function get_functions() {
                 document.getElementById('results_error').innerHTML = result.message;
             } else {
                 functions = result;
-                if(!link_mode) {
-                    get_stats();
-                } else {
-                    load_page(results);
-                }
+                get_stats();
+
             }
         }
     };

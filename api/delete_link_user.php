@@ -20,10 +20,10 @@ $log = new Log();
 $data = json_decode(file_get_contents("php://input"));
 
 // If POST data is empty
-if(empty($data)) {
+if(empty($data) || empty($data->cookie)) {
 
 	// Log use
-	$log->log_activity('create_link.php', 'unknown', 'No input provided.');
+	$log->log_activity('delete_link_user.php', 'unknown', 'No input provided.');
 
     echo json_encode(array("error" => true, "message" => "No input provided."));
     exit(0);
@@ -34,7 +34,7 @@ if(empty($data)) {
 if(!$config->is_configured()) {
 
 	// Log use
-	$log->log_activity('create_link.php', 'unknown', 'Wrapperr is not configured.');
+	$log->log_activity('delete_link_user.php', 'unknown', 'Wrapperr is not configured. Can\'t delete link.');
 
     echo json_encode(array("error" => true, "message" => "Wrapperr is not configured.", "password" => false, "data" => array()));
     exit(0);
@@ -45,7 +45,7 @@ if(!$config->is_configured()) {
 if(!$config->create_share_links) {
 
 	// Log use
-	$log->log_activity('create_link.php', 'unknown', 'Wrapperr does not allow link creation in config.');
+	$log->log_activity('delete_link_user.php', 'unknown', 'Wrapperr does not allow link creation in config. Won\'t delete link.');
 
     echo json_encode(array("error" => true, "message" => "Wrapperr option for link creation not enabled."));
     exit(0);
@@ -54,8 +54,6 @@ if(!$config->create_share_links) {
 
 // Remove potential harmfull input
 $cookie = htmlspecialchars($data->cookie);
-$wrapped_data = $data->data;
-$wrapped_functions = $data->functions;
 
 // Get Plex Token
 $token_object = json_decode($auth->validate_token($cookie));
@@ -64,7 +62,7 @@ $token_object = json_decode($auth->validate_token($cookie));
 if(empty($token_object) || !isset($token_object->data->id)) {
     
 	// Log use
-	$log->log_activity('create_link.php', 'unknown', 'Plex Token from cookie not valid. Could not create link.');
+	$log->log_activity('delete_link_user.php', 'unknown', 'Plex Token from cookie not valid. Could not create link.');
 
     echo json_encode(array("error" => true, "message" => "Login not accepted. Try again."));
     exit(0);
@@ -74,24 +72,20 @@ if(empty($token_object) || !isset($token_object->data->id)) {
 // Assign values from Plex Token
 $id = $token_object->data->id;
 
-// Get the current date
-$now = new DateTime('NOW');
+// Delete content
+if(!$link->delete_link($id)) {
 
-// Create random URL value
-$random = md5(rand(0,1000));
+    // Log use
+    $log->log_activity('delete_link_user.php', $id, 'Failed to delete link. Not found.');
 
-$url_hash = $id . '-' . $random;
+    echo json_encode(array("error" => true, "message" => "This Wrapperr link has expired."));
+    exit(0);
 
-//Create link content
-$link_content = array("url_hash" => $url_hash, "id" => $id, "date" => $now->format('Y-m-d'), "wrapperr_version" => $config->wrapperr_version, "data" => $wrapped_data, "functions" => $wrapped_functions);
-
-// Save the content to file
-$link->save_link($link_content, $id);
+}
 
 // Log use
-$log->log_activity('create_link.php', $id, 'Created Wrapperr link.');
+$log->log_activity('delete_link_user.php', $id, 'Wrapperr link deleted by user.');
 
-// Return URL generated
-echo json_encode(array("error" => false, "message" => "Link created.", "url" => "?hash=" . $url_hash));
+echo json_encode(array("error" => false, "message" => "This Wrapperr link deleted."));
 exit(0);
 ?>

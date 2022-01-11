@@ -21,14 +21,23 @@ class Log {
                 echo json_encode(array("message" => "Failed to create wrapped.log. Is the 'config' directory writable?", "error" => true));
                 exit();
             }
-            fwrite($create_log, 'Plex Wrapped');
+            fwrite($create_log, 'Wrapperr');
             fclose($create_log);
         }
 
-        // Assign use_logs configuration from config
-        include_once(dirname(__FILE__, 3) . '/api/objects/config.php');
-        $config = new Config();
-        $this->use_logs = $config->use_logs;
+        $fail = false;
+        try {
+            // Assign use_logs configuration from config
+            include_once(dirname(__FILE__, 3) . '/api/objects/config.php');
+            $config = new Config();
+            $this->use_logs = $config->use_logs;
+        } catch (Exception $e) {
+            $fail = true;
+        }
+
+        if($fail) {
+            $this->use_logs = false;
+        }
     }
 
     public function log_activity($function, $id, $message) {

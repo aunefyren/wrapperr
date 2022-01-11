@@ -6,7 +6,8 @@ class Auth {
     private $token_encrypter;
     private $strong = true;
     private $header = 'application/json';
-    private $x_plex_product = 'Plex-Wrapped';
+    private $application_url;
+    private $x_plex_product = 'Wrapperr';
     const METHOD = 'aes-256-ctr';
 
     // Constructor
@@ -17,6 +18,7 @@ class Auth {
         $config_file = new Config();
         $this->client_id = $config_file->client_id;
         $this->token_encrypter = $config_file->token_encrypter;
+        $this->application_url = $config_file->application_url;
     
     }
 
@@ -38,7 +40,18 @@ class Auth {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
             // Add payload
-            $payload = array( "strong"=> $this->strong, "X-Plex-Product" => $this->x_plex_product, "X-Plex-Client-Identifier" => $this->client_id );
+            $payload = array(   "strong"=> $this->strong, 
+                                "X-Plex-Product" => $this->x_plex_product,
+                                "X-Plex-Client-Identifier" => $this->client_id,
+                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Model" => "Plex OAuth",
+                                "X-Plex-Language" => 'en'
+                            );
+            
+            if($this->application_url !== '') {
+                array_push($headers, "Host: $this->application_url");
+            }
+
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     
             // Add headers
@@ -57,13 +70,19 @@ class Auth {
     
             // Closing curl
             curl_close($ch);
-    
+            
             // Decode the JSON response
             return $result;
     
     
         // Catch errors
         } catch (Exception $e) {
+            
+            // Log error
+            require_once(dirname(__FILE__) . '/log.php');
+            $log = new Log();
+	        $log->log_activity('auth.php', 'unknown', 'Error: ' . $e->getMessage());
+
             echo json_encode(array("message" => $e->getMessage(), "error" => true, "data" => array()));
             exit(0);
         }
@@ -97,7 +116,18 @@ class Auth {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
             // Add payload
-            $payload = array( "code"=> $code, "X-Plex-Client-Identifier" => $this->client_id );
+            $payload = array(
+                                "code"=> $code,
+                                "X-Plex-Client-Identifier" => $this->client_id,
+                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Model" => "Plex OAuth",
+                                "X-Plex-Language" => 'en'
+                            );
+
+            if($this->application_url !== '') {
+                array_push($headers, "Host: $this->application_url");
+            }
+
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
     
@@ -145,8 +175,15 @@ class Auth {
     
         // Catch errors
         } catch (Exception $e) {
+
+            // Log error
+            require_once(dirname(__FILE__) . '/log.php');
+            $log = new Log();
+	        $log->log_activity('auth.php', 'unknown', 'Error: ' . $e->getMessage());
+
             echo json_encode(array("message" => $e->getMessage(), "error" => true, "data" => array()));
             exit(0);
+
         }
     }
 
@@ -162,7 +199,7 @@ class Auth {
             // Debase token-cookie
             $token_debased = base64_decode($token, true);
             if ($token_debased === false) {
-                throw new Exception('Encryption failure.');
+                throw new Exception('Encryption failure. Failed to decrypt login cookie.');
             }
 
             // Assign variables
@@ -188,7 +225,19 @@ class Auth {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     
             // Add payload
-            $payload = array( "X-Plex-Token"=> $x_plex_token, "X-Plex-Client-Identifier" => $this->client_id, "X-Plex-Product" => $this->x_plex_product );
+            $payload = array(   
+                                "X-Plex-Token"=> $x_plex_token,
+                                "X-Plex-Client-Identifier" => $this->client_id,
+                                "X-Plex-Product" => $this->x_plex_product,
+                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Model" => "Plex OAuth",
+                                "X-Plex-Language" => 'en'
+                            );
+                            
+            if($this->application_url !== '') {
+                array_push($headers, "Host: $this->application_url");
+            }
+            
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
     
@@ -218,8 +267,15 @@ class Auth {
     
         // Catch errors
         } catch (Exception $e) {
+
+            // Log error
+            require_once(dirname(__FILE__) . '/log.php');
+            $log = new Log();
+	        $log->log_activity('auth.php', 'unknown', 'Error: ' . $e->getMessage());
+
             echo json_encode(array("message" => $e->getMessage(), "error" => true, "data" => array()));
             exit(0);
+
         }
     }
 

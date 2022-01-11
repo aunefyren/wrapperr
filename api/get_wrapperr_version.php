@@ -15,11 +15,12 @@ $config = new Config();
 $log = new Log();
 
 // Log use
-$log->log_activity('get_plex_wrapped_version.php', 'unknown', 'Retrieved Plex-Wrapped version.');
+$log->log_activity('get_plex_wrapped_version.php', 'unknown', 'Retrieved Wrapperr version.');
 
 // Create JSON from functions
-$version_json = array("plex_wrapped_version" => $config->plex_wrapped_version,
-						"message" => "Retrieved Plex-Wrapped verison.",
+$version_json = array(	"wrapperr_version" => $config->wrapperr_version,
+						"application_name" => $config->application_name,
+						"message" => "Retrieved Wrapperr verison.",
 						"error" => false
 						);
 

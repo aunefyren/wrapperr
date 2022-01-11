@@ -34,7 +34,7 @@ $code = htmlspecialchars($data->code);
 $cookie = $auth->get_cookie($id, $code);
 
 // Log use
-$log->log_activity('get_login_cookie.php', 'unknown', 'Plex-Wrapped login cookie created.');
+$log->log_activity('get_login_cookie.php', 'unknown', 'Wrapperr login cookie created.');
 
 // Print cookie and exit
 echo json_encode(array("error" => false, "message" => "Cookie created.", "cookie" => $cookie));

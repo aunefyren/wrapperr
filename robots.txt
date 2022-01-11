@@ -1,0 +1,11 @@
+# Folders
+User-agent: *
+Disallow: /api/
+Disallow: /assets/
+Disallow: /config/
+Disallow: /docker/
+# File types
+Disallow: /*.json
+Disallow: /*.php
+Disallow: /*.js
+Disallow: /*.md

@@ -1,61 +1,45 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <!-- Required meta tags -->
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <title>Plex Wrapped</title>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-        <!-- Bootstrap 4 CSS and custom CSS -->
-        <link rel="stylesheet" type="text/css" href="../assets/css/wrapped.css" />
-        <link rel="shortcut icon" href="../assets/img/favicons/favicon.ico" />
-        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-        <script src="../admin.js"></script>
-        <script src="../get_config.js"></script>
-        <script src="../set_config.js"></script>
+    <title>Wrapperr</title>
 
-    </head>
+    <!-- Bootstrap 4 CSS and custom CSS -->
+    <link rel="stylesheet" type="text/css" href="../assets/css/admin.css" />
+    <link rel="shortcut icon" href="../assets/img/favicons/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="../functions.js"></script>
+    <script src="../admin.js"></script>
+
+</head>
+
 <body>
 
-<div class="content_landing" id="login_content" style="">
+<div class="content">
 
-    <div class="boks">
+    <div class="container">
 
-        <div class="boks3" id="search_input" style="padding: 0 !important;">
-
-            <div class="boks2" style="float: none !important; display: block; padding: 0; margin-top: 0em;">
-                <img src="../assets/img/gift.svg" onclick="window.location.href = '../';" style="width: 15em; cursor: pointer;">
-            </div>
-
-            <div class="boks2" style="float: none !important; display: block; margin-top: 0em; padding-top: 0;">
-
-                <div class="status" style="max-width: 100%;">
-
-                    <h1>Wrapped Setup</h1>
-
-                    <div id="setup">
-
-                    </div>
-
-                </div>
-
-            </div>
-
+        <div class="sub_container">
+            <h1 id='application_name'>Wrapperr Setup</h1>
         </div>
-
+    
+    </div>
+        
+    <div class="container">
+        <div class="sub_container" id="setup">
+        </div>
     </div>
 </div>
 
-<div class="footer" id="footer">
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../">Wrapped</a> |
+<div class="content" id="footer">
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../">Wrapperr</a> |
     <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../admin">Admin</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="../caching">Caching</a> |
-    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/plex-wrapped" target="_blank">GitHub</a>
-</div>
-
-<div class="content" id="search_results">
+    <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/wrapperr" target="_blank">GitHub</a>
 </div>
 
 <script type="text/javascript">
@@ -64,57 +48,129 @@ var root = "../";
 
 var first_time = false;
 
-var plex_wrapped_version = "";
+var wrapperr_version = '';
+var tautulli_apikey = '';
+var tautulli_ip = '';
+var tautulli_port = '';
+var tautulli_length = '';
+var tautulli_root = '';
+var tautulli_libraries = '';
+var https = '';
 
-var tautulli_apikey = "";
-var tautulli_ip = "";
-var tautulli_port = "";
-var tautulli_length = 5000;
-var tautulli_root = "";
-var tautulli_libraries = "";
+var password = '';
+var username = '';
 
-var ssl = false;
+var timezone = '';
+var use_cache = '';
+var use_logs = '';
+var stats_intro = '';
+var stats_outro = '';
+var client_id = '';
+var wrapperr_root = '';
+var application_name_str = '';
+var application_url_str = '';
 
-var password = "";
-var username = "";
+var wrapped_start = '';
+var wrapped_end = '';
+var create_share_links = '';
 
-var timezone = "";
+var get_user_movie_stats = '';
+var get_user_movie_stats_title = '';
+var get_user_movie_stats_subtitle = '';
+var get_user_movie_stats_subsubtitle = '';
+var get_user_movie_stats_subtitle_one = '';
+var get_user_movie_stats_subsubtitle_one = '';
+var get_user_movie_stats_subtitle_none = '';
+var get_user_movie_stats_subsubtitle_none = '';
+var get_user_movie_stats_top_movie = '';
+var get_user_movie_stats_top_movie_plural = '';
+var get_user_movie_stats_movie_completion_title = '';
+var get_user_movie_stats_movie_completion_title_plural = '';
+var get_user_movie_stats_movie_completion_subtitle = '';
+var get_user_movie_stats_pause_title = '';
+var get_user_movie_stats_pause_subtitle = '';
+var get_user_movie_stats_pause_title_one = '';
+var get_user_movie_stats_pause_subtitle_one = '';
+var get_user_movie_stats_pause_title_none = '';
+var get_user_movie_stats_pause_subtitle_none = '';
+var get_user_movie_stats_oldest_title = '';
+var get_user_movie_stats_oldest_subtitle = '';
+var get_user_movie_stats_oldest_subtitle_pre_1950 = '';
+var get_user_movie_stats_oldest_subtitle_pre_1975 = '';
+var get_user_movie_stats_oldest_subtitle_pre_2000 = '';
+var get_user_movie_stats_spent_title = '';
 
-var wrapped_start = new Date(0);
-wrapped_start.setUTCSeconds(1609455600);
+var get_user_show_stats = '';
+var get_user_show_stats_buddy = '';
+var get_user_show_stats_title = '';
+var get_user_show_stats_subtitle = '';
+var get_user_show_stats_subsubtitle = '';
+var get_user_show_stats_subtitle_one = '';
+var get_user_show_stats_subsubtitle_one = '';
+var get_user_show_stats_subtitle_none = '';
+var get_user_show_stats_subsubtitle_none = '';
+var get_user_show_stats_top_show = '';
+var get_user_show_stats_top_show_plural = '';
+var get_user_show_stats_spent_title = '';
+var get_user_show_stats_most_played_title = '';
+var get_user_show_stats_most_played_subtitle = '';
+var get_user_show_stats_buddy_title = '';
+var get_user_show_stats_buddy_subtitle = '';
+var get_user_show_stats_buddy_title_none = '';
+var get_user_show_stats_buddy_subtitle_none = '';
 
-var wrapped_end = new Date(0);
-wrapped_end.setUTCSeconds(1640991540);
+var get_user_music_stats = '';
+var get_user_music_stats_title = '';
+var get_user_music_stats_subtitle = '';
+var get_user_music_stats_subsubtitle = '';
+var get_user_music_stats_subtitle_one = '';
+var get_user_music_stats_subsubtitle_one = '';
+var get_user_music_stats_subtitle_none = '';
+var get_user_music_stats_subsubtitle_none = '';
+var get_user_music_stats_top_track = '';
+var get_user_music_stats_top_track_plural = '';
+var get_user_music_stats_top_album_plural = '';
+var get_user_music_stats_top_artist_plural = '';
+var get_user_music_stats_spent_title = '';
+var get_user_music_stats_spent_subtitle = '';
+var get_user_music_stats_oldest_album_title = '';
+var get_user_music_stats_oldest_album_subtitle = '';
 
-var create_share_links = true;
+var get_year_stats_title = '';
+var get_year_stats_subtitle = '';
+var get_year_stats_subsubtitle = '';
+var get_year_stats_movies = '';
+var get_year_stats_movies_title = '';
+var get_year_stats_movies_duration_title = '';
+var get_year_stats_shows = '';
+var get_year_stats_shows_title = '';
+var get_year_stats_shows_duration_title = '';
+var get_year_stats_music = '';
+var get_year_stats_music_title = '';
+var get_year_stats_music_duration_title = '';
+var get_year_stats_leaderboard = '';
+var get_year_stats_leaderboard_title = '';
+var get_year_stats_duration_sum_title = '';
 
-var get_user_movie_stats = true;
-var get_user_show_stats = true;
-var get_user_show_buddy = true;
-var get_user_music_stats = true;
-
-var get_year_stats_movies = true;
-var get_year_stats_shows = true;
-var get_year_stats_music = true;
-var get_year_stats_leaderboard = true;
-
-var use_cache = true;
-
-var use_logs = true;
-
-var current_password = "";
-var current_username = "";
-
-var stats_intro = "New year, new page of statistics...";
-
-var client_id = "";
-var plex_wrapped_root = "";
+var wrapperr_and = '';
+var wrapperr_play = '';
+var wrapperr_play_plural = '';
+var wrapperr_day = '';
+var wrapperr_day_plural = '';
+var wrapperr_hour = '';
+var wrapperr_hour_plural = '';
+var wrapperr_minute = '';
+var wrapperr_minute_plural = '';
+var wrapperr_second = '';
+var wrapperr_second_plural = '';
+var wrapperr_sort_plays = '';
+var wrapperr_sort_duration = '';
 
 $(document).ready(function() {
 
-    get_plex_wrapped_version();
+    get_wrapper_version();
 
-    get_config_initial("../");
+    get_admin_state();
 
 });
 </script>
