@@ -16,7 +16,6 @@ A website-based platform and API for collecting user stats within a set timefram
 - Movies, shows & music
 - Caching of results
 - Friendly, dynamic display for statistics with nice illustrations
-- Email and username search
 - Admin page with authentication for settings
 - Pre-caching of data
 - Shareable links
@@ -46,13 +45,14 @@ There are instructions for this further down.
 <br>
 <br>
 ### How does it work?
-There are things to know when you are up and running: 
+There are things to know when you have the website running: 
 - Head to the front page you should see a small navigation menu at the bottom. This will take you between the few pages you need.
-- The configuration is stored in config/config.json, but can be configured using the admin menu, located at: ```your-domain-or-ip/admin``` or by clicking admin in the navigation menu.
-- The cache is stored in config/cache.json, but can be cleared using the admin menu previously mentioned.
-- Your password and encryption token is hashed and stored in the config/config.json. This is a sensetive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache, but if you are using Nginx you must add a directory deny in your Nginx configuration!
-- If you visit ```your-domain-or-ip/caching```, or click caching in the navigation menu, you can do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error.
+- The configuration is stored in ```config/config.json```, but can be configured using the admin menu, located at: ```your-domain-or-ip/admin``` or by clicking admin in the navigation menu.
+- The cache is stored in ```config/cache.json```, but can be cleared using the admin menu previously mentioned.
+- Your password and encryption token is hashed and stored in the ```config/config.json```. This is a sensitive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache, but if you are using Nginx you must add a directory deny in your Nginx configuration!
+- If you visit ```your-domain-or-ip/admin```, and click 'Caching' you can do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error. 
 - It is recommended to set up the platform at the admin page and then running a pre-cache immediately. The cache is updated automatically if new data in the timeframe becomes available.
+- All stat options are disabled by default. Go to the admin page, and then click on 'Wrapperr customization' and enable the statistics relevant to you.
 
 <br>
 <br>
@@ -68,14 +68,14 @@ Install XAMPP thorugh the installer and open up the GUI. From there you can star
 ### Install Wrapperr
 Download this repository and place the files inside the document-root of XAMPPs apache server. This is typically ```C:\xampp\htdocs``` on Windows, but this will change depending on your system and configuration of XAMPP during installation. 
 
-For instance, I placed this repository in a folder inside the document-root, so my location of XAMPP, with that folder, makes the location: ```C:\xampp\htdocs\plex-wrapped```, which in turn makes the files accessable on ```http://localhost/plex-wrapped```. Notice how my folder inside the document-root altered the URL. If I placed the files directly into ```C:\xampp\htdocs``` the URL would be: ```http://localhost```.
+For instance, I placed this repository in a folder within the document-root, so my document-root, with that folder, makes the full path: ```C:\xampp\htdocs\wrapperr```, which in turn makes the files accessable on ```http://localhost/wrapperr```. Notice how my folder inside the document-root altered the URL. If I placed the repository files directly into ```C:\xampp\htdocs``` the URL would be: ```http://localhost```.
 
 ### Config folder configuration
 You need to give PHP permission to read and write to files in the directory called ```config```. This is where the API saves the cache, configuration and writes the log. 
 
 The directory contains sensitive information that must be only accessed by the PHP scripts! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache (which XAMPP uses). If you are using Nginx you must add a directory deny in your Nginx configuration!
 
-In Windows I never had to change permissions for the folder, PHP could access it by defult. In Linux I had give read/write access by using the ```chmod``` command. In the example below I change the config directory folder permissions recursively on Linux. This will allow PHP to read/write in the directory.
+On Windows I never had to change permissions for the ```config``` folder, PHP could access it by defult. On Linux I had give read/write access by using the ```chmod``` command. In the example below I change the config directory folder permissions recursively on Linux. This will allow PHP to read/write in the directory.
 
 ```
 $ sudo chmod -R 0777 /var/www/html/config
@@ -84,13 +84,13 @@ $ sudo chmod -R 0777 /var/www/html/config
 ### Test
 Go to ```http://localhost```, or your variation as discussed earlier, and you should see the front page.
 
-Everything should now be prepared, and the rest of the setup should be done on the admin page, followed up by a pre-caching on the caching page. You might have to refer to PHP configuration section below if PHP is acting up. 
+Everything should now be prepared, and the rest of the setup should be done on the admin page, followed up by a pre-caching. You might have to refer to PHP configuration section below if PHP is acting up. Go to the previous section named 'How does it work?' if you need information about the admin setup.
 
 <br>
 <br>
 
 ## Docker
-Docker sets up the environment, but I recommend reading the start of the 'Instructions' section for an explanation of functionality! You might have to refer to the 'PHP Configuration' section below if PHP is acting up.
+Docker sets up the environment, but I recommend reading the start of the 'Instructions' section for an explanation of functionality/admin page! You might have to refer to the 'PHP Configuration' section below if PHP is acting up and giving API parsing errors.
 
 Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
 
