@@ -82,6 +82,7 @@ $(document).on('submit', '#plex_login_form', function(){
                 document.getElementById('snowflakes').style.display = 'none';
             } catch(error) {
                 document.getElementById('results_error').innerHTML = "API response can't be parsed.";
+                console.log('API response can\'t be parsed. Error: ' + this.responseText)
             }
 
             //console.log(result);
