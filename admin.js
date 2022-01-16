@@ -64,7 +64,7 @@ function log_in() {
                 document.getElementById("log_in_button").style.opacity = '1';
                 document.getElementById('password').value = '';
             } else {
-                set_cookie("wrapperr-admin", result.cookie, 1);
+                set_cookie("wrapperr-admin", result.cookie, 7);
                 location.reload();
             }
 
@@ -381,7 +381,7 @@ function set_tautulli_settings() {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="tautulli_libraries" title="Comma seprated list of ID\'s to use for statistics. If none are given, it will search all.">Libraries ID\'s to use: (Optional)</label>';
+    html += '<label for="tautulli_libraries" title="Comma seprated list of ID\'s to use for statistics. If none are given, it will search all.">Library ID\'s to use: (Optional)</label>';
     html += '<input type="text" class="form-control" id="tautulli_libraries" value="' + tautulli_libraries + '" autocomplete="off" placeholder=""/><br>';
     html += '</div>';
 

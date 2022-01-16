@@ -25,9 +25,9 @@ $data = json_decode(file_get_contents("php://input"));
 if(!$config->is_configured() || !$admin->is_configured()) {
 
     // Log activity
-    $log->log_activity('get_stats.php', 'unknown', 'Wrapperr is not confgured..');
+    $log->log_activity('get_stats.php', 'unknown', 'Wrapperr is not configured.');
 
-    echo json_encode(array("message" => "Wrapperr is not confgured.", "error" => true));
+    echo json_encode(array("message" => "Wrapperr is not configured.", "error" => true));
     exit(0);
 }
 
@@ -35,7 +35,7 @@ if(!$config->is_configured() || !$admin->is_configured()) {
 date_default_timezone_set($config->timezone);
 
 // Set maximum run-time
-set_time_limit(600);
+set_time_limit(1200);
 
 // Base-URL for connections to Tautulli API.
 $connection = create_url();
@@ -219,7 +219,7 @@ if($config->get_user_movie_stats || $config->get_user_show_stats || $config->get
         $year_music = array("error" => True, "message" => "Disabled in config.", "data" => array());
     }
 
-    // Select the retrieved dataset if music are configured for the server.
+    // Select the retrieved dataset if the leaderboard is configured for the server.
     if(($config->get_year_stats_movies || $config->get_year_stats_shows || $config->get_year_stats_music) && $config->get_year_stats_leaderboard ) {
         $year_users = array("data" => $user_stats["year_users"], "message" => "Success. User year-stats are loaded.", "error" => False);
     } else {

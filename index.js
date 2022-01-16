@@ -155,7 +155,7 @@ function check_token(code, id) {
             if(result.error) {
                 reset_button();
             } else {
-                set_cookie("wrapperr-user", result.cookie, 1);
+                set_cookie("wrapperr-user", result.cookie, 7);
                 location.reload();
             }
         }

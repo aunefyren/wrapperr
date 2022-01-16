@@ -15,7 +15,7 @@ class Config {
     public $https;
 
     // Wrapperr config
-    public $wrapperr_version = 'v2.2.1';
+    public $wrapperr_version = 'v2.2.2';
     public $timezone;
     public $application_name;
     public $application_url;
@@ -205,7 +205,7 @@ class Config {
         if(isset($json->use_logs)) {
             $this->use_logs = $json->use_logs;
         } else {
-            $this->use_logs = false;
+            $this->use_logs = true;
         }
 
         if(isset($json->client_id) && $json->client_id !== '') {
@@ -265,14 +265,14 @@ class Config {
         if(isset($json->create_share_links)) {
             $this->create_share_links = $json->create_share_links;
         } else {
-            $this->create_share_links = false;
+            $this->create_share_links = true;
         }
         
         // Movie values
         if(isset($json->get_user_movie_stats)) {
             $this->get_user_movie_stats = $json->get_user_movie_stats;
         } else {
-            $this->get_user_movie_stats = false;
+            $this->get_user_movie_stats = true;
         }
 
         // Title
@@ -447,7 +447,7 @@ class Config {
         if(isset($json->get_user_show_stats)) {
             $this->get_user_show_stats = $json->get_user_show_stats;
         } else {
-            $this->get_user_show_stats = false;
+            $this->get_user_show_stats = true;
         }
         
         // Get show-buddy
@@ -573,7 +573,7 @@ class Config {
         if(isset($json->get_user_music_stats)) {
             $this->get_user_music_stats = $json->get_user_music_stats;
         } else {
-            $this->get_user_music_stats = false;
+            $this->get_user_music_stats = true;
         }
 
         // Title
@@ -706,7 +706,7 @@ class Config {
         if(isset($json->get_year_stats_movies)) {
             $this->get_year_stats_movies = $json->get_year_stats_movies;
         } else {
-            $this->get_year_stats_movies = false;
+            $this->get_year_stats_movies = true;
         }
 
         // Top movie stats for server title
@@ -726,7 +726,7 @@ class Config {
         if(isset($json->get_year_stats_shows)) {
             $this->get_year_stats_shows = $json->get_year_stats_shows;
         } else {
-            $this->get_year_stats_shows = false;
+            $this->get_year_stats_shows = true;
         }
 
         // Top shows stats for server title
@@ -746,7 +746,7 @@ class Config {
         if(isset($json->get_year_stats_music)) {
             $this->get_year_stats_music = $json->get_year_stats_music;
         } else {
-            $this->get_year_stats_music = false;
+            $this->get_year_stats_music = true;
         }
 
         // Top shows stats for server title
@@ -766,7 +766,7 @@ class Config {
         if(isset($json->get_year_stats_leaderboard)) {
             $this->get_year_stats_leaderboard = $json->get_year_stats_leaderboard;
         } else {
-            $this->get_year_stats_leaderboard = false;
+            $this->get_year_stats_leaderboard = true;
         }
 
         // Top users for server title

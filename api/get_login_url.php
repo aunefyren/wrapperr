@@ -21,9 +21,9 @@ $config = new Config();
 if(!$config->is_configured()) {
 
     // Log activity
-    $log->log_activity('get_login_url.php', 'unknown', 'Wrapperr is not confgured..');
+    $log->log_activity('get_login_url.php', 'unknown', 'Wrapperr is not configured.');
 
-    echo json_encode(array("message" => "Wrapperr is not confgured.", "error" => true));
+    echo json_encode(array("message" => "Wrapperr is not configured.", "error" => true));
     exit(0);
 }
 
