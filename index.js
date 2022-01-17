@@ -25,6 +25,7 @@ function wrapped_link_actions(hash) {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 document.getElementById('stats').innerHTML = "API response can't be parsed.";
+                console.log("API response can't be parsed. Response: " + this.responseText);
                 reset_button();
             }
 
@@ -43,6 +44,7 @@ function wrapped_link_actions(hash) {
 }
 
 function sign_out() {
+
     set_cookie("wrapperr-user", "", 1);
     document.getElementById('search_wrapped_form').style.display = 'none';
     document.getElementById('plex_login_form').style.display = 'block';
@@ -51,9 +53,13 @@ function sign_out() {
     document.getElementById("search_wrapped_button").disabled = true;
     document.getElementById("search_wrapped_button").style.opacity = '0.5';
     document.getElementById('sign_out_div').style.display = 'none';
+
+    document.getElementById('share_wrapped_title_div').style.display = 'none';
+    document.getElementById('share_wrapped_div').style.display = 'none';
+
 }
 
-$(document).on('submit', '#search_wrapped_form', function(){
+function search_wrapperr(){
     
     document.getElementById("search_wrapped_button").disabled = true;
     document.getElementById("search_wrapped_button").style.opacity = '0.5';
@@ -62,7 +68,7 @@ $(document).on('submit', '#search_wrapped_form', function(){
     document.getElementById('results_error').innerHTML = "";
     get_functions();
 
-});
+}
 
 $(document).on('submit', '#plex_login_form', function(){
     
@@ -82,7 +88,7 @@ $(document).on('submit', '#plex_login_form', function(){
                 document.getElementById('snowflakes').style.display = 'none';
             } catch(error) {
                 document.getElementById('results_error').innerHTML = "API response can't be parsed.";
-                console.log('API response can\'t be parsed. Error: ' + this.responseText)
+                console.log("API response can't be parsed. Response: " + this.responseText);
             }
 
             //console.log(result);
@@ -146,7 +152,7 @@ function check_token(code, id) {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 document.getElementById('results_error').innerHTML = "API response can't be parsed.";
-                console.log('API response can\'t be parsed. Error: ' + this.responseText)
+                console.log('API response can\'t be parsed. Response: ' + this.responseText);
                 reset_button();
             }
             
@@ -182,6 +188,7 @@ function validate_cookie_user(cookie) {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 document.getElementById('results_error').innerHTML = "API response can't be parsed.";
+                console.log("API response can't be parsed. Response: " + this.responseText);
                 reset_button();
             }
             
