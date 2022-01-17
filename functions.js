@@ -170,9 +170,9 @@ function seconds_to_seconds(seconds, function_setting) {
     var second_string = '';
 
     if(seconds == 1) {
-        second_string += number_with_spaces(seconds) + ' ' + function_setting.wrapperr_second;
+        second_string += seconds + ' ' + function_setting.wrapperr_second;
     } else {
-        second_string += number_with_spaces(seconds) + ' ' + function_setting.wrapperr_second_plural;
+        second_string += seconds + ' ' + function_setting.wrapperr_second_plural;
     }
 
     return second_string;
