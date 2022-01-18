@@ -49,7 +49,8 @@ class Auth {
                             );
 
             $headers = [
-                "accept: $this->header"
+                "Accept: $this->header",
+                'Referer: https://' . $this->application_url . '/wrapped/index.html'
             ];
             
             if($this->application_url !== '') {
@@ -126,7 +127,8 @@ class Auth {
                             );
             
             $headers = [
-                "accept: $this->header"
+                "Accept: $this->header",
+                'Referer: https://' . $this->application_url . '/wrapped/index.html'
             ];
 
             if($this->application_url !== '') {
@@ -237,11 +239,12 @@ class Auth {
                             );
 
             $headers = [
-                "accept: $this->header"
+                "Accept: " . $this->header,
+                'Referer: https://' . $this->application_url . '/wrapped/index.html'
             ];
                             
             if($this->application_url !== '') {
-                array_push($headers, "Host: $this->application_url");
+                array_push($headers, "Host: " . $this->application_url);
             }
             
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
