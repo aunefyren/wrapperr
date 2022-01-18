@@ -47,6 +47,10 @@ class Auth {
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );
+
+            $headers = [
+                "accept: $this->header"
+            ];
             
             if($this->application_url !== '') {
                 array_push($headers, "Host: $this->application_url");
@@ -55,9 +59,6 @@ class Auth {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     
             // Add headers
-            $headers = [
-                "accept: $this->header"
-            ];
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     
             // Execute curl
@@ -123,6 +124,10 @@ class Auth {
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );
+            
+            $headers = [
+                "accept: $this->header"
+            ];
 
             if($this->application_url !== '') {
                 array_push($headers, "Host: $this->application_url");
@@ -132,9 +137,6 @@ class Auth {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
     
             // Add headers
-            $headers = [
-                "accept: $this->header"
-            ];
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     
             // Execute curl
@@ -233,6 +235,10 @@ class Auth {
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );
+
+            $headers = [
+                "accept: $this->header"
+            ];
                             
             if($this->application_url !== '') {
                 array_push($headers, "Host: $this->application_url");
@@ -242,9 +248,6 @@ class Auth {
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
     
             // Add headers
-            $headers = [
-                "accept: $this->header"
-            ];
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
     
             // Execute curl
