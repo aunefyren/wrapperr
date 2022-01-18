@@ -15,7 +15,7 @@ class Config {
     public $https;
 
     // Wrapperr config
-    public $wrapperr_version = 'v2.2.2';
+    public $wrapperr_version = 'v2.2.3';
     public $timezone;
     public $application_name;
     public $application_url;
