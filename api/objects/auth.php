@@ -51,10 +51,6 @@ class Auth {
             $headers = [
                 "Accept: $this->header"
             ];
-            
-            if($this->application_url !== '') {
-                array_push($headers, "Host: " . parse_url($this->application_url, PHP_URL_HOST));
-            }
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
     
@@ -128,10 +124,6 @@ class Auth {
             $headers = [
                 "Accept: $this->header"
             ];
-
-            if($this->application_url !== '') {
-                array_push($headers, "Host: " . parse_url($this->application_url, PHP_URL_HOST));
-            }
 
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
@@ -239,11 +231,7 @@ class Auth {
             $headers = [
                 "Accept: " . $this->header
             ];
-                            
-            if($this->application_url !== '') {
-                array_push($headers, "Host: " . parse_url($this->application_url, PHP_URL_HOST));
-            }
-            
+         
             curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
             curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "GET"); 
     
