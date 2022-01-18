@@ -19,6 +19,7 @@ class Config {
     public $timezone;
     public $application_name;
     public $application_url;
+    public $use_plex_auth;
     public $use_cache;
     public $use_logs;
     public $client_id;
@@ -194,6 +195,12 @@ class Config {
             $this->timezone = $json->timezone;
         } else {
             $this->timezone = '';
+        }
+
+        if(isset($json->use_plex_auth)) {
+            $this->use_plex_auth = $json->use_plex_auth;
+        } else {
+            $this->use_plex_auth = true;
         }
         
         if(isset($json->use_cache)) {

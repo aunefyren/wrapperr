@@ -6,7 +6,8 @@ function get_stats() {
 
     stats_form = {
                         "cookie" : cookie,
-						"caching" : false
+						"caching" : false,
+                        "plex_identity" : plex_identity
                    };
 
     var stats_data = JSON.stringify(stats_form);

@@ -20,6 +20,7 @@ $log->log_activity('get_plex_wrapped_version.php', 'unknown', 'Retrieved Wrapper
 // Create JSON from functions
 $version_json = array(	"wrapperr_version" => $config->wrapperr_version,
 						"application_name" => $config->application_name,
+						"use_plex_auth" => $config->use_plex_auth,
 						"message" => "Retrieved Wrapperr verison.",
 						"error" => false
 						);

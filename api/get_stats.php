@@ -40,52 +40,6 @@ set_time_limit(1200);
 // Base-URL for connections to Tautulli API.
 $connection = create_url();
 
-// Declare given inputs. GET and POST.
-if(!empty($data) && isset($data->cookie)){
-	$cookie = htmlspecialchars(trim($data->cookie));
-} else if(isset($_GET["cookie"])) {
-	$cookie = htmlspecialchars(trim($_GET["cookie"]));
-} else {
-    // Log activity
-    $log->log_activity('get_stats.php', 'unknown', 'Invalid cookie input.');
-
-    http_response_code(400);
-    echo json_encode(array("message" => "Input error.", "error" => true));
-    exit(0);
-}
-
-//Check if Caching parameter was supplied through GET or POST
-if(!empty($data) && isset($data->caching)) {
-    $caching = filter_var(htmlspecialchars(trim($data->caching)), FILTER_VALIDATE_BOOLEAN);
-} else if(isset($_GET["caching"])) {
-    $caching = filter_var(htmlspecialchars(trim($_GET["caching"])), FILTER_VALIDATE_BOOLEAN);
-} else {
-    $caching = False;
-}
-
-// Confirm input variables
-if($caching) {
-	if(!empty($data) && isset($data->cache_limit)) {
-		$cache_limit = htmlspecialchars(trim($data->cache_limit));
-	} else if(isset($_GET["cache_limit"])) {
-		$cache_limit = htmlspecialchars(trim($_GET["cache_limit"]));
-	} else {
-        http_response_code(400);
-		echo json_encode(array("message" => "Caching enabled, but no 'cache_limit' input retrieved.", "error" => true));
-		exit(0);
-	}
-}
-
-// Check caching mode
-if($caching) {
-    
-    // Log activity
-    $log->log_activity('get_stats.php', 'unknown', 'Starting caching mode.');
-
-    caching_mode($cache_limit, $cookie);
-
-}
-
 // Test Tautulli connection
 if(!tautulli_test_connection()) {
 
@@ -102,41 +56,138 @@ if(!tautulli_test_connection()) {
 
 }
 
-// Get Plex Token
-$token_object = json_decode($auth->validate_token($cookie));
+// Declare given inputs. GET and POST.
+if(!empty($data) && isset($data->cookie)){
+	$cookie = htmlspecialchars(trim($data->cookie));
+} else if(isset($_GET["cookie"])) {
+	$cookie = htmlspecialchars(trim($_GET["cookie"]));
+} else {
+    $cookie = false;
+}
 
-// Validate Plex ID
-if(empty($token_object) || !isset($token_object->data->id)) {
-    
-	// Log use
-	$log->log_activity('get_stats.php', 'unknown', 'Plex Token from cookie not valid.');
+//Check if Caching parameter was supplied through GET or POST
+if(!empty($data) && isset($data->caching)) {
+    $caching = filter_var(htmlspecialchars(trim($data->caching)), FILTER_VALIDATE_BOOLEAN);
+} else if(isset($_GET["caching"])) {
+    $caching = filter_var(htmlspecialchars(trim($_GET["caching"])), FILTER_VALIDATE_BOOLEAN);
+} else {
+    $caching = False;
+}
 
-    echo json_encode(array("error" => true, "message" => "Login not accepted. Log in again."));
+//Check if Plex Identity was provided through GET or POST
+if(!empty($data) && isset($data->plex_identity)){
+	$plex_identity = htmlspecialchars(trim($data->plex_identity));
+} else if(isset($_GET["plex_identity"])) {
+	$plex_identity = htmlspecialchars(trim($_GET["plex_identity"]));
+} else {
+    $plex_identity = false;
+}
+
+// Confirm input variables
+if($caching) {
+	if(!empty($data) && isset($data->cache_limit)) {
+		$cache_limit = htmlspecialchars(trim($data->cache_limit));
+	} else if(isset($_GET["cache_limit"])) {
+		$cache_limit = htmlspecialchars(trim($_GET["cache_limit"]));
+	} else {
+
+		echo json_encode(array("message" => "Caching enabled, but no 'cache_limit' input retrieved.", "error" => true));
+		exit(0);
+
+	}
+}
+
+// If plex identity was provided and Plex Auth is disabled
+if(!$config->use_plex_auth && $plex_identity !== false) {
+
+    $id = tautulli_get_user($plex_identity);
+
+    if(!$id) {
+
+        // Log activity
+        $log->log_activity('get_stats.php', 'unknown', 'Failed to find user matching provided identity.');
+
+        echo json_encode(array("message" => "Could not find user.", "error" => true));
+        exit(0);
+
+    }
+
+
+// If no cookie was provided
+} else if(!$cookie){
+
+    // Log activity
+    $log->log_activity('get_stats.php', 'unknown', 'No login cookie provided to API.');
+
+    echo json_encode(array("message" => "Input error.", "error" => true));
     exit(0);
-	
+
+// Cookie validation
+} else {
+
+    // Check caching mode
+    if($caching) {
+
+        if(!$cookie) {
+
+            // Log activity
+            $log->log_activity('get_stats.php', 'unknown', 'Caching mode enabled, but no admin cookie provided.');
+
+            echo json_encode(array("message" => "Input error. Caching requires admin cookie.", "error" => true));
+            exit(0);
+
+        }
+        
+        // Log activity
+        $log->log_activity('get_stats.php', 'unknown', 'Starting caching mode.');
+
+        caching_mode($cache_limit, $cookie);
+
+    }
+
+    // Get Plex Token
+    $token_object = json_decode($auth->validate_token($cookie));
+
+    // Validate Plex ID
+    if(empty($token_object) || !isset($token_object->data->id)) {
+        
+        // Log use
+        $log->log_activity('get_stats.php', 'unknown', 'Plex Token from cookie not valid.');
+
+        echo json_encode(array("error" => true, "message" => "Login not accepted. Log in again."));
+        exit(0);
+        
+    }
+
+    // Assign values from Plex Token
+    $id = $token_object->data->id;
+    if(isset($token_object->data->friendlyName)) {
+        $name = $token_object->data->friendlyName;
+    } else if(isset($token_object->data->title)) {
+        $name = $token_object->data->title;
+    } else if(isset($token_object->data->username)) {
+        $name = $token_object->data->username;
+    } else if(isset($token_object->data->email)) {
+        $name = $token_object->data->email;
+    }
+
+    // Log use
+    $log->log_activity('get_stats.php', $token_object->data->id, 'Wrapperr login cookie accepted.');
+
 }
 
-// Assign values from Plex Token
-$id = $token_object->data->id;
-if(isset($token_object->data->friendlyName)) {
-    $name = $token_object->data->friendlyName;
-} else if(isset($token_object->data->title)) {
-    $name = $token_object->data->title;
-} else if(isset($token_object->data->username)) {
-    $name = $token_object->data->username;
-} else if(isset($token_object->data->email)) {
-    $name = $token_object->data->email;
-}
-
-// Log use
-$log->log_activity('get_stats.php', $token_object->data->id, 'Wrapperr login cookie accepted.');
-
-// Get user name
+// Get user name from Tautulli
 $name = tautulli_get_name($id);
+
+// If name is not found
 if(!$name) {
-    http_response_code(400);
+    
+    // Log use
+    $log->log_activity('get_stats.php', $id, 'Could not find username from ID.');
+
     echo json_encode(array("message" => "Could not find username.", "error" => true));
     exit(0);
+
 }
 
 // Log checking cache
@@ -364,24 +415,44 @@ function tautulli_get_user($input) {
     $url = $connection . "/api/v2?apikey=" . $config->tautulli_apikey . "&cmd=get_users";
 
     try {
-        if($config->ssl) {
-            @$response = json_decode(file_get_contents($url, false, stream_context_create($arrContextOptions)));
-        } else {
-            @$response = json_decode(file_get_contents($url));
+
+        // Call Tautulli users API
+        //  Initiate curl
+        $ch = curl_init();
+    
+        // Set the options for curl
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    
+        // Execute curl
+        $result = curl_exec($ch);
+    
+        // Check if an error occurred
+        if(curl_errno($ch)) {
+            return false;
+        }
+    
+        // Closing curl
+        curl_close($ch);
+    
+        // Decode the JSON response
+        $decoded = json_decode($result, true);
+    
+        // Check reponse for success
+        if($decoded["response"]["result"] !== "success") {
+            return false;
         }
 
-        if(!isset($response)) {
-            throw new Exception('Could not reach Tautulli.');
-        }
-    } catch (Error $e) {
-        http_response_code(500);
-        echo json_encode(array("message" => $e->getMessage(), "error" => true));
-        exit(0);
+    
+    // Catch errors
+    } catch (Exception $e) {
+        return false;
     }
 
-    for ($i = 0; $i < count($response->response->data); $i++) {
-        if (strtolower($response->response->data[$i]->email) == strtolower($input) || strtolower($response->response->data[$i]->username) == strtolower($input)) {
-            return $response->response->data[$i]->user_id;
+    for ($i = 0; $i < count($decoded["response"]["data"]); $i++) {
+        if (strtolower($decoded["response"]["data"][$i]["email"]) == strtolower($input) || strtolower($decoded["response"]["data"][$i]["username"]) == strtolower($input)) {
+            return $decoded["response"]["data"][$i]["user_id"];
         }
     }
 

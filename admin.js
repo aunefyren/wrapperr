@@ -543,6 +543,15 @@ function set_wrapperr_settings() {
     }
     html += '/><br>';
     html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="use_plex_auth" title="Whether users can unwrap stats using a manual Plex username/e-mail or by signing into Plex.">Use Plex Auth:<br>';
+    html += '<input type="checkbox" class="form-control" id="use_plex_auth" ';
+    if(use_plex_auth) {
+        html += 'checked="' + use_plex_auth + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
 	
     html += '<div class="form-group newline">';
 	html += '<div class="warning">!<br>If your wrapped period is long and no results are pre-cached, the wait time can be extensive, which leads to PHP/parsing errors. Using this cache feature and caching once is recommended, after setup.</div>';
@@ -578,6 +587,7 @@ function set_wrapperr_settings_call() {
 
     use_cache = document.getElementById('use_cache').checked;
     use_logs = document.getElementById('use_logs').checked;
+    use_plex_auth = document.getElementById('use_plex_auth').checked;
     wrapperr_root = document.getElementById('wrapperr_root').value;
     application_name_str = document.getElementById('application_name_str').value;
     application_url_str = document.getElementById('application_url_str').value;
@@ -600,6 +610,7 @@ function set_wrapperr_settings_call() {
                                 "data" : {
                                     "use_cache" : use_cache,
                                     "use_logs" : use_logs,
+                                    "use_plex_auth" : use_plex_auth,
                                     "wrapperr_root" : wrapperr_root,
                                     "create_share_links" : create_share_links,
                                     "timezone" : timezone,
@@ -2081,6 +2092,7 @@ function get_config(cookie) {
                 stats_intro = result.data.stats_intro;
                 stats_outro = result.data.stats_outro;
                 create_share_links = result.data.create_share_links;
+                use_plex_auth = result.data.use_plex_auth;
                 use_cache = result.data.use_cache;
 				use_logs = result.data.use_logs;
                 clientID = result.data.clientID;

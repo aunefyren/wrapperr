@@ -93,6 +93,7 @@ function save_config($data, $data_type, $clear_cache) {
 
         $fail = false;
         try {
+            $config->use_plex_auth = $data->use_plex_auth;
             $config->use_cache = $data->use_cache;
             $config->use_logs = $data->use_logs;
             $config->wrapperr_root = $data->wrapperr_root;

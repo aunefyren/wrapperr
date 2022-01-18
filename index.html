@@ -54,7 +54,7 @@
                         <form id='plex_login_form' class='form' onsubmit='return false' action="" method="post">
 
                             <div class="form-group" id='plex_login_div'>
-                                <button class='form-control btn' name="plex_login_button" id="plex_login_button">
+                                <button class='form-control btn' name="plex_login_button" id="plex_login_button" onclick='plex_login()'>
                                     <img src='assets/external-link.svg' class='btn_logo'>
                                     <p2 id='plex_login_button_text'>Sign in using Plex</p2>
                                 </button>
@@ -171,6 +171,8 @@
     var link_mode = false;
     var results;
     var functions;
+    var plex_identity = false;
+    var cookie = false;
 
     $(document).ready(function() {
 

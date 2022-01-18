@@ -1,7 +1,7 @@
 function cookie_login_actions() {
     cookie = get_cookie('wrapperr-user');
 
-    if(cookie) {
+    if(cookie && !plex_identity) {
         document.getElementById('search_wrapped_form').style.display = 'block';
         document.getElementById('plex_login_form').style.display = 'none';
         document.getElementById('sign_out_div').style.display = 'block';
@@ -70,7 +70,7 @@ function search_wrapperr(){
 
 }
 
-$(document).on('submit', '#plex_login_form', function(){
+function plex_login(){
     
     window_url = window.location.href.split('?')[0];
 
@@ -105,7 +105,7 @@ $(document).on('submit', '#plex_login_form', function(){
     xhttp.open("post", "api/get_login_url.php");
     xhttp.send(auth_data);
 
-});
+}
 
 function pop_up_login(url, code, id) {
 
@@ -265,6 +265,10 @@ function get_wrapper_version() {
                     document.getElementById('application_name').innerHTML = result.application_name;
                     document.title = result.application_name;
                 }
+
+                if(!result.use_plex_auth) {
+                    wrapperr_search_function();
+                }
             }
 
         }
@@ -313,4 +317,53 @@ function delete_link_user() {
     xhttp.open("post", "api/delete_link_user.php");
     xhttp.send(cookie_data);
     return;
+}
+
+function wrapperr_search_function() {
+
+    set_cookie("wrapperr-user", "", 1);
+
+    var html = '';
+    
+    html += '<div class="form-group">';
+        html += '<label for="plex_identity" title="Your Plex username or email.">Plex username or email:</label>';
+        html += '<input type="text" class="form-control" id="plex_identity" value="" autocomplete="on" required />';
+    html += '</div>';
+
+    html += '<div class="form-group" id="search_wrapped_button">';
+        html += '<button class="form-control btn" name="search_wrapped_button" id="search_wrapped_button" style="opacity: 1;" onclick="search_wrapperr_no_auth()">';
+            html += '<img src="assets/done.svg" class="btn_logo">';
+            html += '<p2 id="search_wrapped_button_text">Unwrap</p2>';
+        html += '</button>';
+    html += '</div>';
+
+    html += '<div class="form-group" id="sign_out_div" style="display: none;">';
+        html += '<button class="form-control btn" name="plex_signout_button" id="plex_signout_button" onclick="sign_out()">';
+            html += '<img src="assets/close.svg" class="btn_logo">';
+            html += '<p2 id="plex_signout_button_text">Sign Out</p2>';
+        html += '</button>';
+    html += '</div>';
+
+    document.getElementById('search_wrapped_form').innerHTML = html;
+    document.getElementById('search_wrapped_form').style.display = 'block';
+    document.getElementById('plex_login_form').style.display = 'none';
+}
+
+function search_wrapperr_no_auth(){
+
+    document.getElementById("search_wrapped_button").disabled = true;
+    document.getElementById("search_wrapped_button").style.opacity = '0.5';
+    document.getElementById('results_error').innerHTML = "";
+
+    plex_identity = document.getElementById("plex_identity").value
+
+    if(plex_identity == "") {
+        document.getElementById('results_error').innerHTML = 'You must provide a Plex username or email.';
+        document.getElementById("search_wrapped_button").disabled = false;
+        document.getElementById("search_wrapped_button").style.opacity = '1';
+        return;
+    }
+
+    get_functions();
+
 }
