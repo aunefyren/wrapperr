@@ -181,7 +181,7 @@ function load_movies() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_movies_data_movies_button" id="user_movies_data_movies_button" onclick="top_list_sort_by(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, \'user_movies_data_movies\', \'user_movies_data_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_movies_data_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.user.user_movies.data.movies_duration, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
                     } else {
                         text += top_list(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
@@ -298,7 +298,7 @@ function load_shows() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_shows_data_shows_button" id="user_shows_data_shows_button" onclick="top_list_sort_by(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, \'user_shows_data_shows\', \'user_shows_data_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_shows_data_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.user.user_shows.data.shows_duration, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
                     } else {
                         text += top_list(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
@@ -414,7 +414,7 @@ function load_music() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_tracks_button" id="user_music_data_tracks_button" onclick="top_list_sort_by(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, \'track\', false, \'user_music_data_tracks\', \'user_music_data_tracks_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_tracks_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
 
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.user.user_music.data.tracks_duration, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
                     } else {
                         text += top_list(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
@@ -428,7 +428,7 @@ function load_music() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_albums_button" id="user_music_data_albums_button" onclick="top_list_sort_by(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, \'album\', false, \'user_music_data_albums\', \'user_music_data_albums_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_albums_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.user.user_music.data.albums_duration, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
                     } else {
                         text += top_list(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
@@ -442,7 +442,7 @@ function load_music() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_artists_button" id="user_music_data_artists_button" onclick="top_list_sort_by(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, \'artist\', false, \'user_music_data_artists\', \'user_music_data_artists_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_artists_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
 
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.user.user_music.data.artists_duration, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
                     } else {
                         text += top_list(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
@@ -831,7 +831,7 @@ function load_users() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_users_button" id="year_stats_year_users_button" onclick="top_list_names_sort_by(results.year_stats.year_users.data.users_plays, \'Top users\', \'year_stats_year_users\', \'year_stats_year_users_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_users_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list_names(results.year_stats.year_users.data.users_duration, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
                     } else {
                         text += top_list_names(results.year_stats.year_users.data.users_plays, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
@@ -893,7 +893,7 @@ function load_users() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_movies_button" id="year_stats_year_movies_button" onclick="top_list_sort_by(results.year_stats.year_movies.data.movies_plays, \'Top movies\', false, true, \'year_stats_year_movies\', \'year_stats_year_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
 
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.year_stats.year_movies.data.movies_duration, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
                     } else {
                         text += top_list(results.year_stats.year_movies.data.movies_plays, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
@@ -909,7 +909,7 @@ function load_users() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_shows_button" id="year_stats_year_shows_button" onclick="top_list_sort_by(results.year_stats.year_shows.data.shows_plays, \'Top shows\', false, false, \'year_stats_year_shows\', \'year_stats_year_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.year_stats.year_shows.data.shows_duration, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
                     } else {
                         text += top_list(results.year_stats.year_shows.data.shows_plays, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
@@ -925,7 +925,7 @@ function load_users() {
                         text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_music_button" id="year_stats_year_music_button" onclick="top_list_sort_by(results.year_stats.year_music.data.artists_plays, \'Top artists\', \'artist\', false, \'year_stats_year_music\', \'year_stats_year_music_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_music_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
                     }
                     
-                    if(functions.stats_order_by_plays == false) {
+                    if(functions.stats_order_by_duration !== false) {
                         text += top_list(results.year_stats.year_music.data.artists_duration, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
                     } else {
                         text += top_list(results.year_stats.year_music.data.artists_plays, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
