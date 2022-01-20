@@ -52,7 +52,7 @@ There are things to know when you have the website running:
 - Your password and encryption token is hashed and stored in the ```config/config.json```. This is a sensitive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache, but if you are using Nginx you must add a directory deny in your Nginx configuration!
 - If you visit ```your-domain-or-ip/admin```, and click 'Caching' you can do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error. 
 - It is recommended to set up the platform at the admin page and then running a pre-cache immediately. The cache is updated automatically if new data in the timeframe becomes available.
-- All stat options are disabled by default. Go to the admin page, and then click on 'Wrapperr customization' and enable the statistics relevant to you.
+- Almost all statistics options are enabled by default. Go to the admin page, and then click on 'Wrapperr customization' and customize the statistics page for your liking.
 
 <br>
 <br>
