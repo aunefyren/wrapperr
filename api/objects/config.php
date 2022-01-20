@@ -12,10 +12,11 @@ class Config {
     public $tautulli_length;
     public $tautulli_root;
     public $tautulli_libraries;
+    public $tautulli_grouping;
     public $https;
 
     // Wrapperr config
-    public $wrapperr_version = 'v2.2.3';
+    public $wrapperr_version = 'v2.2.4';
     public $timezone;
     public $application_name;
     public $application_url;
@@ -30,7 +31,12 @@ class Config {
     // Wrapperr custom
     public $wrapped_start;
     public $wrapped_end;
-    public $stats_intro;
+    public $stats_intro_title;
+    public $stats_intro_subtitle;
+    public $stats_outro_title;
+    public $stats_outro_subtitle;
+    public $stats_order_by_plays;
+    public $stats_order_by_duration;
 
     // Wrapperr custom movies
     public $get_user_movie_stats;
@@ -184,6 +190,12 @@ class Config {
         } else {
             $this->tautulli_libraries = '';
         }
+
+        if(isset($json->tautulli_grouping)) {
+            $this->tautulli_grouping = $json->tautulli_grouping;
+        } else {
+            $this->tautulli_grouping = true;
+        }
         
         if(isset($json->https)) {
             $this->https = $json->https;
@@ -257,16 +269,40 @@ class Config {
             $this->wrapped_end = 1640991540;
         }
         
-        if(isset($json->stats_intro)) {
-            $this->stats_intro = $json->stats_intro;
+        if(isset($json->stats_intro_title)) {
+            $this->stats_intro_title = $json->stats_intro_title;
         } else {
-            $this->stats_intro = '<h1>Hey there, {user}!</h1><h2>New year, new page of statistics...</h2>';
+            $this->stats_intro_title = 'Hey there, {user}!';
         }
 
-        if(isset($json->stats_outro)) {
-            $this->stats_outro = $json->stats_outro;
+        if(isset($json->stats_intro_subtitle)) {
+            $this->stats_intro_subtitle = $json->stats_intro_subtitle;
         } else {
-            $this->stats_outro = '<h1>Hope you are staying safe!</h1><h2>Goodbye.</h2>';
+            $this->stats_intro_subtitle = 'New year, new page of statistics...';
+        }
+
+        if(isset($json->stats_outro_title)) {
+            $this->stats_outro_title = $json->stats_outro_title;
+        } else {
+            $this->stats_outro_title = 'Hope you are staying safe!';
+        }
+
+        if(isset($json->stats_outro_subtitle)) {
+            $this->stats_outro_subtitle = $json->stats_outro_subtitle;
+        } else {
+            $this->stats_outro_subtitle = 'Goodbye.';
+        }
+
+        if(isset($json->stats_order_by_plays)) {
+            $this->stats_order_by_plays = $json->stats_order_by_plays;
+        } else {
+            $this->stats_order_by_plays = true;
+        }
+
+        if(isset($json->stats_order_by_duration) && $this->stats_order_by_plays) {
+            $this->stats_order_by_duration = $json->stats_order_by_duration;
+        } else {
+            $this->stats_order_by_duration = true;
         }
         
         if(isset($json->create_share_links)) {

@@ -120,7 +120,8 @@ function load_introduction() {
             text += "</div>";
 
             text += "<div class='boks2' style='margin: auto 0;'>";
-                text += functions.stats_intro.replaceAll('{user}', results.user.name)
+                text += "<h1>" + functions.stats_intro_title.replaceAll('{user}', results.user.name) + "</h1>";
+                text += "<h2>" + functions.stats_intro_subtitle + "</h2>";
             text += "</div>";
 
         text += "</div>";
@@ -164,7 +165,7 @@ function load_movies() {
 
             // Replace custom string with movie plays
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_movie_stats_subtitle.replaceAll('{movie_count}', results.user.user_movies.data.movie_plays) + "</h2>";
+                text += "<h2>" + functions.get_user_movie_stats_subtitle.replaceAll('{movie_count}', number_with_spaces(results.user.user_movies.data.movie_plays)) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -175,8 +176,17 @@ function load_movies() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_movies_data_movies_button" id="user_movies_data_movies_button" onclick="top_list_sort_by(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, \'user_movies_data_movies\', \'user_movies_data_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_movies_data_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.user.user_movies.data.movies_duration, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_movies_data_movies_button" id="user_movies_data_movies_button" onclick="top_list_sort_by(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, \'user_movies_data_movies\', \'user_movies_data_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_movies_data_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.user.user_movies.data.movies_duration, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
+                    } else {
+                        text += top_list(results.user.user_movies.data.movies_plays, functions.get_user_movie_stats_top_movie_plural, false, true, 'user_movies_data_movies');
+                    }
+
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -273,7 +283,7 @@ function load_shows() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_show_stats_subtitle.replaceAll('{show_count}', results.user.user_shows.data.show_plays) + "</h2>";
+                text += "<h2>" + functions.get_user_show_stats_subtitle.replaceAll('{show_count}', number_with_spaces(results.user.user_shows.data.show_plays)) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -283,8 +293,17 @@ function load_shows() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_shows_data_shows_button" id="user_shows_data_shows_button" onclick="top_list_sort_by(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, \'user_shows_data_shows\', \'user_shows_data_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_shows_data_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.user.user_shows.data.shows_duration, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_shows_data_shows_button" id="user_shows_data_shows_button" onclick="top_list_sort_by(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, \'user_shows_data_shows\', \'user_shows_data_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_shows_data_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.user.user_shows.data.shows_duration, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
+                    } else {
+                        text += top_list(results.user.user_shows.data.shows_plays, functions.get_user_show_stats_top_show_plural, false, true, 'user_shows_data_shows');
+                    }
+                
                 text += "</div>";
 
                 text += "<div class='boks2' style='padding: 0;'>";
@@ -380,7 +399,7 @@ function load_music() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_music_stats_subtitle.replaceAll('{track_count}', results.user.user_music.data.track_plays) + "</h2>";
+                text += "<h2>" + functions.get_user_music_stats_subtitle.replaceAll('{track_count}', number_with_spaces(results.user.user_music.data.track_plays)) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -390,18 +409,45 @@ function load_music() {
             text += "<div class='boks3'>";
 
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_tracks_button" id="user_music_data_tracks_button" onclick="top_list_sort_by(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, \'track\', false, \'user_music_data_tracks\', \'user_music_data_tracks_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_tracks_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.user.user_music.data.tracks_duration, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_tracks_button" id="user_music_data_tracks_button" onclick="top_list_sort_by(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, \'track\', false, \'user_music_data_tracks\', \'user_music_data_tracks_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_tracks_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.user.user_music.data.tracks_duration, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
+                    } else {
+                        text += top_list(results.user.user_music.data.tracks_plays, functions.get_user_music_stats_top_track_plural, "track", false, 'user_music_data_tracks');
+                    }
+
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_albums_button" id="user_music_data_albums_button" onclick="top_list_sort_by(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, \'album\', false, \'user_music_data_albums\', \'user_music_data_albums_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_albums_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.user.user_music.data.albums_duration, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_albums_button" id="user_music_data_albums_button" onclick="top_list_sort_by(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, \'album\', false, \'user_music_data_albums\', \'user_music_data_albums_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_albums_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.user.user_music.data.albums_duration, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
+                    } else {
+                        text += top_list(results.user.user_music.data.albums_plays, functions.get_user_music_stats_top_album_plural, "album", false, 'user_music_data_albums');
+                    }
+
                 text += "</div>";
 				
 				text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_artists_button" id="user_music_data_artists_button" onclick="top_list_sort_by(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, \'artist\', false, \'user_music_data_artists\', \'user_music_data_artists_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_artists_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.user.user_music.data.artists_duration, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="user_music_data_artists_button" id="user_music_data_artists_button" onclick="top_list_sort_by(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, \'artist\', false, \'user_music_data_artists\', \'user_music_data_artists_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="user_music_data_artists_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.user.user_music.data.artists_duration, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
+                    } else {
+                        text += top_list(results.user.user_music.data.artists_plays, functions.get_user_music_stats_top_artist_plural, "artist", false, 'user_music_data_artists');
+                    }
+                    
                 text += "</div>";
 
             text += "</div>";
@@ -780,8 +826,17 @@ function load_users() {
             if(functions.get_year_stats_leaderboard) {
 
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_users_button" id="year_stats_year_users_button" onclick="top_list_names_sort_by(results.year_stats.year_users.data.users_plays, \'Top users\', \'year_stats_year_users\', \'year_stats_year_users_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_users_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list_names(results.year_stats.year_users.data.users_duration, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_users_button" id="year_stats_year_users_button" onclick="top_list_names_sort_by(results.year_stats.year_users.data.users_plays, \'Top users\', \'year_stats_year_users\', \'year_stats_year_users_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_users_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list_names(results.year_stats.year_users.data.users_duration, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
+                    } else {
+                        text += top_list_names(results.year_stats.year_users.data.users_plays, functions.get_year_stats_leaderboard_title, 'year_stats_year_users');
+                    }
+
                 text += "</div>";
 
                 var time_movies = seconds_to_time(results.year_stats.year_movies.data.movie_duration, false);
@@ -833,22 +888,49 @@ function load_users() {
 
             if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_movies_button" id="year_stats_year_movies_button" onclick="top_list_sort_by(results.year_stats.year_movies.data.movies_plays, \'Top movies\', false, true, \'year_stats_year_movies\', \'year_stats_year_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.year_stats.year_movies.data.movies_duration, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_movies_button" id="year_stats_year_movies_button" onclick="top_list_sort_by(results.year_stats.year_movies.data.movies_plays, \'Top movies\', false, true, \'year_stats_year_movies\', \'year_stats_year_movies_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_movies_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.year_stats.year_movies.data.movies_duration, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
+                    } else {
+                        text += top_list(results.year_stats.year_movies.data.movies_plays, functions.get_year_stats_movies_title, false, true, 'year_stats_year_movies');
+                    }
+
                 text += "</div>";
             }
 
             if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
                 text += "<div class='boks2'>";
-                    text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_shows_button" id="year_stats_year_shows_button" onclick="top_list_sort_by(results.year_stats.year_shows.data.shows_plays, \'Top shows\', false, false, \'year_stats_year_shows\', \'year_stats_year_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.year_stats.year_shows.data.shows_duration, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_shows_button" id="year_stats_year_shows_button" onclick="top_list_sort_by(results.year_stats.year_shows.data.shows_plays, \'Top shows\', false, false, \'year_stats_year_shows\', \'year_stats_year_shows_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_shows_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.year_stats.year_shows.data.shows_duration, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
+                    } else {
+                        text += top_list(results.year_stats.year_shows.data.shows_plays, functions.get_year_stats_shows_title, false, false, 'year_stats_year_shows');
+                    }
+
                 text += "</div>";
             }
 
             if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
                 text += "<div class='boks2'>";
-                text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_music_button" id="year_stats_year_music_button" onclick="top_list_sort_by(results.year_stats.year_music.data.artists_plays, \'Top artists\', \'artist\', false, \'year_stats_year_music\', \'year_stats_year_music_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_music_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
-                    text += top_list(results.year_stats.year_music.data.artists_duration, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
+
+                    if(functions.stats_order_by_plays !== false && functions.stats_order_by_duration !== false) {
+                        text += '<button class="form-control btn" style="margin: 0.5em auto; width: fit-content;" name="year_stats_year_music_button" id="year_stats_year_music_button" onclick="top_list_sort_by(results.year_stats.year_music.data.artists_plays, \'Top artists\', \'artist\', false, \'year_stats_year_music\', \'year_stats_year_music_button\', functions);"><img src="assets/tweak.svg" class="btn_logo"><p2 id="year_stats_year_music_button_text">' + functions.wrapperr_sort_plays + '</p2></button>';
+                    }
+                    
+                    if(functions.stats_order_by_plays == false) {
+                        text += top_list(results.year_stats.year_music.data.artists_duration, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
+                    } else {
+                        text += top_list(results.year_stats.year_music.data.artists_plays, functions.get_year_stats_music_title, "artist", false, 'year_stats_year_music');
+                    }
+                
                 text += "</div>";
             }
 
@@ -869,8 +951,9 @@ function load_outro() {
                 text += '<img src="assets/img/new-years.svg" style="width:100%; ">';
             text += "</div>";
 
-            text += "<div class='boks2' style='margin-top:5em;'>";
-                text += functions.stats_outro;
+            text += "<div class='boks2' style='margin: auto 0;'>";
+                text += "<h1>" + functions.stats_outro_title + "</h1>";
+                text += "<h2>" + functions.stats_outro_subtitle + "</h2>";
             text += "</div>";
         
         text += "</div>";

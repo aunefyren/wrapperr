@@ -179,6 +179,11 @@ function seconds_to_seconds(seconds, function_setting) {
 }
 
 function number_with_spaces(number) {
+
+    if(isNaN(number)) {
+        return number;
+    }
+
     return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 }
 

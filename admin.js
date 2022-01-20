@@ -386,10 +386,22 @@ function set_tautulli_settings() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="https" title="Enable if your connection uses HTTPS.">Use HTTPS:</label>';
     html += '<input type="checkbox" class="form-control" id="https" ';
     if(https) {
         html += 'checked="' + https + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="tautulli_grouping" title="If Tautulli should group related plays into one entry.">Use Tautulli grouping:</label>';
+    html += '<input type="checkbox" class="form-control" id="tautulli_grouping" ';
+    if(tautulli_grouping) {
+        html += 'checked="' + tautulli_grouping + '" ';
     }
     html += '/><br>';
     html += '</div>';
@@ -418,6 +430,7 @@ function set_tautulli_settings_call() {
     tautulli_length = document.getElementById('tautulli_length').value;
     tautulli_root = document.getElementById('tautulli_root').value;
     tautulli_libraries = document.getElementById('tautulli_libraries').value;
+    tautulli_grouping = document.getElementById('tautulli_grouping').checked;
     https = document.getElementById('https').checked;
 
     if(tautulli_apikey === '') {
@@ -455,6 +468,7 @@ function set_tautulli_settings_call() {
                                     "tautulli_length" : tautulli_length,
                                     "tautulli_root" : tautulli_root,
                                     "tautulli_libraries" : tautulli_libraries,
+                                    "tautulli_grouping" : tautulli_grouping,
                                     "https" : https
                                 }
                             };
@@ -705,9 +719,36 @@ function set_wrapperr_customization() {
     html += '<hr>';
     html += '</div>';
 
+    html += '<div class="form-group">';
+    html += '<label for="stats_order_by_plays" title="Whether top lists can be ordered by plays.">Order lists by plays:<br>';
+    html += '<input type="checkbox" class="form-control" id="stats_order_by_plays" ';
+    if(stats_order_by_plays) {
+        html += 'checked="' + stats_order_by_plays + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="stats_order_by_duration" title="Whether top lists can be ordered by duration. Automatically enabled if Wrapperr can\'t order by plays.">Order lists by duration:<br>';
+    html += '<input type="checkbox" class="form-control" id="stats_order_by_duration" ';
+    if(stats_order_by_duration) {
+        html += 'checked="' + stats_order_by_duration + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
-    html += '<label for="stats_intro" title="Introduction text that is shown when the statistics are done loading. Could be used to inform about chosen timeframe. HTML allowed.">Introduction for statistics page:<br>';
-    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_intro" name="stats_intro" value="" autocomplete="off"></textarea></label>';
+    html += '<hr>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="stats_intro_title" title="Introduction title that is shown when the statistics are done loading.">Introduction title for statistics page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_intro_title" name="stats_intro_title" value="" autocomplete="off"></textarea></label>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="stats_intro_subtitle" title="Introduction subtitle text that is shown when the statistics are done loading. Could be used to inform about chosen timeframe.">Introduction subtitle for statistics page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_intro_subtitle" name="stats_intro_subtitle" value="" autocomplete="off"></textarea></label>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1283,9 +1324,14 @@ function set_wrapperr_customization() {
     html += '<hr>';
     html += '</div>';
 
-    html += '<div class="form-group newline">';
-    html += '<label for="stats_outro" title="Text that is shown at the bottom, when the statistics are done. HTML allowed.">Outro for statistics page:<br>';
-    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_outro" name="stats_outro" value="" autocomplete="off"></textarea></label>';
+    html += '<div class="form-group">';
+    html += '<label for="stats_outro_title" title="Title that is shown at the bottom, when the statistics are done.">Outro title for statistics page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_outro_title" name="stats_outro_title" value="" autocomplete="off"></textarea></label>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="stats_outro_subtitle" title="Subtitle that is shown at the bottom, when the statistics are done.">Outro subtitle for statistics page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="stats_outro_subtitle" name="stats_outro_subtitle" value="" autocomplete="off"></textarea></label>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1411,8 +1457,10 @@ function set_wrapperr_customization() {
     // Place content from config
     document.getElementById("setup").innerHTML = html;
 
-    document.getElementById("stats_intro").value = stats_intro;
-    document.getElementById("stats_outro").value = stats_outro;
+    document.getElementById("stats_intro_title").value = stats_intro_title;
+    document.getElementById("stats_intro_subtitle").value = stats_intro_subtitle;
+    document.getElementById("stats_outro_title").value = stats_outro_title;
+    document.getElementById("stats_outro_subtitle").value = stats_outro_subtitle;
 
     document.getElementById("get_user_movie_stats_title").value = get_user_movie_stats_title;
     document.getElementById("get_user_movie_stats_subtitle").value = get_user_movie_stats_subtitle;
@@ -1492,8 +1540,12 @@ function set_wrapperr_customization_call() {
 
     wrapped_start = new Date(document.getElementById('wrapped_start').value);
     wrapped_end = new Date(document.getElementById('wrapped_end').value);
-    stats_intro = document.getElementById('stats_intro').value;
-    stats_outro = document.getElementById('stats_outro').value;
+    stats_intro_title = document.getElementById('stats_intro_title').value;
+    stats_intro_subtitle = document.getElementById('stats_intro_subtitle').value;
+    stats_outro_title = document.getElementById('stats_outro_title').value;
+    stats_outro_subtitle = document.getElementById('stats_outro_subtitle').value;
+    stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
+    stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
     get_user_movie_stats_title = document.getElementById('get_user_movie_stats_title').value;
@@ -1619,8 +1671,12 @@ function set_wrapperr_customization_call() {
                                 "data" : {
                                     "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
                                     "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
-                                    "stats_intro" : stats_intro,
-                                    "stats_outro" : stats_outro,
+                                    "stats_intro_title" : stats_intro_title,
+                                    "stats_intro_subtitle" : stats_intro_subtitle,
+                                    "stats_outro_title" : stats_outro_title,
+                                    "stats_outro_subtitle" : stats_outro_subtitle,
+                                    "stats_order_by_plays" : stats_order_by_plays,
+                                    "stats_order_by_duration" : stats_order_by_duration,
                                     "get_user_movie_stats" : get_user_movie_stats,
                                     "get_user_movie_stats_title" : get_user_movie_stats_title,
                                     "get_user_movie_stats_subtitle" : get_user_movie_stats_subtitle,
@@ -2086,11 +2142,16 @@ function get_config(cookie) {
                 tautulli_length = result.data.tautulli_length;
                 tautulli_root = result.data.tautulli_root;
                 tautulli_libraries = result.data.tautulli_libraries;
+                tautulli_grouping = result.data.tautulli_grouping;
                 https = result.data.https;
 
                 timezone = result.data.timezone;
-                stats_intro = result.data.stats_intro;
-                stats_outro = result.data.stats_outro;
+                stats_intro_title = result.data.stats_intro_title;
+                stats_intro_subtitle = result.data.stats_intro_subtitle;
+                stats_outro_title = result.data.stats_outro_title;
+                stats_outro_subtitle = result.data.stats_outro_subtitle;
+                stats_order_by_plays = result.data.stats_order_by_plays;
+                stats_order_by_duration = result.data.stats_order_by_duration;
                 create_share_links = result.data.create_share_links;
                 use_plex_auth = result.data.use_plex_auth;
                 use_cache = result.data.use_cache;

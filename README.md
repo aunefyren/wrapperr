@@ -5,7 +5,7 @@ A website-based platform and API for collecting user stats within a set timefram
 
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_01.PNG?raw=true)
+![Image showing the introduction section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_01.PNG?raw=true)
 
 <br>
 
@@ -22,7 +22,7 @@ A website-based platform and API for collecting user stats within a set timefram
 
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_02.PNG?raw=true)
+![Image showing the show section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_02.PNG?raw=true)
 
 <br>
 
@@ -34,7 +34,7 @@ A website-based platform and API for collecting user stats within a set timefram
 
 <br>
 
-![alt text](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_03.PNG?raw=true)
+![Image showing the server-wide section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_03.PNG?raw=true)
 
 <br>
 
@@ -154,6 +154,19 @@ In your ```php.ini``` file you may have to change:
 - max_execution_time=<b>enough seconds for the script to finish.</b><br>The longer the timeframe, the more execution time. Every unique date in your timeframe is a new Tautulli API call.
 - memory_limit=<b>enough M for the script to handle JSON data.</b><br>If there is a lot of data, PHP needs to have enough memory to manage it without crashing. This still applies if caching is on, as PHP needs to be able to read the cache without crashing.
 - max_input_time=<b>enough seconds for the script to parse JSON data.</b><br>You might not need to change this, depending on Tautulli connection speed.
+
+<br>
+<br>
+
+## Frequently asked questions
+
+### Q: Why are the plays different on Wrapperr compared to Tautulli
+
+A: Data is retrieved from the Tautulli API, but not necasserly proccessed in the same manner. The difference could for example be that you have history entries for the same media (movie for example) split over different Tautulli items. For example you could have two items for the movie 'Black Widow' from potentially updating the file on Plex, leading Tautulli to interperet it as a new item/media. The easiest way to test this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
+
+There is an option to merge different Tautulli items if this is your case.
+
+What also could cause confusion is related to Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on a day basis, meaning grouping never spans multiple days, potentially leading to an increase in plays.
 
 <br>
 <br>

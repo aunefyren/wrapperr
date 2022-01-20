@@ -76,6 +76,7 @@ function save_config($data, $data_type, $clear_cache) {
             $config->tautulli_length = $data->tautulli_length;
             $config->tautulli_root = $data->tautulli_root;
             $config->tautulli_libraries = $data->tautulli_libraries;
+            $config->tautulli_grouping = $data->tautulli_grouping;
             $config->https = $data->https;
         } catch (Exception $e) {
             $fail = true;
@@ -119,8 +120,12 @@ function save_config($data, $data_type, $clear_cache) {
         try {
             $config->wrapped_start = $data->wrapped_start;
             $config->wrapped_end = $data->wrapped_end;
-            $config->stats_intro = $data->stats_intro;
-            $config->stats_outro = $data->stats_outro;
+            $config->stats_intro_title = $data->stats_intro_title;
+            $config->stats_intro_subtitle = $data->stats_intro_subtitle;
+            $config->stats_outro_title = $data->stats_outro_title;
+            $config->stats_outro_subtitle = $data->stats_outro_subtitle;
+            $config->stats_order_by_plays = $data->stats_order_by_plays;
+            $config->stats_order_by_duration = $data->stats_order_by_duration;
             $config->get_user_movie_stats = $data->get_user_movie_stats;
             $config->get_user_movie_stats_title = $data->get_user_movie_stats_title;
             $config->get_user_movie_stats_subtitle = $data->get_user_movie_stats_subtitle;
