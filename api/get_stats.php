@@ -29,10 +29,33 @@ if(!$config->is_configured() || !$admin->is_configured()) {
 
     echo json_encode(array("message" => "Wrapperr is not configured.", "error" => true));
     exit(0);
+
 }
 
-// Set time-zone to the one configured
-date_default_timezone_set($config->timezone);
+// Confirm timezone in config is valid
+$timezone_identifiers = DateTimeZone::listIdentifiers();
+$valid_timezone = false;
+for ($i = 0; $i < count($timezone_identifiers); $i++) {
+    if($config->timezone === $timezone_identifiers[$i]) {
+        $valid_timezone = true;
+        break;
+    }
+}
+
+// Set time-zone to the one configured or return error
+if($valid_timezone) {
+
+    date_default_timezone_set($config->timezone);
+
+} else {
+
+    // Log activity
+    $log->log_activity('get_stats.php', 'unknown', 'Timezone not accepted. Not found in \'DateTimeZone::listIdentifiers()\' list.');
+
+    echo json_encode(array("message" => "Configured timezone invalid.", "error" => true));
+    exit(0);
+
+}
 
 // Set maximum run-time
 set_time_limit(1200);
