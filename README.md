@@ -12,12 +12,12 @@ A website-based platform and API for collecting user stats within a set timefram
 ### Features
 - Custom timeframes
 - Plex Auth
-- Custom introduction
+- Customizable text fields
 - Movies, shows & music
-- Caching of results
+- Caching of data
 - Friendly, dynamic display for statistics with nice illustrations
 - Admin page with authentication for settings
-- Pre-caching of data
+- Pre-caching functionality
 - Shareable links
 
 <br>
@@ -45,12 +45,12 @@ There are instructions for this further down.
 <br>
 <br>
 ### How does it work?
-There are things to know when you have the website running: 
+There are some things to know when you have the website running: 
 - Head to the front page you should see a small navigation menu at the bottom. This will take you between the few pages you need.
-- The configuration is stored in ```config/config.json```, but can be configured using the admin menu, located at: ```your-domain-or-ip/admin``` or by clicking admin in the navigation menu.
+- The configuration is stored in ```config/config.json``` on the server, but can be configured using the admin menu, located at: ```your-domain-or-ip/admin``` or by clicking admin in the navigation menu.
 - The cache is stored in ```config/cache.json```, but can be cleared using the admin menu previously mentioned.
-- Your password and encryption token is hashed and stored in the ```config/config.json```. This is a sensitive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache, but if you are using Nginx you must add a directory deny in your Nginx configuration!
-- If you visit ```your-domain-or-ip/admin```, and click 'Caching' you can do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error. 
+- Your password and encryption token is hashed and stored in the ```config/config.json```. This is a sensitive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache. If you are using Nginx you must add a directory deny in your Nginx configuration!
+- If finish essential setup on the admin page you can click 'Caching' and do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error. 
 - It is recommended to set up the platform at the admin page and then running a pre-cache immediately. The cache is updated automatically if new data in the timeframe becomes available.
 - Almost all statistics options are enabled by default. Go to the admin page, and then click on 'Wrapperr customization' and customize the statistics page for your liking.
 
@@ -162,11 +162,11 @@ In your ```php.ini``` file you may have to change:
 
 ### Q: Why are the plays different on Wrapperr compared to Tautulli
 
-A: Data is retrieved from the Tautulli API, but not necasserly proccessed in the same manner. The difference could for example be that you have history entries for the same media (movie for example) split over different Tautulli items. For example you could have two items for the movie 'Black Widow' from potentially updating the file on Plex, leading Tautulli to interperet it as a new item/media. The easiest way to test this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
+A: Data is retrieved from the Tautulli API, but not necasserly proccessed in the same manner. The difference could for example be that you have history entries for the same media (movie for example) split over different Tautulli items. For example, you could have two items for the movie 'Black Widow' from potentially updating the file on Plex, leading Tautulli to interperet it as a new item/media. The easiest way to check for this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
 
 There is an option to merge different Tautulli items if this is your case.
 
-What also could cause confusion is related to Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on a day basis, meaning grouping never spans multiple days, potentially leading to an increase in plays.
+What also could cause confusion is related to Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on a day basis, meaning grouping never spans multiple days, potentially leading to an increase in plays because the groups are smaller.
 
 <br>
 <br>
