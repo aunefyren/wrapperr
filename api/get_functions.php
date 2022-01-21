@@ -115,7 +115,8 @@ $functions_json = array("wrapperr_version" => $config->wrapperr_version,
 						"wrapperr_second" => $config->wrapperr_second,
 						"wrapperr_second_plural" => $config->wrapperr_second_plural,
 						"wrapperr_sort_plays" => $config->wrapperr_sort_plays,
-						"wrapperr_sort_duration" => $config->wrapperr_sort_duration
+						"wrapperr_sort_duration" => $config->wrapperr_sort_duration,
+						"use_plex_auth" => $config->use_plex_auth
 						);
 
 // Encode JSON and print it

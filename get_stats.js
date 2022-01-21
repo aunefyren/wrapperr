@@ -961,7 +961,7 @@ function load_outro() {
 
             text += "<div class='boks2' style='margin-top:5em;'>";
                 
-                if(!link_mode && functions.create_share_links) {
+                if(!link_mode && functions.create_share_links && functions.use_plex_auth) {
 
                     text += "<div class='form-group' id='share_wrapped_div' style=''>";
                         text += "<button class='form-control btn' name='share_wrapped_button' id='share_wrapped_button' onclick='create_wrapped_link()'>";
