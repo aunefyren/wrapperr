@@ -269,6 +269,15 @@ function get_wrapper_version() {
                 if(!result.use_plex_auth) {
                     wrapperr_search_function();
                 }
+
+                if(result.wrapperr_front_page_title !== '') {
+                    document.getElementById('wrapperr_front_page_title').innerHTML = result.wrapperr_front_page_title;
+                }
+
+                if(result.wrapperr_front_page_subtitle !== '') {
+                    document.getElementById('wrapperr_front_page_subtitle').innerHTML = result.wrapperr_front_page_subtitle;
+                }
+
             }
 
         }

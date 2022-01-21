@@ -38,12 +38,15 @@ class Auth {
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            // Declare config object 
+            $config_file = new Config();
     
             // Add payload
             $payload = array(   "strong"=> $this->strong, 
                                 "X-Plex-Product" => $this->x_plex_product,
                                 "X-Plex-Client-Identifier" => $this->client_id,
-                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Version" => $config_file->wrapperr_version,
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );
@@ -111,12 +114,15 @@ class Auth {
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            // Declare config object 
+            $config_file = new Config();
     
             // Add payload
             $payload = array(
                                 "code"=> $code,
                                 "X-Plex-Client-Identifier" => $this->client_id,
-                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Version" => $config_file->wrapperr_version,
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );
@@ -217,13 +223,16 @@ class Auth {
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_TIMEOUT, 10);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+            // Declare config object 
+            $config_file = new Config();
     
             // Add payload
             $payload = array(   
                                 "X-Plex-Token"=> $x_plex_token,
                                 "X-Plex-Client-Identifier" => $this->client_id,
                                 "X-Plex-Product" => $this->x_plex_product,
-                                "X-Plex-Version" => "2.0",
+                                "X-Plex-Version" => $config_file->wrapperr_version,
                                 "X-Plex-Model" => "Plex OAuth",
                                 "X-Plex-Language" => 'en'
                             );

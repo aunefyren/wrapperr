@@ -92,6 +92,27 @@ function save_config($data, $data_type, $clear_cache) {
 
     } else if($data_type === 'wrapperr_settings') {
 
+        // Confirm timezone in config is valid
+        $timezone_identifiers = DateTimeZone::listIdentifiers();
+        $valid_timezone = false;
+        for ($i = 0; $i < count($timezone_identifiers); $i++) {
+            if($data->timezone === $timezone_identifiers[$i]) {
+                $valid_timezone = true;
+                break;
+            }
+        }
+
+        // Set time-zone to the one configured or return error
+        if(!$valid_timezone) {
+
+            // Log activity
+            $log->log_activity('set_config.php', 'admin', 'Timezone not accepted. Not found in \'DateTimeZone::listIdentifiers()\' list.');
+
+            echo json_encode(array("message" => "Configured timezone invalid.", "error" => true));
+            exit(0);
+
+        }
+
         $fail = false;
         try {
             $config->use_plex_auth = $data->use_plex_auth;
@@ -120,6 +141,8 @@ function save_config($data, $data_type, $clear_cache) {
         try {
             $config->wrapped_start = $data->wrapped_start;
             $config->wrapped_end = $data->wrapped_end;
+            $config->wrapperr_front_page_title = $data->wrapperr_front_page_title;
+            $config->wrapperr_front_page_subtitle = $data->wrapperr_front_page_subtitle;
             $config->stats_intro_title = $data->stats_intro_title;
             $config->stats_intro_subtitle = $data->stats_intro_subtitle;
             $config->stats_outro_title = $data->stats_outro_title;

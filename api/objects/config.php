@@ -31,6 +31,8 @@ class Config {
     // Wrapperr custom
     public $wrapped_start;
     public $wrapped_end;
+    public $wrapperr_front_page_title;
+    public $wrapperr_front_page_subtitle;
     public $stats_intro_title;
     public $stats_intro_subtitle;
     public $stats_outro_title;
@@ -267,6 +269,18 @@ class Config {
             $this->wrapped_end = $json->wrapped_end;
         } else {
             $this->wrapped_end = 1640991540;
+        }
+
+        if(isset($json->wrapperr_front_page_title)) {
+            $this->wrapperr_front_page_title = $json->wrapperr_front_page_title;
+        } else {
+            $this->wrapperr_front_page_title = 'Did you get that thing from Spotify and wondered what your Plex statistics looked like?';
+        }
+
+        if(isset($json->wrapperr_front_page_subtitle)) {
+            $this->wrapperr_front_page_subtitle = $json->wrapperr_front_page_subtitle;
+        } else {
+            $this->wrapperr_front_page_subtitle = 'Well, have a look...';
         }
         
         if(isset($json->stats_intro_title)) {

@@ -21,6 +21,8 @@ $log->log_activity('get_plex_wrapped_version.php', 'unknown', 'Retrieved Wrapper
 $version_json = array(	"wrapperr_version" => $config->wrapperr_version,
 						"application_name" => $config->application_name,
 						"use_plex_auth" => $config->use_plex_auth,
+						"wrapperr_front_page_title" => $config->wrapperr_front_page_title,
+						"wrapperr_front_page_subtitle" => $config->wrapperr_front_page_subtitle,
 						"message" => "Retrieved Wrapperr verison.",
 						"error" => false
 						);

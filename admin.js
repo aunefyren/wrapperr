@@ -381,7 +381,7 @@ function set_tautulli_settings() {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="tautulli_libraries" title="Comma seprated list of ID\'s to use for statistics. If none are given, it will search all.">Library ID\'s to use: (Optional)</label>';
+    html += '<label for="tautulli_libraries" title="Comma separated list of ID\'s to use for statistics. If none are given, it will search all.">Library ID\'s to use: (Optional)</label>';
     html += '<input type="text" class="form-control" id="tautulli_libraries" value="' + tautulli_libraries + '" autocomplete="off" placeholder=""/><br>';
     html += '</div>';
 
@@ -735,6 +735,20 @@ function set_wrapperr_customization() {
         html += 'checked="' + stats_order_by_duration + '" ';
     }
     html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
+    html += '<hr>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="wrapperr_front_page_title" title="Introduction title that is shown on top of the front page.">Introduction title for the front page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="wrapperr_front_page_title" name="wrapperr_front_page_title" value="" autocomplete="off"></textarea></label>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="wrapperr_front_page_subtitle" title="Introduction subtitle text that is shown on the front page.">Introduction subtitle for the front page:<br>';
+    html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="wrapperr_front_page_subtitle" name="wrapperr_front_page_subtitle" value="" autocomplete="off"></textarea></label>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1457,6 +1471,8 @@ function set_wrapperr_customization() {
     // Place content from config
     document.getElementById("setup").innerHTML = html;
 
+    document.getElementById("wrapperr_front_page_title").value = wrapperr_front_page_title;
+    document.getElementById("wrapperr_front_page_subtitle").value = wrapperr_front_page_subtitle;
     document.getElementById("stats_intro_title").value = stats_intro_title;
     document.getElementById("stats_intro_subtitle").value = stats_intro_subtitle;
     document.getElementById("stats_outro_title").value = stats_outro_title;
@@ -1540,6 +1556,8 @@ function set_wrapperr_customization_call() {
 
     wrapped_start = new Date(document.getElementById('wrapped_start').value);
     wrapped_end = new Date(document.getElementById('wrapped_end').value);
+    wrapperr_front_page_title = document.getElementById('wrapperr_front_page_title').value;
+    wrapperr_front_page_subtitle = document.getElementById('wrapperr_front_page_subtitle').value;
     stats_intro_title = document.getElementById('stats_intro_title').value;
     stats_intro_subtitle = document.getElementById('stats_intro_subtitle').value;
     stats_outro_title = document.getElementById('stats_outro_title').value;
@@ -1671,6 +1689,8 @@ function set_wrapperr_customization_call() {
                                 "data" : {
                                     "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
                                     "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
+                                    "wrapperr_front_page_title" : wrapperr_front_page_title,
+                                    "wrapperr_front_page_subtitle" : wrapperr_front_page_subtitle,
                                     "stats_intro_title" : stats_intro_title,
                                     "stats_intro_subtitle" : stats_intro_subtitle,
                                     "stats_outro_title" : stats_outro_title,
@@ -2146,6 +2166,8 @@ function get_config(cookie) {
                 https = result.data.https;
 
                 timezone = result.data.timezone;
+                wrapperr_front_page_title = result.data.wrapperr_front_page_title;
+                wrapperr_front_page_subtitle = result.data.wrapperr_front_page_subtitle;
                 stats_intro_title = result.data.stats_intro_title;
                 stats_intro_subtitle = result.data.stats_intro_subtitle;
                 stats_outro_title = result.data.stats_outro_title;
