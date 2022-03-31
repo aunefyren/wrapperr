@@ -47,7 +47,7 @@ class Log {
                 $date = date('Y-m-d H:i:s');
 
                 $log_file = @fopen($this->path, 'a');
-                fwrite($log_file, PHP_EOL . $date . ' - ' . $function . ' - ID: ' . $id . ' - ' . $message);
+                fwrite($log_file, PHP_EOL . 'TIME: ' . $date . "\t" . 'API: ' . $function . "\t" . 'ID: ' . $id . "\t" . 'MESSAGE: ' . $message);
                 fclose($log_file);
 
             } catch(Error $e) {
