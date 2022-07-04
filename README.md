@@ -111,6 +111,9 @@ $ docker run -p '8282:8282' --name 'wrapperr' aunefyren/wrapperr:latest
 
 It should now be accessible on: ```http://localhost:8282```
 
+<br>
+<br>
+
 If you use Docker Compose you could do something like this in your ```docker-compose.yml```:
 
 ```
@@ -130,6 +133,9 @@ And launch the file with:
 $ docker-compose up
 ```
 
+<br>
+<br>
+
 If you want to mount a volume for the config folder, you can do something like this:
 
 ```
@@ -144,6 +150,9 @@ services:
         volumes:
             - './my-folder:/app/config'
 ```
+
+<br>
+<br>
 
 Afterward, remember to ```chmod``` the mounted folder on the host so the Wrapperr can write to it:
 
