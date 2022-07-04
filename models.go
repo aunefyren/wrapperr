@@ -3,7 +3,6 @@ package main
 import (
 	"time"
 
-	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/google/uuid"
 )
 
@@ -12,12 +11,14 @@ type Default_Reply struct {
 	Error   bool   `json:"error"`
 }
 
+/*
 type CustomPayload struct {
 	jwt.Payload
 	Username string `json:"username,omitempty"`
 	PlexID   int    `json:"plexid,omitempty"`
 	Admin    bool   `json:"admin,omitempty"`
 }
+*/
 
 type Payload struct {
 	ID        uuid.UUID `json:"id"`
