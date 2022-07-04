@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+        <title>Wrapperr</title>
+
+        <!-- Bootstrap 4 CSS and custom CSS -->
+        <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
+        <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="./functions.js"></script>
+        <script src="./index.js"></script>
+        <script src="./get_stats.js"></script>
+        <script src="./get_functions.js"></script>
+
+    </head>
+<body id='body'>
+
+<div id="loading">
+    <img id="loading-image" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em;" src="assets/loading.gif" alt="Loading..." />
+
+    <div class="form-group" id=''>
+        <div id="results_error_loading_screen" style="color: var(--white) !important;">Loading...</div>
+    </div>
+
+</div>
+
+<div id="background_image"></div>
+
+<div class="snowflakes" aria-hidden="true" id="snowflakes2">
+    <div class="snowflake-2">
+        ❅
+    </div>
+    <div class="snowflake-2">
+        ❅
+    </div>
+    <div class="snowflake-2">
+        ❆
+    </div>
+    <div class="snowflake-2">
+        ❄
+    </div>
+    <div class="snowflake-2">
+        ❅
+    </div>
+    <div class="snowflake-2">
+        ❆
+    </div>
+    <div class="snowflake-2">
+        ❄
+    </div>
+    <div class="snowflake-2">
+        ❅
+    </div>
+    <div class="snowflake-2">
+        ❆
+    </div>
+    <div class="snowflake-2">
+        ❄
+    </div>
+
+</div>
+
+<div class="content_landing" id="login_content" style="">
+
+    <div class="boks">
+
+        <div class="boks3" id="" style="padding: 0 !important;">
+
+            <div class="boks2" style="float: none !important; display: block; padding: 0; margin: 1em 0 0 0;">
+                <img src="assets/img/gift.svg" onclick="window.location.href = './';" style="width: 12.5em; cursor: pointer;">
+            </div>
+        
+        </div>
+        
+        <div class="boks3" id="search_input" style="padding: 0 !important;">
+
+            <div class="boks2" style="float: none !important; display: block; margin-top: 0em; padding-top: 0;">
+
+                <div class="stats_tekst" id='intro_text' style="height: auto; width: -webkit-fill-available;">
+                    <p id='wrapperr_front_page_title'>
+                    Did you get that thing from Spotify and wondered what your Plex statistics looked like?
+                    </p>
+                    <br><br>
+                    <p id='wrapperr_front_page_subtitle'>
+                    Well, have a look...
+                    </p>
+                </div>
+
+                <br>
+
+                <div class="status" id="stats" style="">
+
+                    <h1 id='application_name'>Wrapperr</h1>
+
+                    <div class="search">
+
+                        <form id='plex_login_form' class='form' onsubmit='return false' action="" method="post">
+
+                            <div class="form-group" id='plex_login_div'>
+                                <button class='form-control btn' name="plex_login_button" id="plex_login_button" onclick='pop_up_login(); return false;' style='opacity: 0.5;' disabled>
+                                    <img src='assets/external-link.svg' class='btn_logo'>
+                                    <p2 id='plex_login_button_text'>Sign in using Plex</p2>
+                                </button>
+                            </div>
+
+                        </form>
+
+                        <form id='search_wrapped_form' class='form' onsubmit='return false;' action="" method="post" style="display: none;">
+
+                            <div class="form-group" id='search_wrapped_div'>
+                                <button class='form-control btn' name="search_wrapped_button" id="search_wrapped_button" style='opacity: 0.5;' onclick='search_wrapperr()' disabled>
+                                    <img src='assets/done.svg' class='btn_logo'>
+                                    <p2 id='search_wrapped_button_text'>Unwrap</p2>
+                                </button>
+                            </div>
+
+                            <div class="form-group" id='sign_out_div' style='display: none;'>
+                                <button class='form-control btn' name="plex_signout_button" id="plex_signout_button" onclick='sign_out()'>
+                                    <img src='assets/close.svg' class='btn_logo'>
+                                    <p2 id='plex_signout_button_text'>Sign Out</p2>
+                                </button>
+                            </div>
+
+                        </form>
+
+
+                    </div>
+
+                    <img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em; display:none; margin: 1em 0 0 0;">
+
+                    <div id="results">
+                    </div>
+                    
+                    <div class="form-group" id='results_error_div'>
+                        <div id="results_error" style="color: var(--red) !important;"></div>
+                    </div>
+                    
+                    <div class="form-group" id='share_wrapped_title_div' style='margin: 0; display: none;'>
+                            <h3 style='margin: 0'>Shareable link:</h3>
+                    </div>
+
+                    <div class="form-group" id='share_wrapped_div' style='  display: none;
+                                                                            flex-direction: row;
+                                                                            flex-wrap: wrap;
+                                                                            align-content: flex-start;
+                                                                            justify-content: center;
+                                                                            align-items: flex-start;
+                                                                            border-radius: 6px;
+                                                                            margin: 0 0 0.5em 0;
+                                                                            padding: 0.5em;
+                                                                        '>
+                        <div class='form-control btn' id="share_wrapped_delete_button" style='background-color: var(--white); cursor: default;'>
+                            <span id='share_wrapped_url' class='share_wrapped_url' style=''></span>
+                            <img id='share_wrapped_copy' src='assets/external-link.svg' style='' onclick='open_link_user();'>
+                            <img id='share_wrapped_delete' src='assets/trash.svg' style='' onclick='delete_link_user();'>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+        <div class="snowflakes" aria-hidden="true" id="snowflakes">
+            <div class="snowflake">
+                ❅
+            </div>
+            <div class="snowflake">
+                ❅
+            </div>
+            <div class="snowflake">
+                ❆
+            </div>
+            <div class="snowflake">
+                ❄
+            </div>
+            <div class="snowflake">
+                ❅
+            </div>
+            <div class="snowflake">
+                ❆
+            </div>
+            <div class="snowflake">
+                ❄
+            </div>
+            <div class="snowflake">
+                ❅
+            </div>
+            <div class="snowflake">
+                ❆
+            </div>
+            <div class="snowflake">
+                ❄
+            </div>
+        
+        </div>
+
+    </div>
+</div>
+
+<div class="footer" id="footer">
+    <div class="footer-elements">
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./">Wrapperr</a> |
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="./admin">Admin</a> |
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/wrapperr" target="_blank">GitHub</a>
+    </div>
+</div>
+
+</div>
+    <div class="content" id="search_results">
+</div>
+
+<script type="text/javascript">
+
+    // Initialize variables for global reference
+    var root = "./";
+    var link_mode = false;
+    var results;
+    var functions;
+    var plex_identity = false;
+    var cookie = false;
+    var client_key = "";
+    var wrapperr_configured = false;
+
+    var url = "";
+    var code = 0;
+    var id = 0;
+
+    document.onreadystatechange = function() {
+
+        switch (document.readyState) {
+            case "loading":
+                break;
+
+            case "interactive":
+                break;
+
+            case "complete":
+                // Get parameters from URL string
+                var url_string = window.location.href
+                var url = new URL(url_string);
+                var hash = url.searchParams.get("hash");
+                var close_me = url.searchParams.get("close_me");
+
+                // Attempt to close the tab if instructed to
+                if(close_me !== null) {
+                    window.close();
+                    return;
+                }
+
+                // If a hash is recieved, attempt to load shared link
+                if(hash !== null) {
+                    document.getElementById('loading').style.display = "none";
+                    link_mode = true;
+                    wrapped_link_actions(hash);
+                    document.getElementById('intro_text').innerHTML = '';
+                    document.getElementById('stats').innerHTML = '<img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em;width: 4em; height: 4em; display:block; margin: auto;">';
+                }
+
+                // Contact the Wrapperr API to get configuration details
+                get_wrapper_version();
+
+        }
+    }
+</script>
+
+</body>
+
+</html>

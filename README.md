@@ -1,7 +1,13 @@
 # Wrapperr
+[![Github Stars](https://img.shields.io/github/stars/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr)
+[![Github Forks](https://img.shields.io/github/forks/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr)
+[![Docker Pulls](https://img.shields.io/docker/pulls/aunefyren/wrapperr?style=for-the-badge)](https://hub.docker.com/r/aunefyren/wrapperr)
+[![Newest Release](https://img.shields.io/github/v/release/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr/releases)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/aunefyren/wrapperr?style=for-the-badge)](https://go.dev/dl/)
+
 ## Introduction - What is this?
 
-A website-based platform and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics-summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
+A website-based application and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
 
 <br>
 
@@ -12,13 +18,14 @@ A website-based platform and API for collecting user stats within a set timefram
 ### Features
 - Custom timeframes
 - Plex Auth
-- Customizable text fields
-- Movies, shows & music
-- Caching of data
 - Friendly, dynamic display for statistics with nice illustrations
-- Admin page with authentication for settings
+- Customizable text
+- Customizable appearance
+- Movies, shows & music statistics
+- Caching of results
+- Admin interface
 - Pre-caching functionality
-- Shareable links
+- Shareable links with expiration
 
 <br>
 
@@ -31,6 +38,7 @@ A website-based platform and API for collecting user stats within a set timefram
 - Amazing statistics gathered using [Tautulli](https://github.com/Tautulli/Tautulli)
 - Wonderful loading icon from [icons8](https://icons8.com/preloaders/en/miscellaneous/hourglass)
 - Splendid web icons from [icons8](https://icons8.com/icon/set/popular/material-rounded)
+- Superb background image from [Pexels](https://www.pexels.com/photo/snowy-forest-235621/)
 
 <br>
 
@@ -38,82 +46,85 @@ A website-based platform and API for collecting user stats within a set timefram
 
 <br>
 
-## Instructions - How do I use this?
-This is a web-based platform. It is a website hosted on a web-server and it gathers and displays statitics using an API (application programming interface) that interacts with Tautulli's API. Place the files included in this GitHub repository in a web-server, like Apache or Nginx, and make sure it processes PHP scripts, as this is the language the Wrapped API is written in. 
+## Explanation - How does it work?
+This is a web-based platform. It gathers and displays statistics using an API (application programming interface) that interacts with the Tautulli API. Install Wrapperr, configure the essential options, and Wrapperr will do the rest. Based on your exact configuration, Wrapperr will gather unique statistics for each user interacting with the application.
 
-There are instructions for this further down.
-<br>
-<br>
-### How does it work?
-There are some things to know when you have the website running: 
-- Head to the front page you should see a small navigation menu at the bottom. This will take you between the few pages you need.
-- The configuration is stored in ```config/config.json``` on the server, but can be configured using the admin menu, located at: ```your-domain-or-ip/admin``` or by clicking admin in the navigation menu.
-- The cache is stored in ```config/cache.json```, but can be cleared using the admin menu previously mentioned.
-- Your password and encryption token is hashed and stored in the ```config/config.json```. This is a sensitive directory! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache. If you are using Nginx you must add a directory deny in your Nginx configuration!
-- If finish essential setup on the admin page you can click 'Caching' and do a pre-caching. This is very useful if you want to prepare for traffic and reduce PHP errors. PHP scripts will exit if they run longer then a certain timeframe, giving the user an error. 
-- It is recommended to set up the platform at the admin page and then running a pre-cache immediately. The cache is updated automatically if new data in the timeframe becomes available.
-- Almost all statistics options are enabled by default. Go to the admin page, and then click on 'Wrapperr customization' and customize the statistics page for your liking.
+In Wrapperr you configure a timeframe, from date-time A to date-time B. This is the timeframe from which the statistics are created. One could for instance have a wrap-up of multiple years of Tautulli data or just a week. If enabled, Wrapperr will verify the user with Plex to ensure personal data is kept private.
+
+Most text is customizable through the Wrapperr admin interface which allows for regional translation. Certain statistics can be disabled and enabled based on relevance/interest. Users can if enabled, generate random URLs which can be shared between friends who want to see each other's statistics.
 
 <br>
 <br>
 
-## Manual setup - Example of setting up a local web-server
-Here is an example of running this platform. This is a general approach, as there are multiple ways to host a webserver with PHP installed.
+## Instructions - How do I install this?
+There are two main ways. Docker information can be found further below.
 
-### XAMPP
-XAMPP is a completely free, easy to install Apache distribution containing MariaDB, PHP, and Perl. The XAMPP open source package has been set up to be incredibly easy to install and to use. This is their [website](https://www.apachefriends.org/). It works on Windows, Linux and MacOs.
+<br>
+<br>
 
-Install XAMPP thorugh the installer and open up the GUI. From there you can start the Apache webserver with a single button. We don't need any of the other tools included, but make sure the status of the module is green. PHP should be pre-configured by XAMPP.
+### Download and start
+There are multiple ways to install Wrapperr. The easiest is just to download the latest release from the [Release Page](https://github.com/aunefyren/wrapperr/releases) which matches your operating system, move all the content to a directory, and start the ```Wrapperr``` application located within the release. It should start right up, perhaps triggering some operating system or firewall warnings.
 
-### Install Wrapperr
-Download this repository and place the files inside the document-root of XAMPPs apache server. This is typically ```C:\xampp\htdocs``` on Windows, but this will change depending on your system and configuration of XAMPP during installation. 
+<br>
+<br>
 
-For instance, I placed this repository in a folder within the document-root, so my document-root, with that folder, makes the full path: ```C:\xampp\htdocs\wrapperr```, which in turn makes the files accessable on ```http://localhost/wrapperr```. Notice how my folder inside the document-root altered the URL. If I placed the repository files directly into ```C:\xampp\htdocs``` the URL would be: ```http://localhost```.
-
-### Config folder configuration
-You need to give PHP permission to read and write to files in the directory called ```config```. This is where the API saves the cache, configuration and writes the log. 
-
-The directory contains sensitive information that must be only accessed by the PHP scripts! There is an ```.htaccess``` file included that blocks traffic to the folder, but this is only effective with Apache (which XAMPP uses). If you are using Nginx you must add a directory deny in your Nginx configuration!
-
-On Windows I never had to change permissions for the ```config``` folder, PHP could access it by defult. On Linux I had give read/write access by using the ```chmod``` command. In the example below I change the config directory folder permissions recursively on Linux. This will allow PHP to read/write in the directory.
+### Build with Go
+If you want to build Wrapperr yourself, you can download whatever version/tag/branch you want, and place the files in a directory. With (Go)[https://go.dev/dl/] installed, from the Wrapperr directory, run the following commands to build and execute Wrapperr:
 
 ```
-$ sudo chmod -R 0777 /var/www/html/config
+$ go build
+$ ./Wrapperr
 ```
+Note, if building on another operating system, the executable could have a different name. Such as ```Wrapperr.exe``` on Windows.
 
-### Test
-Go to ```http://localhost```, or your variation as discussed earlier, and you should see the front page.
+<br>
+<br>
 
-Everything should now be prepared, and the rest of the setup should be done on the admin page, followed up by a pre-caching. You might have to refer to PHP configuration section below if PHP is acting up. Go to the previous section named 'How does it work?' if you need information about the admin setup.
+### Head to the website
+If successful, Wrapperr should be accessible on ```http://localhost:8282```. From there you can click on ```admin``` in the footer at the bottom, or go to ```/admin``` in the URL. From there you can configure everything about Wrapperr in the different sections of the menu. 
+
+<br>
+<br>
+
+### Essential configuration options
+A couple of configuration options are necessary for Wrapperr to function. First of all, Tautulli connection details. There is a test button available on the page to ensure you have entered the correct details. The second one is the time zone option on the ```Wrapperr Settings``` page.
+
+It is recommended to keep ```Cache results for later use``` enabled on the ```Wrapperr Settings``` page, and head to the ```Caching``` page after configuration. This ensures a good, quick user experience. 
+
+<br>
+<br>
+
+### Wrap away!
+Wrapperr should now be functional. Based on your settings, you can now either search with username/e-mail or log in with Plex on the front page. Continue tweaking on the admin menu to get the appearance/language you desire.
 
 <br>
 <br>
 
 ## Docker
-Docker sets up the environment, but I recommend reading the start of the 'Instructions' section for an explanation of functionality/admin page! You might have to refer to the 'PHP Configuration' section below if PHP is acting up and giving API parsing errors.
+Docker sets up the environment, but I recommend reading the start of the 'How do I install this?' section for an explanation of the functionality/admin page! 
 
-Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it if you want and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port 80:
+Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
 
 ```
-$ docker run -p '80:80' --name 'wrapperr' aunefyren/wrapperr:latest
+$ docker run -p '8282:8282' --name 'wrapperr' aunefyren/wrapperr:latest
 ```
 
-It should now be accessable on: ```http://localhost```
+It should now be accessible on: ```http://localhost:8282```
 
-If you use Docker Compose you could do something like this in your docker-compose.yml:
+If you use Docker Compose you could do something like this in your ```docker-compose.yml```:
 
 ```
 version: '3.3'
 services:
     wrapperr:
         ports:
-            - '80:80'
+            - '8282:8282'
         container_name: wrapperr
         image: 'aunefyren/wrapperr:latest'
+        restart: unless-stopped
 ```
 
 And launch the file with:
-
 
 ```
 $ docker-compose up
@@ -126,14 +137,15 @@ version: '3.3'
 services:
     wrapperr:
         ports:
-            - '80:80'
+            - '8282:8282'
         container_name: wrapperr
         image: 'aunefyren/wrapperr:latest'
+        restart: unless-stopped
         volumes:
-            - './my-folder:/var/www/html/config'
+            - './my-folder:/app/config'
 ```
 
-Afterwards, remember to chmod the mounted folder on the host so the container can write to it:
+Afterward, remember to ```chmod``` the mounted folder on the host so the Wrapperr can write to it:
 
 
 ```
@@ -143,35 +155,20 @@ $ sudo chmod -R 0777 ./my-folder
 <br>
 <br>
 
-## PHP Configuration
-PHP will have issues with this API based on the data available in Tautulli and your settings on the admin page. If you have a large time frame for your wrapped period (like a full year), and there are a huge amount of Tautulli entries, you can have multiple issues. The PHP API can, for example, exit because the runtime exceeds the PHP configured runtime, because it takes a long time to interact with your Tautulli server. 
-
-<b>Pre-caching deals with a lot of these problems, so make sure you have it enabled and done to avoid these issues. Go to the caching page found in the navigation meny at the bottom.</b>
-
-If you performed pre-caching and you still have issues, check the list below for possible alterations to PHP. These are changes to the ```php.ini``` file found in the PHP installation directory. Do some research or ask for help if you don't know how to do this.
-
-In your ```php.ini``` file you may have to change:
-- max_execution_time=<b>enough seconds for the script to finish.</b><br>The longer the timeframe, the more execution time. Every unique date in your timeframe is a new Tautulli API call.
-- memory_limit=<b>enough M for the script to handle JSON data.</b><br>If there is a lot of data, PHP needs to have enough memory to manage it without crashing. This still applies if caching is on, as PHP needs to be able to read the cache without crashing.
-- max_input_time=<b>enough seconds for the script to parse JSON data.</b><br>You might not need to change this, depending on Tautulli connection speed.
-
-<br>
-<br>
-
 ## Frequently asked questions
 
 ### Q: Why are the plays different on Wrapperr compared to Tautulli
 
-A: Data is retrieved from the Tautulli API, but not necasserly proccessed in the same manner. The difference could for example be that you have history entries for the same media (movie for example) split over different Tautulli items. For example, you could have two items for the movie 'Black Widow' from potentially updating the file on Plex, leading Tautulli to interperet it as a new item/media. The easiest way to check for this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
+A: Data is retrieved from the Tautulli API, but not necessarily processed in the same manner. The difference could for example be that you have history entries for the same media (a movie for example) split over different Tautulli items. For example, you could have two items for the movie 'Black Widow' from updating the file on Plex, leading Tautulli to interpret it as a new item/media. The easiest way to check for this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
 
 There is an option to merge different Tautulli items if this is your case.
 
-What also could cause confusion is related to Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on a day basis, meaning grouping never spans multiple days, potentially leading to an increase in plays because the groups are smaller.
+What also could confuse is related to the Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on 'day' based loop, meaning Tautulli's grouping never spans multiple days, potentially leading to an increase in plays because the groups are smaller in size.
 
 <br>
 <br>
 
 ## Need help?
-If you have any issues feel free to contact me. I am always trying to improve the project. If I can't, many people on several forums (including [/r/plex](https://www.reddit.com/r/plex)) might be able to assist you.
+If you have any issues feel free to open an issue here on GitHub. I am always trying to improve the project. If I can't, many people on several forums (including [/r/plex](https://www.reddit.com/r/plex)) might be able to assist you.
 
 Have fun.

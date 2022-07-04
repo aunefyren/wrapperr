@@ -1,0 +1,1 @@
+This directory is utilized by Wrapperr and filled with configuration files, logs and data.

@@ -1,0 +1,32 @@
+name: Release GO binaries
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  releases-matrix:
+    name: Release Go Binary
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        # build and publish in parallel: linux/amd64
+        goos: [linux, windows]
+        goarch: [amd64, arm64, 386]
+        #exclude:
+        #  - goarch: "386"
+        #    goos: windows
+        
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: go test -v -p=1 -timeout=0 ./...
+      - uses: wangyoucao577/go-release-action@v1.29
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          goos: ${{ matrix.goos }}
+          goarch: ${{ matrix.goarch }}
+          project_path: "./"
+          binary_name: "Wrapperr"
+          ldflags: "-s -w"
+          extra_files: README.md config web CODE_OF_CONDUCT.md config_default.json Dockerfile

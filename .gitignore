@@ -1,6 +1,4 @@
-
-config/wrapped.log
-config/config.json
-config/cache.json
-config/links
-config/admin.json
+config/*
+!config/README.md
+wrapperr.exe
+wrapperr
