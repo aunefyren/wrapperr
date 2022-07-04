@@ -56,6 +56,7 @@ function log_in() {
                 document.getElementById("log_in_button").disabled = false;
                 document.getElementById("log_in_button").style.opacity = '1';
                 document.getElementById('password').value = '';
+                return;
             }
             
             if(result.error) {
@@ -71,7 +72,7 @@ function log_in() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "../api/login/admin");
+    xhttp.open("post", "/api/login/admin");
     xhttp.send(admin_login_data);
     return;
 }
@@ -136,7 +137,7 @@ function set_password() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
@@ -144,6 +145,7 @@ function set_password() {
                 console.log('Failed to parse API response. Response: ' + this.responseText)
                 document.getElementById("create_admin_button").disabled = false;
                 document.getElementById("create_admin_button").style.opacity = '1';
+                return;
             }
             
             if(result.error) {
@@ -229,7 +231,7 @@ function update_password() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
@@ -238,6 +240,7 @@ function update_password() {
                 console.log('Failed to parse API response. Response: ' + this.responseText)
                 document.getElementById("update_admin_button").disabled = false;
                 document.getElementById("update_admin_button").style.opacity = '1';
+                return;
             }
             
             if(result.error) {
@@ -262,12 +265,13 @@ function update_password() {
 function get_admin_state() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 console.log('Failed to parse API response. Response: ' + this.responseText)
+                return;
             }
             
             if(result.error) {
@@ -507,7 +511,7 @@ function set_tautulli_settings_call() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
@@ -516,6 +520,7 @@ function set_tautulli_settings_call() {
                 console.log('Failed to parse API response. Response: ' + this.responseText)
                 document.getElementById("set_tautulli_form_button").disabled = false;
                 document.getElementById("set_tautulli_form_button").style.opacity = '1';
+                return;
             }
             
             if(result.error) {
@@ -764,6 +769,7 @@ function set_wrapperr_settings_call() {
                 console.log('Failed to parse API response. Response: ' + this.responseText);
                 document.getElementById("set_wrapperr_settings_form_button").disabled = false;
                 document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
+                return;
             }
             
             if(result.error) {
@@ -1842,7 +1848,7 @@ function set_wrapperr_customization_call() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
@@ -1851,6 +1857,7 @@ function set_wrapperr_customization_call() {
                 console.log('Failed to parse API response. Response: ' + this.responseText);
                 document.getElementById("set_wrapperr_customization_form_button").disabled = false;
                 document.getElementById("set_wrapperr_customization_form_button").style.opacity = '1';
+                return;
             }
             
             if(result.error) {
@@ -2209,6 +2216,7 @@ function test_tautulli_connection() {
                 button.style.backgroundColor = 'var(--red)';
                 document.getElementById("test_connection").disabled = false;
                 document.getElementById("test_connection").style.opacity = '1';
+                return;
             }
 
             if(result.error) {
@@ -2244,6 +2252,8 @@ function get_wrapper_version() {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 console.log('Failed to parse Wrapperr version. Response: ' + this.responseText)
+                alert("Failed to parse API response");
+                return;
             }
             
             if(!result.error) {
@@ -2271,12 +2281,13 @@ function get_wrapper_version() {
 function get_admin_state() {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
+        if (this.readyState == 4) {
 
             try {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 console.log('Failed to parse API response. Response: ' + this.responseText)
+                return;
             }
             
             if(result.error) {
@@ -2337,8 +2348,15 @@ function get_config(cookie) {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-            var result = JSON.parse(this.responseText);
+        if (this.readyState == 4) {
+
+            try {
+                var result = JSON.parse(this.responseText);
+            }
+            catch {
+                alert("Failed to parse API response.");
+                return;
+            }
 			
             if(result.error) {
                 alert(result.message);
