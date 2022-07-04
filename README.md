@@ -11,7 +11,7 @@ A website-based application and API for collecting user stats within a set timef
 
 <br>
 
-![Image showing the introduction section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_01.PNG?raw=true)
+![Image showing the introduction section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/web/assets/img/example_01.PNG?raw=true)
 
 <br>
 
@@ -29,7 +29,7 @@ A website-based application and API for collecting user stats within a set timef
 
 <br>
 
-![Image showing the show section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_02.PNG?raw=true)
+![Image showing the show section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/web/assets/img/example_02.PNG?raw=true)
 
 <br>
 
@@ -42,7 +42,7 @@ A website-based application and API for collecting user stats within a set timef
 
 <br>
 
-![Image showing the server-wide section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/assets/img/example_03.PNG?raw=true)
+![Image showing the server-wide section of Wrapperr.](https://raw.githubusercontent.com/aunefyren/wrapperr/main/web/assets/img/example_03.PNG?raw=true)
 
 <br>
 
