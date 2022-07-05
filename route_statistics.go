@@ -256,17 +256,12 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 		var found_date_index int = 0
 		for j := 0; j < len(wrapperr_data); j++ {
 
-			loc, err := time.LoadLocation(config.Timezone)
+			time_temp, err := time.Parse("2006-01-02", wrapperr_data[j].Date)
 			if err != nil {
 				log.Println(err)
 			}
 
-			time_temp, err := time.ParseInLocation("2006-01-02", wrapperr_data[j].Date, loc)
-			if err != nil {
-				log.Println(err)
-			}
-
-			if time_temp.Equal(loop_time) {
+			if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
 				found_date_index = j
 				found_date = true
 				break
