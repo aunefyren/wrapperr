@@ -69,7 +69,7 @@ There are multiple ways to install Wrapperr. The easiest is just to download the
 <br>
 
 ### Build with Go
-If you want to build Wrapperr yourself, you can download whatever version/tag/branch you want, and place the files in a directory. With (Go)[https://go.dev/dl/] installed, from the Wrapperr directory, run the following commands to build and execute Wrapperr:
+If you want to build Wrapperr yourself, you can download whatever version/tag/branch you want, and place the files in a directory. With [Go](https://go.dev/dl/) installed, from the Wrapperr directory, run the following commands to build and execute Wrapperr:
 
 ```
 $ go build
