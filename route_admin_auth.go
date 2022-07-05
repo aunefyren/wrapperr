@@ -106,7 +106,7 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 
 			} else if config_payload.DataType == "wrapperr_data" {
 
-				_, err := time.LoadLocation(config_payload.WrapperrData.Timezone)
+				new_time, err := time.LoadLocation(config_payload.WrapperrData.Timezone)
 				if err != nil {
 					log.Println("Failed to set the new time zone. Error: ")
 					log.Println(err)
@@ -132,6 +132,8 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 					respond_default_error(w, r, errors.New("Failed to save new Wrapperr configuration."), 500)
 					return
 				}
+
+				time.Local = new_time
 
 			} else {
 				log.Println("Cannot set new config. Invalid data type recieved. Type: " + config_payload.DataType)
