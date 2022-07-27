@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+
+	_ "time/tzdata"
 )
 
 func main() {
