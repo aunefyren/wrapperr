@@ -123,7 +123,7 @@ services:
         ports:
             - '8282:8282'
         container_name: wrapperr
-        image: 'aunefyren/wrapperr:latest'
+        image: aunefyren/wrapperr:latest
         restart: unless-stopped
 ```
 
@@ -145,7 +145,7 @@ services:
         ports:
             - '8282:8282'
         container_name: wrapperr
-        image: 'aunefyren/wrapperr:latest'
+        image: aunefyren/wrapperr:latest
         restart: unless-stopped
         volumes:
             - './my-folder:/app/config'
