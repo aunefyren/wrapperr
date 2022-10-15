@@ -717,7 +717,7 @@ function top_list(array, title, music, show, year, div_id) {
         html += "<div class='stats'>";
             html += "<div class='status-title'>" + title + "</div>";
             html += "<div class='stats-list'>";
-                for(i = 0; (i < array.length && i < 10); i++) {
+                for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
                         html += "<div class='number'>";
                             html += i+1 + ". ";
@@ -769,7 +769,7 @@ function top_list_names(array, title, div_id) {
         html += "<div class='stats'>";
             html += "<div class='status-title'>" + title + "</div>";
             html += "<div class='stats-list'>";
-            for(i = 0; i < 10 && i < array.length; i++) {
+            for(i = 0; i < array.length; i++) {
                 if(i == 0) {
                     html += "<div class='item gold'>";
                 } else if(i == 1) {

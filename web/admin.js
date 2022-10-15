@@ -826,6 +826,15 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<label for="stats_top_list_length" title="Use 0 for no limit.">Maximum length of top lists:<br>';
+    html += '<input type="number" class="form-control" id="stats_top_list_length" value="' + stats_top_list_length + '" autocomplete="off" placeholder="" required /><br>';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
+    html += '<hr>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="wrapperr_front_page_title" title="Introduction title that is shown on top of the front page.">Introduction title for the front page:<br>';
     html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="wrapperr_front_page_title" name="wrapperr_front_page_title" value="" autocomplete="off"></textarea></label>';
     html += '</div>';
@@ -1561,6 +1570,7 @@ function set_wrapperr_customization() {
     document.getElementById("stats_intro_subtitle").value = stats_intro_subtitle;
     document.getElementById("stats_outro_title").value = stats_outro_title;
     document.getElementById("stats_outro_subtitle").value = stats_outro_subtitle;
+    document.getElementById("stats_top_list_length").value = stats_top_list_length;
 
     document.getElementById("get_user_movie_stats_title").value = get_user_movie_stats_title;
     document.getElementById("get_user_movie_stats_subtitle").value = get_user_movie_stats_subtitle;
@@ -1646,6 +1656,7 @@ function set_wrapperr_customization_call() {
     stats_outro_subtitle = document.getElementById('stats_outro_subtitle').value;
     stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
     stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
+    stats_top_list_length = parseInt(document.getElementById("stats_top_list_length").value);
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
     get_user_movie_stats_title = document.getElementById('get_user_movie_stats_title').value;
@@ -1754,6 +1765,7 @@ function set_wrapperr_customization_call() {
                                     "stats_outro_subtitle" : stats_outro_subtitle,
                                     "stats_order_by_plays" : stats_order_by_plays,
                                     "stats_order_by_duration" : stats_order_by_duration,
+                                    "stats_top_list_length" : stats_top_list_length,
                                     "get_user_movie_stats" : get_user_movie_stats,
                                     "get_user_movie_stats_title" : get_user_movie_stats_title,
                                     "get_user_movie_stats_subtitle" : get_user_movie_stats_subtitle,
@@ -1845,6 +1857,9 @@ function set_wrapperr_customization_call() {
                             };
 
     var wrapperr_customization_data = JSON.stringify(wrapperr_customization_form);
+
+    // Debug line
+    // console.log(wrapperr_customization_data);
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -2397,6 +2412,7 @@ function get_config(cookie) {
                 stats_intro_subtitle = result.data.wrapperr_customize.stats_intro_subtitle;
                 stats_outro_title = result.data.wrapperr_customize.stats_outro_title;
                 stats_outro_subtitle = result.data.wrapperr_customize.stats_outro_subtitle;
+                stats_top_list_length = result.data.wrapperr_customize.stats_top_list_length;
 
                 get_user_movie_stats = result.data.wrapperr_customize.get_user_movie_stats;
                 get_user_movie_stats_title = result.data.wrapperr_customize.get_user_movie_stats_title;

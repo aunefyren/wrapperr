@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.0.3"
+var wrapperr_version_parameter = "v3.0.4"
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
 
@@ -123,6 +123,7 @@ func CreateConfigFile() error {
 	config.TautulliConfig.TautulliGrouping = true
 	config.CreateShareLinks = true
 	config.WinterTheme = true
+	config.WrapperrCustomize.StatsTopListLength = 10
 	config.WrapperrCustomize.StatsOrderByDuration = true
 	config.WrapperrCustomize.StatsOrderByPlays = true
 	config.WrapperrCustomize.GetUserMovieStats = true
@@ -225,6 +226,10 @@ func GetConfig() (*WrapperrConfig, error) {
 	// Set Tautulli port to 80 if none is set
 	if config.TautulliConfig.TautulliPort == 0 {
 		config.TautulliConfig.TautulliPort = config_default.TautulliConfig.TautulliPort
+	}
+
+	if config.WrapperrCustomize.StatsTopListLength < 0 {
+		config.WrapperrCustomize.StatsTopListLength = config_default.WrapperrCustomize.StatsTopListLength
 	}
 
 	if config.WrapperrCustomize.WrapperrFrontPageTitle == "" {

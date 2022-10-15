@@ -368,7 +368,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 	end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 	start_loop_date := time.Unix(int64(config.WrappedStart), 0)
-	top_list_limit := 10
+	top_list_limit := config.WrapperrCustomize.StatsTopListLength
 
 	var wrapperr_user_movie []TautulliEntry
 	var wrapperr_user_episode []TautulliEntry
@@ -695,7 +695,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_movie, "Duration")
 		count := 0
 		for _, entry := range wrapperr_user_movie {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMovies.Data.MoviesDuration = append(wrapperr_reply.User.UserMovies.Data.MoviesDuration, entry)
@@ -706,7 +706,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_movie, "Plays")
 		count = 0
 		for _, entry := range wrapperr_user_movie {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMovies.Data.MoviesPlays = append(wrapperr_reply.User.UserMovies.Data.MoviesPlays, entry)
@@ -756,7 +756,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_show, "Duration")
 		count := 0
 		for _, entry := range wrapperr_user_show {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserShows.Data.ShowsDuration = append(wrapperr_reply.User.UserShows.Data.ShowsDuration, entry)
@@ -767,7 +767,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_show, "Plays")
 		count = 0
 		for _, entry := range wrapperr_user_show {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserShows.Data.ShowsPlays = append(wrapperr_reply.User.UserShows.Data.ShowsPlays, entry)
@@ -808,7 +808,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_track, "Duration")
 		count := 0
 		for _, entry := range wrapperr_user_track {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.TracksDuration = append(wrapperr_reply.User.UserMusic.Data.TracksDuration, entry)
@@ -819,7 +819,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_track, "Plays")
 		count = 0
 		for _, entry := range wrapperr_user_track {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.TracksPlays = append(wrapperr_reply.User.UserMusic.Data.TracksPlays, entry)
@@ -830,7 +830,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_album, "Duration")
 		count = 0
 		for _, entry := range wrapperr_user_album {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.AlbumsDuration = append(wrapperr_reply.User.UserMusic.Data.AlbumsDuration, entry)
@@ -841,7 +841,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_album, "Plays")
 		count = 0
 		for _, entry := range wrapperr_user_album {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.AlbumsPlays = append(wrapperr_reply.User.UserMusic.Data.AlbumsPlays, entry)
@@ -852,7 +852,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_artist, "Duration")
 		count = 0
 		for _, entry := range wrapperr_user_artist {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.ArtistsDuration = append(wrapperr_reply.User.UserMusic.Data.ArtistsDuration, entry)
@@ -863,7 +863,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_user_artist, "Plays")
 		count = 0
 		for _, entry := range wrapperr_user_artist {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.User.UserMusic.Data.ArtistsPlays = append(wrapperr_reply.User.UserMusic.Data.ArtistsPlays, entry)
@@ -909,7 +909,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_movie, "Duration")
 		count := 0
 		for _, entry := range wrapperr_year_movie {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration = append(wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration, entry)
@@ -920,7 +920,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_movie, "Plays")
 		count = 0
 		for _, entry := range wrapperr_year_movie {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays = append(wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays, entry)
@@ -953,7 +953,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_show, "Duration")
 		count := 0
 		for _, entry := range wrapperr_year_show {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearShows.Data.ShowsDuration = append(wrapperr_reply.YearStats.YearShows.Data.ShowsDuration, entry)
@@ -964,7 +964,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_show, "Plays")
 		count = 0
 		for _, entry := range wrapperr_year_show {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearShows.Data.ShowsPlays = append(wrapperr_reply.YearStats.YearShows.Data.ShowsPlays, entry)
@@ -997,7 +997,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_artist, "Duration")
 		count := 0
 		for _, entry := range wrapperr_year_artist {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration = append(wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration, entry)
@@ -1008,7 +1008,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_artist, "Plays")
 		count = 0
 		for _, entry := range wrapperr_year_artist {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays = append(wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays, entry)
@@ -1046,7 +1046,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_user, "Duration")
 		count := 0
 		for _, entry := range wrapperr_year_user {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearUsers.Data.UsersDuration = append(wrapperr_reply.YearStats.YearUsers.Data.UsersDuration, entry)
@@ -1057,7 +1057,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		sortutil.DescByField(wrapperr_year_user, "Plays")
 		count = 0
 		for _, entry := range wrapperr_year_user {
-			if count >= top_list_limit {
+			if count >= top_list_limit && top_list_limit != 0 {
 				break
 			}
 			wrapperr_reply.YearStats.YearUsers.Data.UsersPlays = append(wrapperr_reply.YearStats.YearUsers.Data.UsersPlays, entry)

@@ -78,6 +78,7 @@ type WrapperrCustomize struct {
 	StatsOutroSubtitle                          string `json:"stats_outro_subtitle"`
 	StatsOrderByPlays                           bool   `json:"stats_order_by_plays"`
 	StatsOrderByDuration                        bool   `json:"stats_order_by_duration"`
+	StatsTopListLength                          int    `json:"stats_top_list_length"`
 	GetUserMovieStats                           bool   `json:"get_user_movie_stats"`
 	GetUserMovieStatsTitle                      string `json:"get_user_movie_stats_title"`
 	GetUserMovieStatsSubtitle                   string `json:"get_user_movie_stats_subtitle"`
