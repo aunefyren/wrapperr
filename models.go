@@ -148,6 +148,7 @@ type WrapperrCustomize struct {
 	GetYearStatsMusic                           bool   `json:"get_year_stats_music"`
 	GetYearStatsMusicTitle                      string `json:"get_year_stats_music_title"`
 	GetYearStatsLeaderboard                     bool   `json:"get_year_stats_leaderboard"`
+	GetYearStatsLeaderboardNumbers              bool   `json:"get_year_stats_leaderboard_numbers"`
 	GetYearStatsLeaderboardTitle                string `json:"get_year_stats_leaderboard_title"`
 	GetYearStatsMoviesDurationTitle             string `json:"get_year_stats_movies_duration_title"`
 	GetYearStatsShowsDurationTitle              string `json:"get_year_stats_shows_duration_title"`

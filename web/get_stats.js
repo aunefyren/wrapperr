@@ -782,16 +782,22 @@ function top_list_names(array, title, div_id) {
                     html += "<div class='number'>";
                         html += i+1 + ". ";
                     html += "</div>";
+ 
+                    html += "<div class='name'>";
+                    
+                        html += array[i].user;
 
-                    if(array[i].user == results.user.name) {
-                        html += "<div class='name you'>";
-                            html += array[i].user;
-                        html += "</div>";
-                    }else {
-                        html += "<div class='name'>";
-                            html += array[i].user;
-                        html += "</div>";
-                    }
+                        if(array[i].duration !== 0 && array[i].plays !== 0) {
+                            var duration_string = seconds_to_time(array[i].duration, true);
+                            html += "<br>"
+                            html += duration_string
+
+                            html += "<br>"
+                            html += play_plays(array[i].plays)
+                        }
+
+                    html += "</div>";
+
                 html += "</div>";
             }
             html += "</div>";

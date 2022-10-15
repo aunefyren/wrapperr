@@ -1349,6 +1349,15 @@ function set_wrapperr_customization() {
     html += '/><br>';
     html += '</div>';
 
+    html += '<div class="form-group">';
+    html += '<label for="get_year_stats_leaderboard_numbers" title="Displays the statistics of users on the leaderboard.">Display server-wide leaderboard numbers:<br>';
+    html += '<input type="checkbox" class="form-control" id="get_year_stats_leaderboard_numbers" ';
+    if(get_year_stats_leaderboard_numbers) {
+        html += 'checked="' + get_year_stats_leaderboard_numbers + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
     html += '</div>';
 
@@ -1733,6 +1742,7 @@ function set_wrapperr_customization_call() {
     get_year_stats_music_title = document.getElementById('get_year_stats_music_title').value;
     get_year_stats_music_duration_title = document.getElementById('get_year_stats_music_duration_title').value;
     get_year_stats_leaderboard = document.getElementById('get_year_stats_leaderboard').checked;
+    get_year_stats_leaderboard_numbers = document.getElementById('get_year_stats_leaderboard_numbers').checked;
     get_year_stats_leaderboard_title = document.getElementById('get_year_stats_leaderboard_title').value;
     get_year_stats_duration_sum_title = document.getElementById('get_year_stats_duration_sum_title').value;
     clear_cache = document.getElementById('clear_cache').checked;
@@ -1838,6 +1848,7 @@ function set_wrapperr_customization_call() {
                                     "get_year_stats_music_title" : get_year_stats_music_title,
                                     "get_year_stats_music_duration_title" : get_year_stats_music_duration_title,
                                     "get_year_stats_leaderboard" : get_year_stats_leaderboard,
+                                    "get_year_stats_leaderboard_numbers" : get_year_stats_leaderboard_numbers,
                                     "get_year_stats_leaderboard_title" : get_year_stats_leaderboard_title,
                                     "get_year_stats_duration_sum_title" : get_year_stats_duration_sum_title,
                                     "wrapperr_and" : wrapperr_and,
@@ -2489,6 +2500,7 @@ function get_config(cookie) {
                 get_year_stats_music_title = result.data.wrapperr_customize.get_year_stats_music_title;
                 get_year_stats_music_duration_title = result.data.wrapperr_customize.get_year_stats_music_duration_title;
                 get_year_stats_leaderboard = result.data.wrapperr_customize.get_year_stats_leaderboard;
+                get_year_stats_leaderboard_numbers = result.data.wrapperr_customize.get_year_stats_leaderboard_numbers;
                 get_year_stats_leaderboard_title = result.data.wrapperr_customize.get_year_stats_leaderboard_title;
                 get_year_stats_duration_sum_title = result.data.wrapperr_customize.get_year_stats_duration_sum_title;
                 

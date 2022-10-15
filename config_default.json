@@ -78,6 +78,7 @@
         "get_year_stats_music":true,
         "get_year_stats_music_title":"Top artists",
         "get_year_stats_leaderboard":true,
+        "get_year_stats_leaderboard_number":false,
         "get_year_stats_leaderboard_title":"Top users",
         "get_year_stats_movies_duration_title":"All users combined spent {movie_duration_sum} watching movies.",
         "get_year_stats_shows_duration_title":"All users combined spent {show_duration_sum} watching shows.",

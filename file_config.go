@@ -134,6 +134,7 @@ func CreateConfigFile() error {
 	config.WrapperrCustomize.GetYearStatsShows = true
 	config.WrapperrCustomize.GetYearStatsMusic = true
 	config.WrapperrCustomize.GetYearStatsLeaderboard = true
+	config.WrapperrCustomize.GetYearStatsLeaderboardNumbers = false
 
 	err := SaveConfig(&config)
 	if err != nil {

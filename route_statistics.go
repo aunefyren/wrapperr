@@ -1066,6 +1066,26 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 		wrapperr_reply.YearStats.YearMovies.Message = "All users processed."
 
+		// Scrub the data after ordering array
+		if !config.WrapperrCustomize.GetYearStatsLeaderboardNumbers {
+			for index, _ := range wrapperr_reply.YearStats.YearUsers.Data.UsersPlays {
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].Duration = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].DurationArtists = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].DurationMovies = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].DurationShows = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].Plays = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersPlays[index].PausedCounter = 0
+			}
+			for index, _ := range wrapperr_reply.YearStats.YearUsers.Data.UsersDuration {
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].Duration = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].DurationArtists = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].DurationMovies = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].DurationShows = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].Plays = 0
+				wrapperr_reply.YearStats.YearUsers.Data.UsersDuration[index].PausedCounter = 0
+			}
+		}
+
 	} else {
 		wrapperr_reply.YearStats.YearUsers.Data.UsersDuration = []WrapperrYearUserEntry{}
 		wrapperr_reply.YearStats.YearUsers.Data.UsersPlays = []WrapperrYearUserEntry{}

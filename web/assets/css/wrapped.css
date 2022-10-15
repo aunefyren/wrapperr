@@ -297,11 +297,20 @@ img {
 .item:hover {
   background-color: var(--black) !important;
   border-radius: 0.5em;
+  margin: 0.5em 0;
+  max-height: none;
 }
 
 .item {
   padding: 0.5em;
   display: flex;
+  justify-content: space-between;
+  transition: 1s;
+}
+
+.item-expandable {
+  max-height: 1.25em;
+  overflow-y: hidden;
 }
 
 .gold {
@@ -338,9 +347,7 @@ img {
   text-align: right;
   margin: 0.1em;
   display: inline-block;
-  width: 10%;
   vertical-align: top;
-  float: left;
 }
 
 .info {
@@ -355,8 +362,6 @@ img {
   text-align: right;
   margin: 0.1em;
   display: inline-block;
-  width: 90%;
-  vertical: center;
   text-overflow: ellipsis;
   vertical-align: top;
 }
@@ -366,7 +371,6 @@ img {
 }
 
 .movie_name {
-  width: 90%;
   text-align: right;
   display: inline-block;
   margin: 0.1em;
@@ -376,7 +380,6 @@ img {
 }
 
 .info_name {
-  width: 14em;
   text-align: right;
   display: inline-block;
   margin: 0.1em;
