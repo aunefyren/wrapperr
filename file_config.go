@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.0.4"
+var wrapperr_version_parameter = "v3.1.0"
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
 
@@ -36,7 +36,7 @@ func GetConfigState() (bool, error) {
 	}
 
 	// Check if certain parameters are set. These are essential paramteres the user must configure for basic functionality.
-	if config.TautulliConfig.TautulliApiKey != "" && config.TautulliConfig.TautulliIP != "" && config.TautulliConfig.TautulliLength != 0 && config.Timezone != "" && config.WrappedStart != 0 && config.WrappedEnd != 0 && config.WrapperrVersion != "" {
+	if config.TautulliConfig[0].TautulliApiKey != "" && config.TautulliConfig[0].TautulliIP != "" && config.TautulliConfig[0].TautulliLength != 0 && config.Timezone != "" && config.WrappedStart != 0 && config.WrappedEnd != 0 && config.WrapperrVersion != "" {
 		return true, nil
 	} else {
 		return false, nil
@@ -120,7 +120,12 @@ func CreateConfigFile() error {
 	config.UseCache = true
 	config.PlexAuth = true
 	config.UseLogs = true
-	config.TautulliConfig.TautulliGrouping = true
+
+	var tautulli_config = TautulliConfig{
+		TautulliGrouping: true,
+	}
+	config.TautulliConfig = append(config.TautulliConfig, tautulli_config)
+
 	config.CreateShareLinks = true
 	config.WinterTheme = true
 	config.WrapperrCustomize.StatsTopListLength = 10
@@ -219,14 +224,14 @@ func GetConfig() (*WrapperrConfig, error) {
 		config.WrappedEnd = config_default.WrappedEnd // If no start time, set to 31 Dec
 	}
 
-	// Set Tautulli length to 5000 if none is set
-	if config.TautulliConfig.TautulliLength == 0 {
-		config.TautulliConfig.TautulliLength = config_default.TautulliConfig.TautulliLength
+	// Set Tautulli length to 5000 if zero is set
+	if config.TautulliConfig[0].TautulliLength == 0 {
+		config.TautulliConfig[0].TautulliLength = config_default.TautulliConfig[0].TautulliLength
 	}
 
-	// Set Tautulli port to 80 if none is set
-	if config.TautulliConfig.TautulliPort == 0 {
-		config.TautulliConfig.TautulliPort = config_default.TautulliConfig.TautulliPort
+	// Set Tautulli port to 80 if zero is set
+	if config.TautulliConfig[0].TautulliPort == 0 {
+		config.TautulliConfig[0].TautulliPort = config_default.TautulliConfig[0].TautulliPort
 	}
 
 	if config.WrapperrCustomize.StatsTopListLength < 0 {

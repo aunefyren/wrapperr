@@ -39,7 +39,7 @@ type AdminConfig struct {
 }
 
 type WrapperrConfig struct {
-	TautulliConfig    TautulliConfig    `json:"tautulli_config"`
+	TautulliConfig    []TautulliConfig  `json:"tautulli_config"`
 	WrapperrCustomize WrapperrCustomize `json:"wrapperr_customize"`
 	WrapperrVersion   string            `json:"wrapperr_version"`
 	Timezone          string            `json:"timezone"`
@@ -67,6 +67,8 @@ type TautulliConfig struct {
 	TautulliLibraries string `json:"tautulli_libraries"`
 	TautulliGrouping  bool   `json:"tautulli_grouping"`
 	TautulliHttps     bool   `json:"tautulli_https"`
+	TautulliName      string `json:"tautulli_name"`
+	TautulliID        int    `json:"tautulli_id"`
 }
 
 type WrapperrCustomize struct {
@@ -211,7 +213,7 @@ type WrapperrFunctions struct {
 type SetWrapperrConfig struct {
 	ClearCache        bool              `json:"clear_cache"`
 	DataType          string            `json:"data_type"`
-	TautulliConfig    TautulliConfig    `json:"tautulli_config"`
+	TautulliConfig    []TautulliConfig  `json:"tautulli_config"`
 	WrapperrCustomize WrapperrCustomize `json:"wrapperr_customize"`
 	WrapperrData      struct {
 		UseCache         bool   `json:"use_cache"`

@@ -38,15 +38,18 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("1. Configuration check passed." + ip_string)
 
-	tautulli_state, err := TautulliTestConnection(config.TautulliConfig.TautulliPort, config.TautulliConfig.TautulliIP, config.TautulliConfig.TautulliHttps, config.TautulliConfig.TautulliRoot, config.TautulliConfig.TautulliApiKey)
-	if err != nil {
-		log.Println(err)
-		respond_default_error(w, r, errors.New("Failed to reach Tautulli server."), 500)
-		return
-	} else if !tautulli_state {
-		log.Println("Failed to ping Tautulli server before retrieving statistics.")
-		respond_default_error(w, r, errors.New("Failed to reach Tautulli server."), 400)
-		return
+	// Check every Tautulli server
+	for i := 0; i < len(config.TautulliConfig); i++ {
+		tautulli_state, err := TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
+		if err != nil {
+			log.Println(err)
+			respond_default_error(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 500)
+			return
+		} else if !tautulli_state {
+			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
+			respond_default_error(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 400)
+			return
+		}
 	}
 
 	log.Println("2. Tautulli check passed." + ip_string)
@@ -105,15 +108,24 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// If no auth has been passed, caching mode is false, and user is not admin, search for the Plex details using Tautulli and PlexIdentity
 	if !auth_passed && !wrapperr_request.CachingMode && !admin {
-		new_id, new_username, err := TautulliGetUserId(config.TautulliConfig.TautulliPort, config.TautulliConfig.TautulliIP, config.TautulliConfig.TautulliHttps, config.TautulliConfig.TautulliRoot, config.TautulliConfig.TautulliApiKey, wrapperr_request.PlexIdentity)
-		if err != nil {
-			log.Println(err)
-			respond_default_error(w, r, errors.New("Could not find user."), 500)
-			return
+
+		UserNameFound := false
+
+		for i := 0; i < len(config.TautulliConfig); i++ {
+			new_id, new_username, err := TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
+
+			if err == nil {
+				UserNameFound = true
+				user_name = new_username
+				user_id = new_id
+			}
 		}
 
-		user_name = new_username
-		user_id = new_id
+		if !UserNameFound {
+			log.Println(err)
+			respond_default_error(w, r, errors.New("Could not find a matching user."), 500)
+			return
+		}
 	}
 
 	// If caching mode is false and user is admin, return bad request error
@@ -222,141 +234,148 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int, config *WrapperrConfig) ([]WrapperrDay, bool, error) {
 
-	// Define object with end date from wrapped period
-	end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
-
 	// Define variables
 	var complete_date_loop bool = true
 	var use_loop_interval bool = true
+	var found_date bool = false
+	var found_date_index int = 0
 
-	// If loop_interval is less than one, do not utilize the loop interval and set use_loop_interval to false
-	if loop_interval < 1 {
-		use_loop_interval = false
-	}
+	// Go through each Tautulli server
+	for q := 0; q < len(config.TautulliConfig); q++ {
 
-	// Split the string containing libraries. If the result is zero, set the first object in the array to an empty string
-	libraries := strings.Split(config.TautulliConfig.TautulliLibraries, ",")
-	if len(libraries) < 1 {
-		libraries[0] = ""
-	}
+		// Define object with end date from wrapped period
+		end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 
-	// Create a date time object containing the beginning of the wrapped period. If that date time object is before the end_loop_date variable, keep adding one day, each iteration
-	for loop_time := time.Unix(int64(config.WrappedStart), 0); !loop_time.After(end_loop_date); loop_time = loop_time.AddDate(0, 0, 1) {
-
-		// Define string variable with current iteration date and variable with date time containing the current local time
-		current_loop_date := loop_time.Format("2006-01-02")
-		now := time.Now()
-
-		// Stop if time has reached current time or end loop date
-		if loop_time.After(now) || loop_time.After(end_loop_date) {
-			break
+		// If loop_interval is less than one, do not utilize the loop interval and set use_loop_interval to false
+		if loop_interval < 1 {
+			use_loop_interval = false
 		}
 
-		var found_date bool = false
-		var found_date_index int = 0
-		for j := 0; j < len(wrapperr_data); j++ {
+		// Split the string containing libraries. If the result is zero, set the first object in the array to an empty string
+		libraries := strings.Split(config.TautulliConfig[q].TautulliLibraries, ",")
+		if len(libraries) < 1 {
+			libraries[0] = ""
+		}
 
-			time_temp, err := time.Parse("2006-01-02", wrapperr_data[j].Date)
-			if err != nil {
-				log.Println(err)
-			}
+		// Create a date time object containing the beginning of the wrapped period. If that date time object is before the end_loop_date variable, keep adding one day, each iteration
+		for loop_time := time.Unix(int64(config.WrappedStart), 0); !loop_time.After(end_loop_date); loop_time = loop_time.AddDate(0, 0, 1) {
 
-			if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
-				found_date_index = j
-				found_date = true
+			// Define string variable with current iteration date and variable with date time containing the current local time
+			current_loop_date := loop_time.Format("2006-01-02")
+			now := time.Now()
+
+			// Stop if time has reached current time or end loop date
+			if loop_time.After(now) || loop_time.After(end_loop_date) {
 				break
 			}
 
-		}
-
-		if found_date && wrapperr_data[found_date_index].DataComplete {
-			continue
-		} else if found_date && !wrapperr_data[found_date_index].DataComplete {
-			log.Println("Date " + current_loop_date + " marked as incomplete in cache. Refreshing.")
-		} else if !found_date {
-			log.Println("Downloading day: " + current_loop_date)
-		} else {
-			log.Println("Unknown date error. Skipping.")
-			continue
-		}
-
-		// Clean array to populate with results
-		wrapperr_day := WrapperrDay{
-			Date:         current_loop_date,
-			Data:         nil,
-			DataComplete: true,
-		}
-
-		// Loop through selected libraries
-		for library_loop := 0; library_loop < len(libraries); library_loop++ {
-
-			var library_str string = ""
-			var grouping string = ""
-
-			// If no libraries are selected do not specify one in API call to Tautulli
-			if libraries[library_loop] == "" {
-				library_str = ""
-			} else {
-				library_str = "&section_id=" + strings.TrimSpace(libraries[library_loop])
+			// Clean array to populate with results
+			wrapperr_day := WrapperrDay{
+				Date:         current_loop_date,
+				Data:         nil,
+				DataComplete: true,
 			}
 
-			if config.TautulliConfig.TautulliGrouping {
-				grouping = "1"
-			} else {
-				grouping = "0"
-			}
+			found_date = false
+			found_date_index = 0
+			for j := 0; j < len(wrapperr_data); j++ {
 
-			tautulli_data, err := TautulliDownloadStatistics(config.TautulliConfig.TautulliPort, config.TautulliConfig.TautulliIP, config.TautulliConfig.TautulliHttps, config.TautulliConfig.TautulliRoot, config.TautulliConfig.TautulliApiKey, config.TautulliConfig.TautulliLength, library_str, grouping, current_loop_date)
-			if err != nil {
-				log.Println(err)
-			}
-
-			for j := 0; j < len(tautulli_data); j++ {
-				if tautulli_data[j].MediaType == "movie" || tautulli_data[j].MediaType == "episode" || tautulli_data[j].MediaType == "track" {
-					tautulli_entry := TautulliEntry{
-						Date:                 tautulli_data[j].Date,
-						RowID:                tautulli_data[j].RowID,
-						Duration:             tautulli_data[j].Duration,
-						FriendlyName:         tautulli_data[j].FriendlyName,
-						FullTitle:            tautulli_data[j].FullTitle,
-						GrandparentRatingKey: tautulli_data[j].GrandparentRatingKey,
-						GrandparentTitle:     tautulli_data[j].GrandparentTitle,
-						OriginalTitle:        tautulli_data[j].OriginalTitle,
-						MediaType:            tautulli_data[j].MediaType,
-						ParentRatingKey:      tautulli_data[j].ParentRatingKey,
-						ParentTitle:          tautulli_data[j].ParentTitle,
-						PausedCounter:        tautulli_data[j].PausedCounter,
-						PercentComplete:      tautulli_data[j].PercentComplete,
-						RatingKey:            tautulli_data[j].RatingKey,
-						Title:                tautulli_data[j].Title,
-						User:                 tautulli_data[j].User,
-						UserID:               tautulli_data[j].UserID,
-						Year:                 tautulli_data[j].Year,
-					}
-
-					wrapperr_day.Data = append(wrapperr_day.Data, tautulli_entry)
+				time_temp, err := time.Parse("2006-01-02", wrapperr_data[j].Date)
+				if err != nil {
+					log.Println(err)
 				}
+
+				if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
+					found_date_index = j
+					found_date = true
+					break
+				}
+
 			}
 
-		}
+			if found_date && wrapperr_data[found_date_index].DataComplete {
+				continue
+			} else if found_date && !wrapperr_data[found_date_index].DataComplete {
+				log.Println("Date " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "' marked as incomplete in cache. Refreshing.")
+			} else if !found_date {
+				log.Println("Downloading day: " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "'.")
+			} else {
+				log.Println("Unknown date error from server '" + config.TautulliConfig[q].TautulliName + "'. Skipping.")
+				continue
+			}
 
-		if loop_time.Format("2006-01-02") == now.Format("2006-01-02") {
-			wrapperr_day.DataComplete = false
-		}
+			// Loop through selected libraries
+			for library_loop := 0; library_loop < len(libraries); library_loop++ {
 
-		if found_date {
-			wrapperr_data[found_date_index] = wrapperr_day
-		} else {
-			wrapperr_data = append(wrapperr_data, wrapperr_day)
-		}
+				var library_str string = ""
+				var grouping string = ""
 
-		if loop_interval > 0 && use_loop_interval {
-			loop_interval -= 1
-		}
+				// If no libraries are selected do not specify one in API call to Tautulli
+				if libraries[library_loop] == "" {
+					library_str = ""
+				} else {
+					library_str = "&section_id=" + strings.TrimSpace(libraries[library_loop])
+				}
 
-		if loop_interval == 0 && use_loop_interval {
-			complete_date_loop = false
-			break
+				if config.TautulliConfig[q].TautulliGrouping {
+					grouping = "1"
+				} else {
+					grouping = "0"
+				}
+
+				tautulli_data, err := TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
+				if err != nil {
+					log.Println(err)
+				}
+
+				for j := 0; j < len(tautulli_data); j++ {
+					if tautulli_data[j].MediaType == "movie" || tautulli_data[j].MediaType == "episode" || tautulli_data[j].MediaType == "track" {
+						tautulli_entry := TautulliEntry{
+							Date:                 tautulli_data[j].Date,
+							RowID:                tautulli_data[j].RowID,
+							Duration:             tautulli_data[j].Duration,
+							FriendlyName:         tautulli_data[j].FriendlyName,
+							FullTitle:            tautulli_data[j].FullTitle,
+							GrandparentRatingKey: tautulli_data[j].GrandparentRatingKey,
+							GrandparentTitle:     tautulli_data[j].GrandparentTitle,
+							OriginalTitle:        tautulli_data[j].OriginalTitle,
+							MediaType:            tautulli_data[j].MediaType,
+							ParentRatingKey:      tautulli_data[j].ParentRatingKey,
+							ParentTitle:          tautulli_data[j].ParentTitle,
+							PausedCounter:        tautulli_data[j].PausedCounter,
+							PercentComplete:      tautulli_data[j].PercentComplete,
+							RatingKey:            tautulli_data[j].RatingKey,
+							Title:                tautulli_data[j].Title,
+							User:                 tautulli_data[j].User,
+							UserID:               tautulli_data[j].UserID,
+							Year:                 tautulli_data[j].Year,
+						}
+
+						wrapperr_day.Data = append(wrapperr_day.Data, tautulli_entry)
+					}
+				}
+
+			}
+
+			if loop_time.Format("2006-01-02") == now.Format("2006-01-02") {
+				wrapperr_day.DataComplete = false
+			}
+
+			if found_date {
+				wrapperr_data[found_date_index] = wrapperr_day
+			} else {
+				wrapperr_data = append(wrapperr_data, wrapperr_day)
+			}
+
+			if loop_interval > 0 && use_loop_interval {
+				loop_interval -= 1
+			}
+
+			if loop_interval == 0 && use_loop_interval {
+				complete_date_loop = false
+				break
+			}
+
 		}
 
 	}

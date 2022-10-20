@@ -99,10 +99,14 @@
         "wrapperr_sort_duration":"Sort by duration",
         "get_user_show_stats_buddy":true
     },
-    "tautulli_config": {
-        "tautulli_port": 80,
-        "tautulli_length": 5000
-    },
+    "tautulli_config": [
+        {
+            "tautulli_name" : "Tautulli",
+            "tautulli_id": 0,
+            "tautulli_port": 80,
+            "tautulli_length": 5000
+        }
+    ],
     "wrapped_start": 1640991600,
     "wrapped_end": 1672527540,
     "wrapperr_port" : 8282,
