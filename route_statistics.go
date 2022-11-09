@@ -1023,7 +1023,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 			count += 1
 		}
 
-		// Sort year show array by plays
+		// Sort year artist array by plays
 		sortutil.DescByField(wrapperr_year_artist, "Plays")
 		count = 0
 		for _, entry := range wrapperr_year_artist {
