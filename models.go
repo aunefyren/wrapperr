@@ -58,6 +58,26 @@ type WrapperrConfig struct {
 	WinterTheme       bool              `json:"winter_theme"`
 }
 
+type WrapperrConfigLegacy struct {
+	TautulliConfig    TautulliConfigLegacy `json:"tautulli_config"`
+	WrapperrCustomize WrapperrCustomize    `json:"wrapperr_customize"`
+	WrapperrVersion   string               `json:"wrapperr_version"`
+	Timezone          string               `json:"timezone"`
+	ApplicationName   string               `json:"application_name"`
+	ApplicationURL    string               `json:"application_url"`
+	UseCache          bool                 `json:"use_cache"`
+	UseLogs           bool                 `json:"use_logs"`
+	ClientKey         string               `json:"client_key"`
+	WrapperrRoot      string               `json:"wrapperr_root"`
+	PrivateKey        string               `json:"private_key"`
+	CreateShareLinks  bool                 `json:"create_share_links"`
+	WrappedStart      int                  `json:"wrapped_start"`
+	WrappedEnd        int                  `json:"wrapped_end"`
+	WrapperrPort      int                  `json:"wrapperr_port"`
+	PlexAuth          bool                 `json:"plex_auth"`
+	WinterTheme       bool                 `json:"winter_theme"`
+}
+
 type TautulliConfig struct {
 	TautulliApiKey    string `json:"tautulli_apikey"`
 	TautulliIP        string `json:"tautulli_ip"`
@@ -68,6 +88,18 @@ type TautulliConfig struct {
 	TautulliGrouping  bool   `json:"tautulli_grouping"`
 	TautulliHttps     bool   `json:"tautulli_https"`
 	TautulliName      string `json:"tautulli_name"`
+	TautulliID        int    `json:"tautulli_id"`
+}
+
+type TautulliConfigLegacy struct {
+	TautulliApiKey    string `json:"tautulli_apikey"`
+	TautulliIP        string `json:"tautulli_ip"`
+	TautulliPort      int    `json:"tautulli_port"`
+	TautulliLength    int    `json:"tautulli_length"`
+	TautulliRoot      string `json:"tautulli_root"`
+	TautulliLibraries string `json:"tautulli_libraries"`
+	TautulliGrouping  bool   `json:"tautulli_grouping"`
+	TautulliHttps     bool   `json:"tautulli_https"`
 	TautulliID        int    `json:"tautulli_id"`
 }
 
@@ -382,9 +414,10 @@ type TautulliGetUsersReply struct {
 }
 
 type WrapperrDay struct {
-	Date         string          `json:"date"`
-	Data         []TautulliEntry `json:"data"`
-	DataComplete bool            `json:"data_complete"`
+	Date            string          `json:"date"`
+	Data            []TautulliEntry `json:"data"`
+	DataComplete    bool            `json:"data_complete"`
+	TautulliServers []string        `json:"tautulli_servers"`
 }
 
 type TautulliEntry struct {

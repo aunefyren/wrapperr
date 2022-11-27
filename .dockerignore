@@ -1,0 +1,4 @@
+config/*
+!config/README.md
+wrapperr.exe
+wrapperr

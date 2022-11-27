@@ -40,6 +40,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// Check every Tautulli server
 	for i := 0; i < len(config.TautulliConfig); i++ {
+		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'." + ip_string)
 		tautulli_state, err := TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
 		if err != nil {
 			log.Println(err)
@@ -243,6 +244,9 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 	// Go through each Tautulli server
 	for q := 0; q < len(config.TautulliConfig); q++ {
 
+		// Log Tautulli server
+		log.Println("Checking Tautulli server '" + config.TautulliConfig[q].TautulliName + "'.")
+
 		// Define object with end date from wrapped period
 		end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 
@@ -271,13 +275,15 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 
 			// Clean array to populate with results
 			wrapperr_day := WrapperrDay{
-				Date:         current_loop_date,
-				Data:         nil,
-				DataComplete: true,
+				Date:            current_loop_date,
+				Data:            nil,
+				DataComplete:    true,
+				TautulliServers: []string{},
 			}
 
 			found_date = false
 			found_date_index = 0
+			tautulli_server_processed := false
 			for j := 0; j < len(wrapperr_data); j++ {
 
 				time_temp, err := time.Parse("2006-01-02", wrapperr_data[j].Date)
@@ -288,16 +294,30 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 				if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
 					found_date_index = j
 					found_date = true
+
+					for y := 0; y < len(wrapperr_data[j].TautulliServers); y++ {
+						if wrapperr_data[j].TautulliServers[y] == config.TautulliConfig[q].TautulliName {
+							tautulli_server_processed = true
+						}
+					}
+
+					wrapperr_day.TautulliServers = wrapperr_data[j].TautulliServers
+
 					break
 				}
 
 			}
 
-			if found_date && wrapperr_data[found_date_index].DataComplete {
+			if found_date && wrapperr_data[found_date_index].DataComplete && tautulli_server_processed {
 				continue
 			} else if found_date && !wrapperr_data[found_date_index].DataComplete {
+
 				log.Println("Date " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "' marked as incomplete in cache. Refreshing.")
-			} else if !found_date {
+
+				// Remove server downloads for date as it is incomplete
+				wrapperr_day.TautulliServers = []string{}
+
+			} else if !found_date || !tautulli_server_processed {
 				log.Println("Downloading day: " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "'.")
 			} else {
 				log.Println("Unknown date error from server '" + config.TautulliConfig[q].TautulliName + "'. Skipping.")
@@ -359,6 +379,14 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 
 			if loop_time.Format("2006-01-02") == now.Format("2006-01-02") {
 				wrapperr_day.DataComplete = false
+			}
+
+			if wrapperr_day.TautulliServers == nil || len(wrapperr_day.TautulliServers) == 0 {
+				var servers []string
+				servers = append(servers, config.TautulliConfig[q].TautulliName)
+				wrapperr_day.TautulliServers = servers
+			} else {
+				wrapperr_day.TautulliServers = append(wrapperr_day.TautulliServers, config.TautulliConfig[q].TautulliName)
 			}
 
 			if found_date {

@@ -161,26 +161,59 @@ func GetConfig() (*WrapperrConfig, error) {
 		}
 	}
 
+	// Load config file
 	file, err := os.Open(config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the file.")
 		return nil, err
 	}
 	defer file.Close()
+
+	// Parse config file
 	decoder := json.NewDecoder(file)
 	config := WrapperrConfig{}
 	err = decoder.Decode(&config)
 	if err != nil {
-		log.Println("Get config file threw error trying to parse the file.")
-		return nil, err
+
+		log.Println("Failed to parse config file. Replacing, but saving backup.")
+
+		new_save_loc := config_path + "." + uuid.NewString() + ".replaced"
+		err = os.Rename(config_path, new_save_loc)
+		if err != nil {
+			log.Println("Failed to rename old config file.")
+			return nil, err
+		} else {
+			log.Println("Old config file saved to '" + new_save_loc + "'.")
+		}
+
+		// Load default config file
+		file, err = os.Open(default_config_path)
+		if err != nil {
+			log.Println("Get config file threw error trying to open the template file.")
+			return nil, err
+		}
+		defer file.Close()
+
+		// Parse default config file
+		decoder = json.NewDecoder(file)
+		config = WrapperrConfig{}
+		err = decoder.Decode(&config)
+		if err != nil {
+			log.Println("Get config file threw error trying to parse the template file.")
+			return nil, err
+		}
+
 	}
 
+	// Load default config file
 	file, err = os.Open(default_config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the template file.")
 		return nil, err
 	}
 	defer file.Close()
+
+	// Parse default config file
 	decoder = json.NewDecoder(file)
 	config_default := WrapperrConfig{}
 	err = decoder.Decode(&config_default)
@@ -222,6 +255,17 @@ func GetConfig() (*WrapperrConfig, error) {
 	// Set Wrapperr end time to dec if there is no time
 	if config.WrappedEnd == 0 {
 		config.WrappedEnd = config_default.WrappedEnd // If no start time, set to 31 Dec
+	}
+
+	if config.TautulliConfig == nil {
+		config.TautulliConfig = []TautulliConfig{}
+
+		NewTautulliConfig := TautulliConfig{
+			TautulliLength: config_default.TautulliConfig[0].TautulliLength,
+			TautulliPort:   config_default.TautulliConfig[0].TautulliPort,
+		}
+
+		config.TautulliConfig = append(config.TautulliConfig, NewTautulliConfig)
 	}
 
 	// Set Tautulli length to 5000 if zero is set
