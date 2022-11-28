@@ -294,6 +294,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 				if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
 					found_date_index = j
 					found_date = true
+					wrapperr_day = wrapperr_data[j]
 
 					for y := 0; y < len(wrapperr_data[j].TautulliServers); y++ {
 						if wrapperr_data[j].TautulliServers[y] == config.TautulliConfig[q].TautulliName {
@@ -301,7 +302,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 						}
 					}
 
-					wrapperr_day.TautulliServers = wrapperr_data[j].TautulliServers
+					wrapperr_day = wrapperr_data[j]
 
 					break
 				}

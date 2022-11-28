@@ -175,32 +175,68 @@ func GetConfig() (*WrapperrConfig, error) {
 	err = decoder.Decode(&config)
 	if err != nil {
 
-		log.Println("Failed to parse config file. Replacing, but saving backup.")
-
-		new_save_loc := config_path + "." + uuid.NewString() + ".replaced"
-		err = os.Rename(config_path, new_save_loc)
+		// Parse config file
+		log.Println("Failed to parse config file. Trying legacy format. Error: " + err.Error())
+		// Load config file
+		file, err := os.Open(config_path)
 		if err != nil {
-			log.Println("Failed to rename old config file.")
-			return nil, err
-		} else {
-			log.Println("Old config file saved to '" + new_save_loc + "'.")
-		}
-
-		// Load default config file
-		file, err = os.Open(default_config_path)
-		if err != nil {
-			log.Println("Get config file threw error trying to open the template file.")
+			log.Println("Get config file threw error trying to open the file.")
 			return nil, err
 		}
 		defer file.Close()
 
-		// Parse default config file
-		decoder = json.NewDecoder(file)
-		config = WrapperrConfig{}
-		err = decoder.Decode(&config)
+		decoder := json.NewDecoder(file)
+		config_legacy := WrapperrConfigLegacy{}
+		err = decoder.Decode(&config_legacy)
+
+		convert_failed := false
+
 		if err != nil {
-			log.Println("Get config file threw error trying to parse the template file.")
-			return nil, err
+
+			// Back up old config as legacy didn't work
+			log.Println("Failed to parse config file as legacy. Replacing, but saving backup. Error: " + err.Error())
+			convert_failed = true
+
+		}
+
+		if !convert_failed {
+			// Attempt to convert Go struct
+			config, err = ConvertLegacyToCurrentConfig(config, config_legacy)
+			if err != nil {
+				log.Println("Failed to convert config from legacy to modern. Replacing, but saving backup. Error: " + err.Error())
+				convert_failed = true
+			}
+
+		}
+
+		// if nothing worked, replace config file
+		if convert_failed {
+
+			// Backup old config
+			new_save_loc, err := BackUpConfig(config_path)
+			if err != nil {
+				log.Println("Failed to rename old config file.")
+				return nil, err
+			} else {
+				log.Println("Old config file saved to '" + new_save_loc + "'.")
+			}
+
+			// Load default config file
+			file, err = os.Open(default_config_path)
+			if err != nil {
+				log.Println("Get config file threw error trying to open the template file.")
+				return nil, err
+			}
+			defer file.Close()
+
+			// Parse default config file
+			decoder = json.NewDecoder(file)
+			config = WrapperrConfig{}
+			err = decoder.Decode(&config)
+			if err != nil {
+				log.Println("Get config file threw error trying to parse the template file.")
+				return nil, err
+			}
 		}
 
 	}
@@ -634,4 +670,52 @@ func GetConfig() (*WrapperrConfig, error) {
 
 	// Return config object
 	return &config, nil
+}
+
+func BackUpConfig(ConfigPath string) (string, error) {
+	new_save_loc := ConfigPath + "." + uuid.NewString() + ".replaced"
+	err := os.Rename(config_path, new_save_loc)
+	if err != nil {
+		return "", err
+	}
+	return new_save_loc, nil
+}
+
+func ConvertLegacyToCurrentConfig(config WrapperrConfig, config_legacy WrapperrConfigLegacy) (WrapperrConfig, error) {
+
+	var NewTautulli TautulliConfig
+
+	NewTautulli.TautulliApiKey = config_legacy.TautulliConfig.TautulliApiKey
+	NewTautulli.TautulliIP = config_legacy.TautulliConfig.TautulliIP
+	NewTautulli.TautulliLibraries = config_legacy.TautulliConfig.TautulliLibraries
+	NewTautulli.TautulliRoot = config_legacy.TautulliConfig.TautulliRoot
+	NewTautulli.TautulliGrouping = config_legacy.TautulliConfig.TautulliGrouping
+	NewTautulli.TautulliHttps = config_legacy.TautulliConfig.TautulliHttps
+	NewTautulli.TautulliLength = config_legacy.TautulliConfig.TautulliLength
+	NewTautulli.TautulliPort = config_legacy.TautulliConfig.TautulliPort
+
+	NewTautulli.TautulliName = "Server 1"
+
+	config.TautulliConfig = append(config.TautulliConfig, NewTautulli)
+
+	config.WrapperrCustomize = config_legacy.WrapperrCustomize
+	config.WrapperrVersion = config_legacy.WrapperrVersion
+	config.Timezone = config_legacy.Timezone
+	config.ApplicationName = config_legacy.ApplicationName
+	config.ApplicationURL = config_legacy.ApplicationURL
+	config.UseCache = config_legacy.UseCache
+	config.UseLogs = config_legacy.UseLogs
+	config.ClientKey = config_legacy.ClientKey
+	config.WrapperrRoot = config_legacy.WrapperrRoot
+	config.PrivateKey = config_legacy.PrivateKey
+	config.CreateShareLinks = config_legacy.CreateShareLinks
+	config.WrappedStart = config_legacy.WrappedStart
+	config.WrappedEnd = config_legacy.WrappedEnd
+	config.WrapperrPort = config_legacy.WrapperrPort
+	config.PlexAuth = config_legacy.PlexAuth
+	config.WinterTheme = config_legacy.WinterTheme
+
+	log.Println("Config migrated.")
+
+	return config, nil
 }
