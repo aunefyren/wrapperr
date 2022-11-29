@@ -457,6 +457,10 @@ function set_tautulli_settings() {
     html += '<hr>';
     html += '</div>';
 
+    html += '<div class="form-group newline">';
+    html += '<div class="warning">!<br>If you changed any server names you must clear the cache for Wrapperr to function.</div>';
+    html += '</div>';
+
     html += '<div class="form-group newline" title="Clear the cache now to include the newest settings.">';
     html += '<label for="clear_cache">Clear cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
@@ -1694,6 +1698,10 @@ function set_wrapperr_customization() {
     html += '<hr>';
     html += '</div>';
 
+    html += '<div class="form-group newline">';
+    html += '<div class="warning">!<br>Many of the settings here need a clean cache to be applied.</div>';
+    html += '</div>';
+
     html += '<div class="form-group newline" title="Clear the cache now to include the newest settings.">';
     html += '<label for="clear_cache">Clear cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
@@ -2049,8 +2057,13 @@ function caching_menu() {
     html += '<hr>';
     html += '</div>';
 
+    var min_day_length = 1;
+    if(tautulli.length > 1) {
+        min_day_length = tautulli.length + 1 
+    }
+
     html += `
-        <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
+        <form id='stats_form' class='form' onsubmit='event.preventDefault(); cache_initiate();' action="" method="post">
 
             <div class='form-group newline'>
                 <h3>
@@ -2079,12 +2092,12 @@ function caching_menu() {
             <div class='form-group newline'>
 
                 <label for="days" title="">Days between safety-save of cache:</label>
-                <input type="number" class='form-control' name="days" id="days" minlenght='1' value='50' autocomplete="off" required />
+                <input type="number" class='form-control' name="days" id="days" min='` + min_day_length + `' value='50' autocomplete="off" required />
 
             </div>
 
             <div class="form-group newline">
-                <button class="form-control btn" name="cache_button" id="cache_button" onclick="cache_initiate();"><img src="../assets/download.svg" class="btn_logo"></img><p2 id="cache_button_text">Cache</p2></button>
+                <button class="form-control btn" type="submit" name="cache_button" id="cache_button"><img src="../assets/download.svg" class="btn_logo"></img><p2 id="cache_button_text">Cache</p2></button>
             </div>
 
             <div id="cache"></div>

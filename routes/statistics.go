@@ -245,6 +245,11 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 	var found_date bool = false
 	var found_date_index int = 0
 
+	// If loop_interval is less than one, do not utilize the loop interval and set use_loop_interval to false
+	if loop_interval < 1 {
+		use_loop_interval = false
+	}
+
 	// Go through each Tautulli server
 	for q := 0; q < len(config.TautulliConfig); q++ {
 
@@ -253,11 +258,6 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 
 		// Define object with end date from wrapped period
 		end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
-
-		// If loop_interval is less than one, do not utilize the loop interval and set use_loop_interval to false
-		if loop_interval < 1 {
-			use_loop_interval = false
-		}
 
 		// Split the string containing libraries. If the result is zero, set the first object in the array to an empty string
 		libraries := strings.Split(config.TautulliConfig[q].TautulliLibraries, ",")
@@ -285,51 +285,69 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				TautulliServers: []string{},
 			}
 
+			// Declare variables to populate
 			found_date = false
 			found_date_index = 0
 			tautulli_server_processed := false
+
+			// Go through all dates in current dataset
 			for j := 0; j < len(wrapperr_data); j++ {
 
+				// Parse current date string
 				time_temp, err := time.Parse("2006-01-02", wrapperr_data[j].Date)
 				if err != nil {
 					log.Println(err)
 				}
 
+				// If current date in the dataset is current processing date
 				if time_temp.Format("2006-01-02") == loop_time.Format("2006-01-02") {
+					// Keep index, save bool as true,
 					found_date_index = j
 					found_date = true
-					wrapperr_day = wrapperr_data[j]
 
+					// Look at proccessed servers for current server
 					for y := 0; y < len(wrapperr_data[j].TautulliServers); y++ {
 						if wrapperr_data[j].TautulliServers[y] == config.TautulliConfig[q].TautulliName {
 							tautulli_server_processed = true
 						}
 					}
 
+					// Keep current dataset
 					wrapperr_day = wrapperr_data[j]
 
+					// Stop looking
 					break
 				}
 
 			}
 
 			if found_date && wrapperr_data[found_date_index].DataComplete && tautulli_server_processed {
+
+				// Found the date, the data is complete and the server is processed for the day. Skip.
 				continue
+
 			} else if found_date && !wrapperr_data[found_date_index].DataComplete {
 
+				// The date is found, the data is not complete
 				log.Println("Date " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "' marked as incomplete in cache. Refreshing.")
 
-				// Remove server downloads for date as it is incomplete
+				// Remove processed server to ensure re-processing by all servers
 				wrapperr_day.TautulliServers = []string{}
 
 			} else if !found_date || !tautulli_server_processed {
+
+				// No data found, download with empty dataset
 				log.Println("Downloading day: " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "'.")
+
 			} else {
+
+				// Something is wrong. Quit.
 				log.Println("Unknown date error from server '" + config.TautulliConfig[q].TautulliName + "'. Skipping.")
 				continue
+
 			}
 
-			// Loop through selected libraries
+			// Loop through selected libraries for Tautullli API calls
 			for library_loop := 0; library_loop < len(libraries); library_loop++ {
 
 				var library_str string = ""
@@ -342,17 +360,20 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 					library_str = "&section_id=" + strings.TrimSpace(libraries[library_loop])
 				}
 
+				// Create string for selecting grouping feature in API call
 				if config.TautulliConfig[q].TautulliGrouping {
 					grouping = "1"
 				} else {
 					grouping = "0"
 				}
 
+				// Get data from Tautulli for server, day, and library
 				tautulli_data, err := modules.TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
 				if err != nil {
 					log.Println(err)
 				}
 
+				// Loop through retrieved data from Tautulli
 				for j := 0; j < len(tautulli_data); j++ {
 					if tautulli_data[j].MediaType == "movie" || tautulli_data[j].MediaType == "episode" || tautulli_data[j].MediaType == "track" {
 						tautulli_entry := models.TautulliEntry{
@@ -376,16 +397,19 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							Year:                 tautulli_data[j].Year,
 						}
 
+						// Append to day data
 						wrapperr_day.Data = append(wrapperr_day.Data, tautulli_entry)
 					}
 				}
 
 			}
 
+			// If the date is the current day, mark as imcomplete so it can be refreshed the next time
 			if loop_time.Format("2006-01-02") == now.Format("2006-01-02") {
 				wrapperr_day.DataComplete = false
 			}
 
+			// Add current Tautulli server to processed servers for this day
 			if wrapperr_day.TautulliServers == nil || len(wrapperr_day.TautulliServers) == 0 {
 				var servers []string
 				servers = append(servers, config.TautulliConfig[q].TautulliName)
@@ -394,21 +418,30 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				wrapperr_day.TautulliServers = append(wrapperr_day.TautulliServers, config.TautulliConfig[q].TautulliName)
 			}
 
+			// If found in dataset, update the values. if not found, append to dataset array.
 			if found_date {
 				wrapperr_data[found_date_index] = wrapperr_day
 			} else {
 				wrapperr_data = append(wrapperr_data, wrapperr_day)
 			}
 
+			// Change the loop interval to change date
 			if loop_interval > 0 && use_loop_interval {
 				loop_interval -= 1
 			}
 
+			// If loop interval is enabled, and reached 0, break the for loop and mark the data download as incomplete
 			if loop_interval == 0 && use_loop_interval {
 				complete_date_loop = false
 				break
 			}
 
+		}
+
+		// If loop interval is enabled, and reached 0, break the for loop and mark the data download as incomplete
+		if loop_interval == 0 && use_loop_interval {
+			complete_date_loop = false
+			break
 		}
 
 	}
@@ -976,7 +1009,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 				break
 			}
 			wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays = append(wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays, entry)
-			count = +1
+			count += 1
 		}
 
 		// Find duration sum and play sum
@@ -1020,7 +1053,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 				break
 			}
 			wrapperr_reply.YearStats.YearShows.Data.ShowsPlays = append(wrapperr_reply.YearStats.YearShows.Data.ShowsPlays, entry)
-			count = +1
+			count += 1
 		}
 
 		// Find duration sum and play sum
@@ -1113,7 +1146,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 				break
 			}
 			wrapperr_reply.YearStats.YearUsers.Data.UsersPlays = append(wrapperr_reply.YearStats.YearUsers.Data.UsersPlays, entry)
-			count = +1
+			count += 1
 		}
 
 		wrapperr_reply.YearStats.YearMovies.Message = "All users processed."

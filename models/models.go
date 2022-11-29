@@ -90,7 +90,6 @@ type TautulliConfig struct {
 	TautulliGrouping  bool   `json:"tautulli_grouping"`
 	TautulliHttps     bool   `json:"tautulli_https"`
 	TautulliName      string `json:"tautulli_name"`
-	TautulliID        int    `json:"tautulli_id"`
 }
 
 type TautulliConfigLegacy struct {
