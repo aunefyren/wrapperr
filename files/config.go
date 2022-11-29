@@ -1,6 +1,7 @@
-package main
+package files
 
 import (
+	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
 	"log"
@@ -96,7 +97,7 @@ func UpdatePrivateKey() (string, error) {
 }
 
 // Saves the given config struct as config.json
-func SaveConfig(config *WrapperrConfig) error {
+func SaveConfig(config *models.WrapperrConfig) error {
 
 	file, err := json.MarshalIndent(config, "", "	")
 	if err != nil {
@@ -114,14 +115,14 @@ func SaveConfig(config *WrapperrConfig) error {
 // Creates empty config.json
 func CreateConfigFile() error {
 
-	var config WrapperrConfig
+	var config models.WrapperrConfig
 
 	// Define default boolean values since they are harder to seperate from deliberate boolean values
 	config.UseCache = true
 	config.PlexAuth = true
 	config.UseLogs = true
 
-	var tautulli_config = TautulliConfig{
+	var tautulli_config = models.TautulliConfig{
 		TautulliGrouping: true,
 	}
 	config.TautulliConfig = append(config.TautulliConfig, tautulli_config)
@@ -150,7 +151,7 @@ func CreateConfigFile() error {
 }
 
 // Read the config file and return the file as an object
-func GetConfig() (*WrapperrConfig, error) {
+func GetConfig() (*models.WrapperrConfig, error) {
 	// Create config.json if it doesn't exist
 	if _, err := os.Stat(config_path); errors.Is(err, os.ErrNotExist) {
 		log.Println("Config file does not exist. Creating.")
@@ -171,7 +172,7 @@ func GetConfig() (*WrapperrConfig, error) {
 
 	// Parse config file
 	decoder := json.NewDecoder(file)
-	config := WrapperrConfig{}
+	config := models.WrapperrConfig{}
 	err = decoder.Decode(&config)
 	if err != nil {
 
@@ -186,7 +187,7 @@ func GetConfig() (*WrapperrConfig, error) {
 		defer file.Close()
 
 		decoder := json.NewDecoder(file)
-		config_legacy := WrapperrConfigLegacy{}
+		config_legacy := models.WrapperrConfigLegacy{}
 		err = decoder.Decode(&config_legacy)
 
 		convert_failed := false
@@ -231,7 +232,7 @@ func GetConfig() (*WrapperrConfig, error) {
 
 			// Parse default config file
 			decoder = json.NewDecoder(file)
-			config = WrapperrConfig{}
+			config = models.WrapperrConfig{}
 			err = decoder.Decode(&config)
 			if err != nil {
 				log.Println("Get config file threw error trying to parse the template file.")
@@ -251,7 +252,7 @@ func GetConfig() (*WrapperrConfig, error) {
 
 	// Parse default config file
 	decoder = json.NewDecoder(file)
-	config_default := WrapperrConfig{}
+	config_default := models.WrapperrConfig{}
 	err = decoder.Decode(&config_default)
 	if err != nil {
 		log.Println("Get config file threw error trying to parse the template file.")
@@ -294,9 +295,9 @@ func GetConfig() (*WrapperrConfig, error) {
 	}
 
 	if config.TautulliConfig == nil {
-		config.TautulliConfig = []TautulliConfig{}
+		config.TautulliConfig = []models.TautulliConfig{}
 
-		NewTautulliConfig := TautulliConfig{
+		NewTautulliConfig := models.TautulliConfig{
 			TautulliLength: config_default.TautulliConfig[0].TautulliLength,
 			TautulliPort:   config_default.TautulliConfig[0].TautulliPort,
 		}
@@ -681,9 +682,9 @@ func BackUpConfig(ConfigPath string) (string, error) {
 	return new_save_loc, nil
 }
 
-func ConvertLegacyToCurrentConfig(config WrapperrConfig, config_legacy WrapperrConfigLegacy) (WrapperrConfig, error) {
+func ConvertLegacyToCurrentConfig(config models.WrapperrConfig, config_legacy models.WrapperrConfigLegacy) (models.WrapperrConfig, error) {
 
-	var NewTautulli TautulliConfig
+	var NewTautulli models.TautulliConfig
 
 	NewTautulli.TautulliApiKey = config_legacy.TautulliConfig.TautulliApiKey
 	NewTautulli.TautulliIP = config_legacy.TautulliConfig.TautulliIP

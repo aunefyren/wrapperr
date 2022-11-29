@@ -1,6 +1,10 @@
-package main
+package routes
 
 import (
+	"aunefyren/wrapperr/files"
+	"aunefyren/wrapperr/models"
+	"aunefyren/wrapperr/modules"
+	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -15,24 +19,24 @@ import (
 
 func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
-	ip_string := GetOriginIPString(w, r)
+	ip_string := utilities.GetOriginIPString(w, r)
 	log.Println("New /get/statistics request." + ip_string)
 
-	bool_state, err := GetConfigState()
+	bool_state, err := files.GetConfigState()
 	if err != nil {
 		log.Println(err)
-		respond_default_error(w, r, errors.New("Failed to retrieve confguration state."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve confguration state."), 500)
 		return
 	} else if !bool_state {
 		log.Println("Wrapperr get statistics failed. Configuration state function retrieved false response.")
-		respond_default_error(w, r, errors.New("Can't retrieve statistics because Wrapperr is not configured."), 400)
+		utilities.RespondDefaultError(w, r, errors.New("Can't retrieve statistics because Wrapperr is not configured."), 400)
 		return
 	}
 
-	config, err := GetConfig()
+	config, err := files.GetConfig()
 	if err != nil {
 		log.Println(err)
-		respond_default_error(w, r, errors.New("Failed to load Wrapperr configuration."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to load Wrapperr configuration."), 500)
 		return
 	}
 
@@ -41,14 +45,14 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	// Check every Tautulli server
 	for i := 0; i < len(config.TautulliConfig); i++ {
 		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'." + ip_string)
-		tautulli_state, err := TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
+		tautulli_state, err := modules.TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
 		if err != nil {
 			log.Println(err)
-			respond_default_error(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 500)
 			return
 		} else if !tautulli_state {
 			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
-			respond_default_error(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 400)
+			utilities.RespondDefaultError(w, r, errors.New("Failed to reach Tautulli server '"+config.TautulliConfig[i].TautulliName+"'."), 400)
 			return
 		}
 	}
@@ -62,13 +66,13 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	var admin bool = false
 
 	// Try to authorize bearer token from header
-	payload, err := AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r)
 
 	// If it failed and PlexAuth is enabled, respond with and error
 	// If it didn't fail, and PlexAuth is enabled, declare auth as passed
 	if err != nil && config.PlexAuth {
 		log.Println(err)
-		respond_default_error(w, r, errors.New("Failed to authorize request."), 401)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to authorize request."), 401)
 		return
 	} else if config.PlexAuth {
 		auth_passed = true
@@ -82,10 +86,10 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// If the user is not an admin, and PlexAuth is enabled, validate and retrieve details from Plex Token in payload
 	if !admin && config.PlexAuth {
-		plex_object, err := PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
+		plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
 		if err != nil {
 			log.Println(err)
-			respond_default_error(w, r, errors.New("Could not validate Plex Auth login."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Could not validate Plex Auth login."), 500)
 			return
 		}
 
@@ -97,13 +101,13 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// Read payload from Post input
 	reqBody, _ := ioutil.ReadAll(r.Body)
-	var wrapperr_request SearchWrapperrRequest
+	var wrapperr_request models.SearchWrapperrRequest
 	json.Unmarshal(reqBody, &wrapperr_request)
 
 	// If auth is not passed, caching mode is false, and no PlexIdentity was recieved, mark it as a bad request
 	if wrapperr_request.PlexIdentity == "" && !auth_passed && !wrapperr_request.CachingMode {
 		log.Println("Cannot retrieve statistics because search parameter is invalid.")
-		respond_default_error(w, r, errors.New("Invalid search parameter."), 400)
+		utilities.RespondDefaultError(w, r, errors.New("Invalid search parameter."), 400)
 		return
 	}
 
@@ -113,7 +117,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 		UserNameFound := false
 
 		for i := 0; i < len(config.TautulliConfig); i++ {
-			new_id, new_username, err := TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
+			new_id, new_username, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
 
 			if err == nil {
 				UserNameFound = true
@@ -124,7 +128,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 		if !UserNameFound {
 			log.Println(err)
-			respond_default_error(w, r, errors.New("Could not find a matching user."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Could not find a matching user."), 500)
 			return
 		}
 	}
@@ -132,14 +136,14 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	// If caching mode is false and user is admin, return bad request error
 	if !wrapperr_request.CachingMode && admin {
 		log.Println("Caching mode deactivated, but admin login session retrieved.")
-		respond_default_error(w, r, errors.New("You can not retrieve stats as admin."), 400)
+		utilities.RespondDefaultError(w, r, errors.New("You can not retrieve stats as admin."), 400)
 		return
 	}
 
 	// If caching mode is true and user is not admin, return bad request error
 	if wrapperr_request.CachingMode && !admin {
 		log.Println("Caching mode recieved, but user was not verified as admin.")
-		respond_default_error(w, r, errors.New("Only the admin can perform caching."), 401)
+		utilities.RespondDefaultError(w, r, errors.New("Only the admin can perform caching."), 401)
 		return
 	}
 
@@ -151,7 +155,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 		if !config.UseCache {
 			log.Println("Admin attempted to use cache mode, but the cache feature is disabled in the config.")
-			respond_default_error(w, r, errors.New("Caching mode enabled, but the cache feature is disabled in the settings."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Caching mode enabled, but the cache feature is disabled in the settings."), 500)
 			return
 		}
 	}
@@ -159,19 +163,19 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	// If no username and no user_id has been declared at this point, something is wrong. Return error.
 	if user_name == "" && user_id == 0 {
 		log.Println("At this point the user should have been verified, but username and ID is empty.")
-		respond_default_error(w, r, errors.New("User validation error."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("User validation error."), 500)
 		return
 	}
 
 	log.Println("4. User details confirmed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ip_string)
 
 	// Create empty array object for each day in Wrapped period. If cache is enabled, call GetCache() and replace the empty object.
-	wrapperr_data := []WrapperrDay{}
+	wrapperr_data := []models.WrapperrDay{}
 	if config.UseCache {
-		wrapperr_data, err = GetCache()
+		wrapperr_data, err = files.GetCache()
 		if err != nil {
 			log.Println(err)
-			respond_default_error(w, r, errors.New("Failed to load cache file."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Failed to load cache file."), 500)
 			return
 		}
 	}
@@ -188,10 +192,10 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// If cache is enabled, send the object to SaveCache() for later use.
 	if config.UseCache {
-		err = SaveCache(&wrapperr_data)
+		err = files.SaveCache(&wrapperr_data)
 		if err != nil {
 			log.Println(err)
-			respond_default_error(w, r, errors.New("Failed to save new cache file for "+user_name+" ("+strconv.Itoa(user_id)+")."), 500)
+			utilities.RespondDefaultError(w, r, errors.New("Failed to save new cache file for "+user_name+" ("+strconv.Itoa(user_id)+")."), 500)
 			return
 		}
 	}
@@ -201,22 +205,22 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	// If caching mode is in use, stop the proccess here and return the result to the user
 	if wrapperr_request.CachingMode {
 
-		boolean_reply := BooleanReply{
+		boolean_reply := models.BooleanReply{
 			Message: "Completed caching request.",
 			Error:   false,
 			Data:    wrapperr_data_complete,
 		}
 
-		ip_string := GetOriginIPString(w, r)
+		ip_string := utilities.GetOriginIPString(w, r)
 		log.Println("Caching request completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ip_string)
 
-		respondWithJSON(w, http.StatusOK, boolean_reply)
+		utilities.RespondWithJSON(w, http.StatusOK, boolean_reply)
 		return
 
 	}
 
 	// Create reply object
-	var wrapperr_reply WrapperrStatisticsReply
+	var wrapperr_reply models.WrapperrStatisticsReply
 	wrapperr_reply.User.ID = user_id
 	wrapperr_reply.User.Name = user_name
 	wrapperr_reply.Date = time.Now().Format("2006-01-02")
@@ -225,15 +229,15 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	// Loop through Wrapperr data and format reply
 	wrapperr_reply, err = WrapperrLoopData(user_id, config, wrapperr_data, wrapperr_reply)
 
-	ip_string = GetOriginIPString(w, r)
+	ip_string = utilities.GetOriginIPString(w, r)
 	log.Println("8. Wrapperr request completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ip_string)
 
-	respondWithJSON(w, http.StatusOK, wrapperr_reply)
+	utilities.RespondWithJSON(w, http.StatusOK, wrapperr_reply)
 	return
 
 }
 
-func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int, config *WrapperrConfig) ([]WrapperrDay, bool, error) {
+func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_interval int, config *models.WrapperrConfig) ([]models.WrapperrDay, bool, error) {
 
 	// Define variables
 	var complete_date_loop bool = true
@@ -274,7 +278,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 			}
 
 			// Clean array to populate with results
-			wrapperr_day := WrapperrDay{
+			wrapperr_day := models.WrapperrDay{
 				Date:            current_loop_date,
 				Data:            nil,
 				DataComplete:    true,
@@ -344,14 +348,14 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 					grouping = "0"
 				}
 
-				tautulli_data, err := TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
+				tautulli_data, err := modules.TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
 				if err != nil {
 					log.Println(err)
 				}
 
 				for j := 0; j < len(tautulli_data); j++ {
 					if tautulli_data[j].MediaType == "movie" || tautulli_data[j].MediaType == "episode" || tautulli_data[j].MediaType == "track" {
-						tautulli_entry := TautulliEntry{
+						tautulli_entry := models.TautulliEntry{
 							Date:                 tautulli_data[j].Date,
 							RowID:                tautulli_data[j].RowID,
 							Duration:             tautulli_data[j].Duration,
@@ -412,22 +416,22 @@ func WrapperrDownloadDays(ID int, wrapperr_data []WrapperrDay, loop_interval int
 	return wrapperr_data, complete_date_loop, nil
 }
 
-func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []WrapperrDay, wrapperr_reply WrapperrStatisticsReply) (WrapperrStatisticsReply, error) {
+func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data []models.WrapperrDay, wrapperr_reply models.WrapperrStatisticsReply) (models.WrapperrStatisticsReply, error) {
 
 	end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 	start_loop_date := time.Unix(int64(config.WrappedStart), 0)
 	top_list_limit := config.WrapperrCustomize.StatsTopListLength
 
-	var wrapperr_user_movie []TautulliEntry
-	var wrapperr_user_episode []TautulliEntry
-	var wrapperr_user_show []TautulliEntry
-	var wrapperr_user_track []TautulliEntry
-	var wrapperr_user_album []TautulliEntry
-	var wrapperr_user_artist []TautulliEntry
-	var wrapperr_year_user []WrapperrYearUserEntry
-	var wrapperr_year_movie []TautulliEntry
-	var wrapperr_year_show []TautulliEntry
-	var wrapperr_year_artist []TautulliEntry
+	var wrapperr_user_movie []models.TautulliEntry
+	var wrapperr_user_episode []models.TautulliEntry
+	var wrapperr_user_show []models.TautulliEntry
+	var wrapperr_user_track []models.TautulliEntry
+	var wrapperr_user_album []models.TautulliEntry
+	var wrapperr_user_artist []models.TautulliEntry
+	var wrapperr_year_user []models.WrapperrYearUserEntry
+	var wrapperr_year_movie []models.TautulliEntry
+	var wrapperr_year_show []models.TautulliEntry
+	var wrapperr_year_artist []models.TautulliEntry
 
 	for i := 0; i < len(wrapperr_data); i++ {
 
@@ -620,7 +624,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 				// If user was not found, add it to array
 				if !user_found {
-					var user_entry = WrapperrYearUserEntry{
+					var user_entry = models.WrapperrYearUserEntry{
 						Plays:          1,
 						DurationMovies: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:  wrapperr_data[i].Data[j].PausedCounter,
@@ -670,7 +674,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 				// If user was not found, add it to array
 				if !user_found {
-					var user_entry = WrapperrYearUserEntry{
+					var user_entry = models.WrapperrYearUserEntry{
 						Plays:         1,
 						DurationShows: wrapperr_data[i].Data[j].Duration,
 						PausedCounter: wrapperr_data[i].Data[j].PausedCounter,
@@ -720,7 +724,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 				// If user was not found, add it to array
 				if !user_found {
-					var user_entry = WrapperrYearUserEntry{
+					var user_entry = models.WrapperrYearUserEntry{
 						Plays:           1,
 						DurationArtists: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:   wrapperr_data[i].Data[j].PausedCounter,
@@ -791,8 +795,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
 	} else {
-		wrapperr_reply.User.UserMovies.Data.MoviesDuration = []TautulliEntry{}
-		wrapperr_reply.User.UserMovies.Data.MoviesPlays = []TautulliEntry{}
+		wrapperr_reply.User.UserMovies.Data.MoviesDuration = []models.TautulliEntry{}
+		wrapperr_reply.User.UserMovies.Data.MoviesPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.User.UserMovies.Message = "No movies processed."
 	}
@@ -843,8 +847,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.User.UserShows.Message = "All shows processed."
 
 	} else {
-		wrapperr_reply.User.UserShows.Data.ShowsDuration = []TautulliEntry{}
-		wrapperr_reply.User.UserShows.Data.ShowsPlays = []TautulliEntry{}
+		wrapperr_reply.User.UserShows.Data.ShowsDuration = []models.TautulliEntry{}
+		wrapperr_reply.User.UserShows.Data.ShowsPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.User.UserShows.Message = "No shows processed."
 	}
@@ -944,8 +948,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.User.UserMusic.Message = "All tracks processed."
 
 	} else {
-		wrapperr_reply.User.UserMusic.Data.TracksDuration = []TautulliEntry{}
-		wrapperr_reply.User.UserMusic.Data.TracksPlays = []TautulliEntry{}
+		wrapperr_reply.User.UserMusic.Data.TracksDuration = []models.TautulliEntry{}
+		wrapperr_reply.User.UserMusic.Data.TracksPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.User.UserMusic.Message = "No tracks processed."
 	}
@@ -988,8 +992,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.YearStats.YearMovies.Message = "All movies processed."
 
 	} else {
-		wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration = []TautulliEntry{}
-		wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays = []TautulliEntry{}
+		wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration = []models.TautulliEntry{}
+		wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.YearStats.YearMovies.Message = "No movies processed."
 	}
@@ -1032,8 +1036,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.YearStats.YearShows.Message = "All shows processed."
 
 	} else {
-		wrapperr_reply.YearStats.YearShows.Data.ShowsDuration = []TautulliEntry{}
-		wrapperr_reply.YearStats.YearShows.Data.ShowsPlays = []TautulliEntry{}
+		wrapperr_reply.YearStats.YearShows.Data.ShowsDuration = []models.TautulliEntry{}
+		wrapperr_reply.YearStats.YearShows.Data.ShowsPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.YearStats.YearShows.Message = "No shows processed."
 	}
@@ -1076,8 +1080,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		wrapperr_reply.YearStats.YearMusic.Message = "All tracks processed."
 
 	} else {
-		wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration = []TautulliEntry{}
-		wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays = []TautulliEntry{}
+		wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration = []models.TautulliEntry{}
+		wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays = []models.TautulliEntry{}
 
 		wrapperr_reply.YearStats.YearMusic.Message = "No tracks processed."
 	}
@@ -1086,7 +1090,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 	if (config.WrapperrCustomize.GetYearStatsMusic || config.WrapperrCustomize.GetYearStatsMovies || config.WrapperrCustomize.GetYearStatsShows) && config.WrapperrCustomize.GetYearStatsLeaderboard && len(wrapperr_year_user) > 0 {
 
 		// Create new array with duration sum, then sort year users array by duration
-		var wrapperr_year_user_summed []WrapperrYearUserEntry
+		var wrapperr_year_user_summed []models.WrapperrYearUserEntry
 		for d := 0; d < len(wrapperr_year_user); d++ {
 			wrapperr_year_user[d].Duration = wrapperr_year_user[d].DurationMovies + wrapperr_year_user[d].DurationShows + wrapperr_year_user[d].DurationArtists
 			wrapperr_year_user_summed = append(wrapperr_year_user_summed, wrapperr_year_user[d])
@@ -1135,8 +1139,8 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 		}
 
 	} else {
-		wrapperr_reply.YearStats.YearUsers.Data.UsersDuration = []WrapperrYearUserEntry{}
-		wrapperr_reply.YearStats.YearUsers.Data.UsersPlays = []WrapperrYearUserEntry{}
+		wrapperr_reply.YearStats.YearUsers.Data.UsersDuration = []models.WrapperrYearUserEntry{}
+		wrapperr_reply.YearStats.YearUsers.Data.UsersPlays = []models.WrapperrYearUserEntry{}
 
 		wrapperr_reply.YearStats.YearMovies.Message = "No users processed."
 	}
@@ -1151,7 +1155,7 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 			err, buddy_name, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
 
-			var show_buddy WrapperrShowBuddy
+			var show_buddy models.WrapperrShowBuddy
 
 			if err != nil {
 				log.Println("Show buddy threw error: ")
@@ -1181,9 +1185,9 @@ func WrapperrLoopData(user_id int, config *WrapperrConfig, wrapperr_data []Wrapp
 
 }
 
-func GetUserShowBuddy(config *WrapperrConfig, top_show TautulliEntry, user_id int, wrapperr_data []WrapperrDay) (error, string, bool, int) {
+func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, bool, int) {
 
-	var top_show_users []WrapperrYearUserEntry
+	var top_show_users []models.WrapperrYearUserEntry
 	var top_show_buddy_name = "Something went wrong."
 	var top_show_buddy_duration = 0
 	var top_show_buddy_found = false
@@ -1221,7 +1225,7 @@ func GetUserShowBuddy(config *WrapperrConfig, top_show TautulliEntry, user_id in
 
 				// If user was not found, add it to array
 				if !user_found {
-					var user_entry = WrapperrYearUserEntry{
+					var user_entry = models.WrapperrYearUserEntry{
 						Plays:        1,
 						Duration:     wrapperr_data[i].Data[j].Duration,
 						FriendlyName: wrapperr_data[i].Data[j].FriendlyName,

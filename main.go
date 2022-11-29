@@ -1,6 +1,9 @@
 package main
 
 import (
+	"aunefyren/wrapperr/files"
+	"aunefyren/wrapperr/routes"
+	"aunefyren/wrapperr/utilities"
 	"flag"
 	"fmt"
 	"log"
@@ -16,7 +19,7 @@ import (
 
 func main() {
 
-	PrintASCII()
+	utilities.PrintASCII()
 
 	// Create and define file for logging
 	file, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -30,7 +33,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	config, err := GetConfig()
+	config, err := files.GetConfig()
 	if err != nil {
 		log.Println("Failed to load configuration file. Error: ")
 		log.Println(err)
@@ -54,7 +57,7 @@ func main() {
 			log.Println("Removing value...")
 
 			config.Timezone = ""
-			err = SaveConfig(config)
+			err = files.SaveConfig(config)
 			if err != nil {
 				log.Println("Failed to set new time zone in the config. Error: ")
 				log.Println(err)
@@ -87,32 +90,32 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	// Admin auth routes
-	router.HandleFunc("/api/validate/admin", ApiValidateAdmin)
-	router.HandleFunc("/api/get/config", ApiGetConfig)
-	router.HandleFunc("/api/get/log", ApiGetLog)
-	router.HandleFunc("/api/set/config", ApiSetConfig)
-	router.HandleFunc("/api/update/admin", ApiUpdateAdmin)
+	router.HandleFunc("/api/validate/admin", routes.ApiValidateAdmin)
+	router.HandleFunc("/api/get/config", routes.ApiGetConfig)
+	router.HandleFunc("/api/get/log", routes.ApiGetLog)
+	router.HandleFunc("/api/set/config", routes.ApiSetConfig)
+	router.HandleFunc("/api/update/admin", routes.ApiUpdateAdmin)
 
 	// No-auth routes
-	router.HandleFunc("/api/get/config-state", ApiWrapperrConfigured)
-	router.HandleFunc("/api/login/admin", ApiLogInAdmin)
-	router.HandleFunc("/api/get/wrapperr-version", ApiGetWrapperrVersion)
-	router.HandleFunc("/api/get/admin-state", ApiGetAdminState)
-	router.HandleFunc("/api/get/functions", ApiGetFunctions)
-	router.HandleFunc("/api/create/admin", ApiCreateAdmin)
-	router.HandleFunc("/api/get/tautulli-connection", ApiGetTautulliConncection)
-	router.HandleFunc("/api/get/share-link", ApiGetShareLink)
+	router.HandleFunc("/api/get/config-state", routes.ApiWrapperrConfigured)
+	router.HandleFunc("/api/login/admin", routes.ApiLogInAdmin)
+	router.HandleFunc("/api/get/wrapperr-version", routes.ApiGetWrapperrVersion)
+	router.HandleFunc("/api/get/admin-state", routes.ApiGetAdminState)
+	router.HandleFunc("/api/get/functions", routes.ApiGetFunctions)
+	router.HandleFunc("/api/create/admin", routes.ApiCreateAdmin)
+	router.HandleFunc("/api/get/tautulli-connection", routes.ApiGetTautulliConncection)
+	router.HandleFunc("/api/get/share-link", routes.ApiGetShareLink)
 
 	// User auth routes
-	router.HandleFunc("/api/get/login-url", ApiGetLoginURL)
-	router.HandleFunc("/api/login/plex-auth", ApiLoginPlexAuth)
-	router.HandleFunc("/api/validate/plex-auth", ApiValidatePlexAuth)
-	router.HandleFunc("/api/create/share-link", ApiCreateShareLink)
-	router.HandleFunc("/api/get/user-share-link", ApiGetUserShareLink)
-	router.HandleFunc("/api/delete/user-share-link", ApiDeleteUserShareLink)
+	router.HandleFunc("/api/get/login-url", routes.ApiGetLoginURL)
+	router.HandleFunc("/api/login/plex-auth", routes.ApiLoginPlexAuth)
+	router.HandleFunc("/api/validate/plex-auth", routes.ApiValidatePlexAuth)
+	router.HandleFunc("/api/create/share-link", routes.ApiCreateShareLink)
+	router.HandleFunc("/api/get/user-share-link", routes.ApiGetUserShareLink)
+	router.HandleFunc("/api/delete/user-share-link", routes.ApiDeleteUserShareLink)
 
 	// Get stats route
-	router.HandleFunc("/api/get/statistics", ApiWrapperGetStatistics)
+	router.HandleFunc("/api/get/statistics", routes.ApiWrapperGetStatistics)
 
 	// Static routes
 	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/")))

@@ -1,6 +1,8 @@
-package main
+package files
 
 import (
+	"aunefyren/wrapperr/models"
+	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
 	"log"
@@ -11,7 +13,7 @@ import (
 var cache_path, _ = filepath.Abs("./config/cache.json")
 
 // Saves the given config struct as cache.json
-func SaveCache(cache *[]WrapperrDay) error {
+func SaveCache(cache *[]models.WrapperrDay) error {
 
 	file, err := json.MarshalIndent(cache, "", "	")
 	if err != nil {
@@ -28,7 +30,7 @@ func SaveCache(cache *[]WrapperrDay) error {
 
 // Saves an empty cache, clearing any data present
 func ClearCache() error {
-	cache := []WrapperrDay{}
+	cache := []models.WrapperrDay{}
 
 	err := SaveCache(&cache)
 	if err != nil {
@@ -41,7 +43,7 @@ func ClearCache() error {
 // Creates empty cache.json
 func CreateCacheFile() error {
 
-	var cache []WrapperrDay
+	var cache []models.WrapperrDay
 
 	err := SaveCache(&cache)
 	if err != nil {
@@ -52,7 +54,7 @@ func CreateCacheFile() error {
 }
 
 // Read the cache file and return the file as an object
-func GetCache() ([]WrapperrDay, error) {
+func GetCache() ([]models.WrapperrDay, error) {
 	// Create cache.json if it doesn't exist
 	if _, err := os.Stat(cache_path); errors.Is(err, os.ErrNotExist) {
 
@@ -61,7 +63,7 @@ func GetCache() ([]WrapperrDay, error) {
 		err = CreateCacheFile()
 		if err != nil {
 			log.Println("Failed to create new cache file. Restarting Wrapperr.")
-			err = RestartSelf()
+			err = utilities.RestartSelf()
 			if err != nil {
 				return nil, err
 			}
@@ -69,7 +71,7 @@ func GetCache() ([]WrapperrDay, error) {
 	}
 
 	// Load cache file for alterations, information
-	var cache []WrapperrDay
+	var cache []models.WrapperrDay
 	file, err := os.Open(cache_path)
 	if err != nil {
 		return nil, err

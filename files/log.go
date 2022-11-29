@@ -1,6 +1,7 @@
-package main
+package files
 
 import (
+	"aunefyren/wrapperr/models"
 	"bufio"
 	"log"
 	"os"
@@ -11,7 +12,11 @@ import (
 var log_path, _ = filepath.Abs("./config/wrapperr.log")
 var max_lines_returned = 200
 
-func GetLogLines() ([]WrapperrLogLine, error) {
+func GetMaxLogLinesReturned() int {
+	return max_lines_returned
+}
+
+func GetLogLines() ([]models.WrapperrLogLine, error) {
 
 	readFile, err := os.Open(log_path)
 
@@ -30,14 +35,14 @@ func GetLogLines() ([]WrapperrLogLine, error) {
 
 	readFile.Close()
 
-	var logline_array []WrapperrLogLine
+	var logline_array []models.WrapperrLogLine
 	var re = regexp.MustCompile(`([0-9]{4,4}\/{1,1}[0-9]{2,2}\/[0-9]{2,2})\s([0-9]{2,2}:[0-9]{2,2}:[0-9]{2,2})\s([^\n]{1,})`)
 
 	for _, line := range fileLines {
 
 		match := re.FindStringSubmatch(line)
 
-		var logline WrapperrLogLine
+		var logline models.WrapperrLogLine
 
 		if len(match) != 4 {
 

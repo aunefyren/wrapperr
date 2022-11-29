@@ -1,6 +1,7 @@
-package main
+package files
 
 import (
+	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -30,7 +31,7 @@ func GetAdminState() (bool, error) {
 }
 
 // Saves the given admin config struct as admin.json
-func SaveAdminConfig(config AdminConfig) error {
+func SaveAdminConfig(config models.AdminConfig) error {
 
 	file, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
@@ -46,7 +47,7 @@ func SaveAdminConfig(config AdminConfig) error {
 }
 
 // Read the config file and return the file as an object
-func GetAdminConfig() (*AdminConfig, error) {
+func GetAdminConfig() (*models.AdminConfig, error) {
 
 	// Create admin.json if it doesn't exist
 	if _, err := os.Stat(admin_config_path); errors.Is(err, os.ErrNotExist) {
@@ -66,7 +67,7 @@ func GetAdminConfig() (*AdminConfig, error) {
 	}
 	defer file.Close()
 	decoder := json.NewDecoder(file)
-	admin_config := AdminConfig{}
+	admin_config := models.AdminConfig{}
 	err = decoder.Decode(&admin_config)
 	if err != nil {
 		log.Println("Admin config parsing threw error.")
@@ -79,7 +80,7 @@ func GetAdminConfig() (*AdminConfig, error) {
 // Creates empty admin.json
 func CreateAdminConfigFile() error {
 
-	var admin_config AdminConfig
+	var admin_config models.AdminConfig
 
 	err := SaveAdminConfig(admin_config)
 	if err != nil {

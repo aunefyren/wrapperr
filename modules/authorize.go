@@ -1,6 +1,8 @@
-package main
+package modules
 
 import (
+	"aunefyren/wrapperr/files"
+	"aunefyren/wrapperr/models"
 	"errors"
 	"log"
 	"net/http"
@@ -11,20 +13,20 @@ import (
 )
 
 // AuthorizeToken validates JWT tokens using the private key.
-func AuthorizeToken(writer http.ResponseWriter, request *http.Request) (*Payload, error) {
+func AuthorizeToken(writer http.ResponseWriter, request *http.Request) (*models.Payload, error) {
 
-	PrivateKey, err := GetPrivateKey()
+	PrivateKey, err := files.GetPrivateKey()
 	if err != nil {
 		log.Println("Failed to load JWT Token settings. Error: ")
 		log.Println(err)
-		return &Payload{}, errors.New("Failed to load JWT Token settings.")
+		return &models.Payload{}, errors.New("Failed to load JWT Token settings.")
 	}
 
 	// Check if Authorization header is available
 	header := request.Header.Get("Authorization")
 	if header == "" || !strings.Contains(header, " ") || !strings.Contains(strings.ToLower(header), "bearer") {
 		log.Println("No valid Authorization token found in header during API request.")
-		return &Payload{}, errors.New("No valid Authorization token found in header.")
+		return &models.Payload{}, errors.New("No valid Authorization token found in header.")
 	}
 
 	headerParts := strings.Split(header, " ")
@@ -32,7 +34,7 @@ func AuthorizeToken(writer http.ResponseWriter, request *http.Request) (*Payload
 	if len(headerParts) < 2 {
 		log.Println("Failed to parse header. Error: ")
 		log.Println(err)
-		return &Payload{}, errors.New("Failed to parse header.")
+		return &models.Payload{}, errors.New("Failed to parse header.")
 	}
 
 	jwtToken := headerParts[1]
@@ -41,34 +43,34 @@ func AuthorizeToken(writer http.ResponseWriter, request *http.Request) (*Payload
 	if err != nil {
 		log.Println("Session token not accepted. Error: ")
 		log.Println(err)
-		return &Payload{}, errors.New("Session token not accepted. Please relog.")
+		return &models.Payload{}, errors.New("Session token not accepted. Please relog.")
 	}
 
 	return payload, nil
 }
 
 // VerifyToken checks if the token is valid or not
-func VerifyToken(PrivateKey string, token string) (*Payload, error) {
+func VerifyToken(PrivateKey string, token string) (*models.Payload, error) {
 	keyFunc := func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 		if !ok {
-			return nil, ErrInvalidToken
+			return nil, models.ErrInvalidToken
 		}
 		return []byte(PrivateKey), nil
 	}
 
-	jwtToken, err := jwt.ParseWithClaims(token, &Payload{}, keyFunc)
+	jwtToken, err := jwt.ParseWithClaims(token, &models.Payload{}, keyFunc)
 	if err != nil {
 		verr, ok := err.(*jwt.ValidationError)
-		if ok && errors.Is(verr.Inner, ErrExpiredToken) {
-			return nil, ErrExpiredToken
+		if ok && errors.Is(verr.Inner, jwt.ErrTokenExpired) {
+			return nil, models.ErrExpiredToken
 		}
-		return nil, ErrInvalidToken
+		return nil, models.ErrInvalidToken
 	}
 
-	payload, ok := jwtToken.Claims.(*Payload)
+	payload, ok := jwtToken.Claims.(*models.Payload)
 	if !ok {
-		return nil, ErrInvalidToken
+		return nil, models.ErrInvalidToken
 	}
 
 	return payload, nil
@@ -77,7 +79,7 @@ func VerifyToken(PrivateKey string, token string) (*Payload, error) {
 // CreateToken creates a new JWT token used to validate a users session. Valid for three days by default.
 func CreateToken(username string, admin bool, authtoken string) (string, error) {
 
-	PrivateKey, err := GetPrivateKey()
+	PrivateKey, err := files.GetPrivateKey()
 	if err != nil {
 		log.Println("Failed to load JWT Token settings. Error: ")
 		log.Println(err)
@@ -97,7 +99,7 @@ func CreateToken(username string, admin bool, authtoken string) (string, error) 
 }
 
 // CreateToken creates a new token for a specific username and duration
-func CreateTokenTwo(PrivateKey string, username string, admin bool, authtoken string, duration time.Duration) (string, *Payload, error) {
+func CreateTokenTwo(PrivateKey string, username string, admin bool, authtoken string, duration time.Duration) (string, *models.Payload, error) {
 	payload, err := NewPayload(username, admin, authtoken, duration)
 	if err != nil {
 		return "", payload, err

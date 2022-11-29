@@ -1,6 +1,7 @@
-package main
+package files
 
 import (
+	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
 	"log"
@@ -12,7 +13,7 @@ import (
 var link_path, _ = filepath.Abs("./config/links")
 
 // Save new link object to the correct path
-func SaveLink(link_object *WrapperrShareLink) error {
+func SaveLink(link_object *models.WrapperrShareLink) error {
 
 	// Check if the link folder exists
 	err := CheckLinkDir()
@@ -63,14 +64,14 @@ func CheckLinkDir() error {
 }
 
 // Read
-func GetLink(UserID string) (*WrapperrShareLink, error) {
+func GetLink(UserID string) (*models.WrapperrShareLink, error) {
 	// Check if the link folder exists
 	err := CheckLinkDir()
 	if err != nil {
 		return nil, err
 	}
 
-	link_object := WrapperrShareLink{}
+	link_object := models.WrapperrShareLink{}
 
 	share_link_path, err := filepath.Abs(link_path + "/" + UserID + ".json")
 	if err != nil {

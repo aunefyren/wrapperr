@@ -1,6 +1,7 @@
-package main
+package utilities
 
 import (
+	"aunefyren/wrapperr/models"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -38,7 +39,7 @@ func checkScopes(requiredScopes []string, providedScopes string) bool {
 	return true
 }
 
-func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
+func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	response, err := json.Marshal(payload)
 	if err != nil {
 		log.Println(err)
@@ -50,37 +51,37 @@ func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
 	return
 }
 
-func respond_default_error(writer http.ResponseWriter, request *http.Request, error_reply error, http_code int) {
+func RespondDefaultError(writer http.ResponseWriter, request *http.Request, error_reply error, http_code int) {
 
 	ip_string := GetOriginIPString(writer, request)
 
 	log.Println("Returned error: '" + error_reply.Error() + "'" + ip_string)
 
-	reply := Default_Reply{
+	reply := models.Default_Reply{
 		Message: error_reply.Error(),
 		Error:   true,
 	}
 
-	respondWithJSON(writer, http_code, reply)
+	RespondWithJSON(writer, http_code, reply)
 	return
 }
 
-func respond_default_okay(writer http.ResponseWriter, request *http.Request, reply_string string) {
+func RespondDefaultOkay(writer http.ResponseWriter, request *http.Request, reply_string string) {
 
 	ip_string := GetOriginIPString(writer, request)
 
 	log.Println("Returned reply: '" + reply_string + "'" + ip_string)
 
-	reply := Default_Reply{
+	reply := models.Default_Reply{
 		Message: reply_string,
 		Error:   false,
 	}
 
-	respondWithJSON(writer, http.StatusOK, reply)
+	RespondWithJSON(writer, http.StatusOK, reply)
 	return
 }
 
-func hashAndSalt(pwd_string string) (string, error) {
+func HashAndSalt(pwd_string string) (string, error) {
 
 	pwd := []byte(pwd_string)
 
@@ -98,7 +99,7 @@ func hashAndSalt(pwd_string string) (string, error) {
 	return string(hash), nil
 }
 
-func comparePasswords(hashedPwd string, pwd string) bool {
+func ComparePasswords(hashedPwd string, pwd string) bool {
 	// Since we'll be getting the hashed password from the DB it
 	// will be a string so we'll need to convert it to a byte slice
 	plainPwd := []byte(pwd)

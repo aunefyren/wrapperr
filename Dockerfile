@@ -15,4 +15,4 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build
 
 EXPOSE ${port}
 
-ENTRYPOINT /app/Wrapperr -port=${port}
+ENTRYPOINT /app/wrapperr -port=${port}

@@ -1,4 +1,4 @@
-module Wrapperr
+module aunefyren/wrapperr
 
 go 1.19
 

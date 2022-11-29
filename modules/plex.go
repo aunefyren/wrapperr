@@ -1,6 +1,7 @@
-package main
+package modules
 
 import (
+	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
@@ -15,7 +16,7 @@ var strong bool = true
 var x_plex_model string = "Plex OAuth"
 var x_plex_language string = "en"
 
-func GetPin(ClientKey string, WrapperrVersion string) (*PlexGetPinReply, error) {
+func GetPin(ClientKey string, WrapperrVersion string) (*models.PlexGetPinReply, error) {
 
 	url_string := "https://plex.tv/api/v2/pins"
 
@@ -44,7 +45,7 @@ func GetPin(ClientKey string, WrapperrVersion string) (*PlexGetPinReply, error) 
 
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
-	var body_reply PlexGetPinReply
+	var body_reply models.PlexGetPinReply
 	json.Unmarshal(body, &body_reply)
 	if err != nil {
 		return nil, err
@@ -62,7 +63,7 @@ func GetLoginURLString(client_id string, code string, home_url string) string {
 
 }
 
-func GetPlexAuthLogin(ID int, Code string, WrapperrVersion string, ClientKey string) (*PlexGetPinReply, error) {
+func GetPlexAuthLogin(ID int, Code string, WrapperrVersion string, ClientKey string) (*models.PlexGetPinReply, error) {
 
 	url_string := "https://plex.tv/api/v2/pins/" + strconv.Itoa(ID)
 
@@ -91,7 +92,7 @@ func GetPlexAuthLogin(ID int, Code string, WrapperrVersion string, ClientKey str
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	var body_reply PlexGetPinReply
+	var body_reply models.PlexGetPinReply
 	json.Unmarshal(body, &body_reply)
 	if err != nil {
 		return nil, err
@@ -100,7 +101,7 @@ func GetPlexAuthLogin(ID int, Code string, WrapperrVersion string, ClientKey str
 	return &body_reply, nil
 }
 
-func PlexAuthValidateToken(PlexAuth string, ClientKey string, WrapperrVersion string) (*PlexGetUserReply, error) {
+func PlexAuthValidateToken(PlexAuth string, ClientKey string, WrapperrVersion string) (*models.PlexGetUserReply, error) {
 
 	url_string := "https://plex.tv/api/v2/user"
 
@@ -130,7 +131,7 @@ func PlexAuthValidateToken(PlexAuth string, ClientKey string, WrapperrVersion st
 	defer res.Body.Close()
 	body, err := ioutil.ReadAll(res.Body)
 
-	var body_reply PlexGetUserReply
+	var body_reply models.PlexGetUserReply
 	json.Unmarshal(body, &body_reply)
 	if err != nil {
 		return nil, err

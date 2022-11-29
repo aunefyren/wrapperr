@@ -63,7 +63,7 @@ There are two main ways. Docker information can be found further below.
 <br>
 
 ### Download and start
-There are multiple ways to install Wrapperr. The easiest is just to download the latest release from the [Release Page](https://github.com/aunefyren/wrapperr/releases) which matches your operating system, move all the content to a directory, and start the ```Wrapperr``` application located within the release. It should start right up, perhaps triggering some operating system or firewall warnings.
+There are multiple ways to install Wrapperr. The easiest is just to download the latest release from the [Release Page](https://github.com/aunefyren/wrapperr/releases) which matches your operating system, move all the content to a directory, and start the ```wrapperr``` application located within the release. It should start right up, perhaps triggering some operating system or firewall warnings.
 
 <br>
 <br>
@@ -73,9 +73,9 @@ If you want to build Wrapperr yourself, you can download whatever version/tag/br
 
 ```
 $ go build
-$ ./Wrapperr
+$ ./wrapperr
 ```
-Note, if building on another operating system, the executable could have a different name. Such as ```Wrapperr.exe``` on Windows.
+Note, if building on another operating system, the executable could have a different name. Such as ```wrapperr.exe``` on Windows.
 
 <br>
 <br>
