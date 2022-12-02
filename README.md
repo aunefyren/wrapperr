@@ -5,6 +5,16 @@
 [![Newest Release](https://img.shields.io/github/v/release/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/aunefyren/wrapperr?style=for-the-badge)](https://go.dev/dl/)
 
+<br>
+<br>
+
+[![Donate](https://img.shields.io/badge/PayPal-Buy%20me%20coffee-blue?style=for-the-badge)](https://www.paypal.com/donate/?hosted_button_id=YRKMNM4S8VNBS) 
+
+Like the project? Have too much money? Buy me a coffe or something! ☕️
+
+<br>
+<br>
+
 ## Introduction - What is this?
 
 A website-based application and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
