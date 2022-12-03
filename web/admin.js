@@ -72,7 +72,7 @@ function log_in() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/login/admin");
+    xhttp.open("post", api_url + "login/admin");
     xhttp.send(admin_login_data);
     return;
 }
@@ -159,7 +159,7 @@ function set_password() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/create/admin");
+    xhttp.open("post", api_url + "create/admin");
     xhttp.send(admin_create_data);
     return;
 }
@@ -255,7 +255,7 @@ function update_password() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/update/admin");
+    xhttp.open("post", api_url + "update/admin");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(admin_create_data);
@@ -290,7 +290,7 @@ function get_admin_state() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "../api/get_admin_state.php");
+    xhttp.open("post", api_url + "get_admin_state.php");
     xhttp.send();
     return;
 }
@@ -673,7 +673,7 @@ function set_tautulli_settings_call() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/set/config");
+    xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(tautulli_settings_data);
@@ -852,24 +852,24 @@ function set_wrapperr_settings_call() {
     }
 
     if(wrapped_end < wrapped_start) {
-        document.getElementById("set_wrapperr_customization_form_button").disabled = false;
-        document.getElementById("set_wrapperr_customization_form_button").style.opacity = '1';
+        document.getElementById("set_wrapperr_settings_form_button").disabled = false;
+        document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
         alert('The wrapped end period must be later than the wrapped start period.');
         document.getElementById('wrapped_end').focus();
         return;
     }
 
     if(wrapped_end === '') {
-        document.getElementById("set_wrapperr_customization_form_button").disabled = false;
-        document.getElementById("set_wrapperr_customization_form_button").style.opacity = '1';
+        document.getElementById("set_wrapperr_settings_form_button").disabled = false;
+        document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
         alert('Ending of wrapped period is required for Wrapperr to function.');
         document.getElementById('wrapped_end').focus();
         return;
     }
 
     if(wrapped_start === '') {
-        document.getElementById("set_wrapperr_customization_form_button").disabled = false;
-        document.getElementById("set_wrapperr_customization_form_button").style.opacity = '1';
+        document.getElementById("set_wrapperr_settings_form_button").disabled = false;
+        document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
         alert('Start of wrapped period is required for Wrapperr to function.');
         document.getElementById('wrapped_start').focus();
         return;
@@ -878,7 +878,7 @@ function set_wrapperr_settings_call() {
     wrapperr_settings_form = {
                                 "clear_cache" : clear_cache,
                                 "data_type" : "wrapperr_data",
-                                "tautulli_config" : {},
+                                "tautulli_config" : [],
                                 "wrapperr_customize" : {},
                                 "wrapperr_data" : {
                                     "use_cache" : use_cache,
@@ -922,7 +922,7 @@ function set_wrapperr_settings_call() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/set/config");
+    xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(wrapperr_settings_data);
@@ -1907,7 +1907,7 @@ function set_wrapperr_customization_call() {
     wrapperr_customization_form = {
                                 "clear_cache" : clear_cache,
                                 "data_type" : "wrapperr_customize",
-                                "tautulli_config" : {},
+                                "tautulli_config" : [],
                                 "wrapperr_data" : {},
                                 "wrapperr_customize" : {
                                     "wrapperr_front_page_title" : wrapperr_front_page_title,
@@ -2040,7 +2040,7 @@ function set_wrapperr_customization_call() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/set/config");
+    xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(wrapperr_customization_data);
@@ -2237,7 +2237,7 @@ function get_stats(days) {
         
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", root + "api/get/statistics", );
+    xhttp.open("post", api_url + "get/statistics", );
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(stats_data);
@@ -2327,7 +2327,7 @@ function get_log() {
         
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", root + "api/get/log", );
+    xhttp.open("post", api_url + "get/log", );
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(log_data_data);
@@ -2413,7 +2413,7 @@ function test_tautulli_connection(tautulli_id) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", root + 'api/get/tautulli-connection');
+    xhttp.open("post", api_url + 'get/tautulli-connection');
     xhttp.send(config_data);
 }
 
@@ -2437,6 +2437,13 @@ function get_wrapper_version() {
                     document.getElementById('application_name').innerHTML = result.application_name + ' Setup';
                     document.title = result.application_name;
                 }
+
+                if(result.wrapperr_root != "") {
+                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
+                    console.log("URL: " + api_url)
+                }
+
+                get_admin_state();
             }
 
         } else if(this.readyState == 4 && this.status !== 200) {
@@ -2446,7 +2453,10 @@ function get_wrapper_version() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/get/wrapperr-version");
+
+    root = window.location.pathname.replace('/admin', '')
+
+    xhttp.open("post", window.location.origin + "/" + root + "api/get/wrapperr-version");
     xhttp.send();
     return;
 }
@@ -2482,7 +2492,7 @@ function get_admin_state() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/get/admin-state");
+    xhttp.open("post", api_url + "get/admin-state");
     xhttp.send();
     return;
 }
@@ -2510,7 +2520,7 @@ function validate_cookie_admin(cookie) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/validate/admin");
+    xhttp.open("post", api_url + "validate/admin");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send();
@@ -2666,7 +2676,7 @@ function get_config(cookie) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/get/config");
+    xhttp.open("post", api_url + "get/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send();

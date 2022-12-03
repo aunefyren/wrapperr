@@ -8,8 +8,8 @@
         <title>Wrapperr</title>
 
         <!-- Bootstrap 4 CSS and custom CSS -->
-        <link rel="stylesheet" type="text/css" href="assets/css/wrapped.css" />
-        <link rel="shortcut icon" href="assets/img/favicons/favicon.ico" />
+        <link rel="stylesheet" type="text/css" href="./assets/css/wrapped.css" />
+        <link rel="shortcut icon" href="./assets/img/favicons/favicon.ico" />
         <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
         <script src="./functions.js"></script>
@@ -21,7 +21,7 @@
 <body id='body'>
 
 <div id="loading">
-    <img id="loading-image" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em;" src="assets/loading.gif" alt="Loading..." />
+    <img id="loading-image" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em;" src="./assets/loading.gif" alt="Loading..." />
 
     <div class="form-group" id=''>
         <div id="results_error_loading_screen" style="color: var(--white) !important;">Loading...</div>
@@ -72,7 +72,7 @@
         <div class="boks3" id="" style="padding: 0 !important;">
 
             <div class="boks2" style="float: none !important; display: block; padding: 0; margin: 1em 0 0 0;">
-                <img src="assets/img/gift.svg" onclick="window.location.href = './';" style="width: 12.5em; cursor: pointer;">
+                <img src="./assets/img/gift.svg" onclick="window.location.href = './';" style="width: 12.5em; cursor: pointer;">
             </div>
         
         </div>
@@ -103,7 +103,7 @@
 
                             <div class="form-group" id='plex_login_div'>
                                 <button class='form-control btn' name="plex_login_button" id="plex_login_button" onclick='pop_up_login(); return false;' style='opacity: 0.5;' disabled>
-                                    <img src='assets/external-link.svg' class='btn_logo'>
+                                    <img src='./assets/external-link.svg' class='btn_logo'>
                                     <p2 id='plex_login_button_text'>Sign in using Plex</p2>
                                 </button>
                             </div>
@@ -114,14 +114,14 @@
 
                             <div class="form-group" id='search_wrapped_div'>
                                 <button class='form-control btn' name="search_wrapped_button" id="search_wrapped_button" style='opacity: 0.5;' onclick='search_wrapperr()' disabled>
-                                    <img src='assets/done.svg' class='btn_logo'>
+                                    <img src='./assets/done.svg' class='btn_logo'>
                                     <p2 id='search_wrapped_button_text'>Unwrap</p2>
                                 </button>
                             </div>
 
                             <div class="form-group" id='sign_out_div' style='display: none;'>
                                 <button class='form-control btn' name="plex_signout_button" id="plex_signout_button" onclick='sign_out()'>
-                                    <img src='assets/close.svg' class='btn_logo'>
+                                    <img src='./assets/close.svg' class='btn_logo'>
                                     <p2 id='plex_signout_button_text'>Sign Out</p2>
                                 </button>
                             </div>
@@ -131,7 +131,7 @@
 
                     </div>
 
-                    <img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em; display:none; margin: 1em 0 0 0;">
+                    <img id="loading_icon" src="./assets/loading.gif" style="border-radius: 25px; background-color: var(--white); padding: 1em;width: 4em; height: 4em; display:none; margin: 1em 0 0 0;">
 
                     <div id="results">
                     </div>
@@ -156,8 +156,8 @@
                                                                         '>
                         <div class='form-control btn' id="share_wrapped_delete_button" style='background-color: var(--white); cursor: default;'>
                             <span id='share_wrapped_url' class='share_wrapped_url' style=''></span>
-                            <img id='share_wrapped_copy' src='assets/external-link.svg' style='' onclick='open_link_user();'>
-                            <img id='share_wrapped_delete' src='assets/trash.svg' style='' onclick='delete_link_user();'>
+                            <img id='share_wrapped_copy' src='./assets/external-link.svg' style='' onclick='open_link_user();'>
+                            <img id='share_wrapped_delete' src='./assets/trash.svg' style='' onclick='delete_link_user();'>
                         </div>
                     </div>
 
@@ -218,7 +218,6 @@
 <script type="text/javascript">
 
     // Initialize variables for global reference
-    var root = "./";
     var link_mode = false;
     var results;
     var functions;
@@ -226,6 +225,7 @@
     var cookie = false;
     var client_key = "";
     var wrapperr_configured = false;
+    var api_url = window.location.origin + "/api/";
 
     var url = "";
     var code = 0;
@@ -259,7 +259,7 @@
                     link_mode = true;
                     wrapped_link_actions(hash);
                     document.getElementById('intro_text').innerHTML = '';
-                    document.getElementById('stats').innerHTML = '<img id="loading_icon" src="assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em;width: 4em; height: 4em; display:block; margin: auto;">';
+                    document.getElementById('stats').innerHTML = '<img id="loading_icon" src="./assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em;width: 4em; height: 4em; display:block; margin: auto;">';
                 }
 
                 // Contact the Wrapperr API to get configuration details

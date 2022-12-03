@@ -89,36 +89,43 @@ func main() {
 	// Assign routes
 	router := mux.NewRouter().StrictSlash(true)
 
+	var root string
+	if config.WrapperrRoot != "" {
+		root = "/" + config.WrapperrRoot
+	} else {
+		root = ""
+	}
+
 	// Admin auth routes
-	router.HandleFunc("/api/validate/admin", routes.ApiValidateAdmin)
-	router.HandleFunc("/api/get/config", routes.ApiGetConfig)
-	router.HandleFunc("/api/get/log", routes.ApiGetLog)
-	router.HandleFunc("/api/set/config", routes.ApiSetConfig)
-	router.HandleFunc("/api/update/admin", routes.ApiUpdateAdmin)
+	router.HandleFunc(root+"/api/validate/admin", routes.ApiValidateAdmin)
+	router.HandleFunc(root+"/api/get/config", routes.ApiGetConfig)
+	router.HandleFunc(root+"/api/get/log", routes.ApiGetLog)
+	router.HandleFunc(root+"/api/set/config", routes.ApiSetConfig)
+	router.HandleFunc(root+"/api/update/admin", routes.ApiUpdateAdmin)
 
 	// No-auth routes
-	router.HandleFunc("/api/get/config-state", routes.ApiWrapperrConfigured)
-	router.HandleFunc("/api/login/admin", routes.ApiLogInAdmin)
-	router.HandleFunc("/api/get/wrapperr-version", routes.ApiGetWrapperrVersion)
-	router.HandleFunc("/api/get/admin-state", routes.ApiGetAdminState)
-	router.HandleFunc("/api/get/functions", routes.ApiGetFunctions)
-	router.HandleFunc("/api/create/admin", routes.ApiCreateAdmin)
-	router.HandleFunc("/api/get/tautulli-connection", routes.ApiGetTautulliConncection)
-	router.HandleFunc("/api/get/share-link", routes.ApiGetShareLink)
+	router.HandleFunc(root+"/api/get/config-state", routes.ApiWrapperrConfigured)
+	router.HandleFunc(root+"/api/login/admin", routes.ApiLogInAdmin)
+	router.HandleFunc(root+"/api/get/wrapperr-version", routes.ApiGetWrapperrVersion)
+	router.HandleFunc(root+"/api/get/admin-state", routes.ApiGetAdminState)
+	router.HandleFunc(root+"/api/get/functions", routes.ApiGetFunctions)
+	router.HandleFunc(root+"/api/create/admin", routes.ApiCreateAdmin)
+	router.HandleFunc(root+"/api/get/tautulli-connection", routes.ApiGetTautulliConncection)
+	router.HandleFunc(root+"/api/get/share-link", routes.ApiGetShareLink)
 
 	// User auth routes
-	router.HandleFunc("/api/get/login-url", routes.ApiGetLoginURL)
-	router.HandleFunc("/api/login/plex-auth", routes.ApiLoginPlexAuth)
-	router.HandleFunc("/api/validate/plex-auth", routes.ApiValidatePlexAuth)
-	router.HandleFunc("/api/create/share-link", routes.ApiCreateShareLink)
-	router.HandleFunc("/api/get/user-share-link", routes.ApiGetUserShareLink)
-	router.HandleFunc("/api/delete/user-share-link", routes.ApiDeleteUserShareLink)
+	router.HandleFunc(root+"/api/get/login-url", routes.ApiGetLoginURL)
+	router.HandleFunc(root+"/api/login/plex-auth", routes.ApiLoginPlexAuth)
+	router.HandleFunc(root+"/api/validate/plex-auth", routes.ApiValidatePlexAuth)
+	router.HandleFunc(root+"/api/create/share-link", routes.ApiCreateShareLink)
+	router.HandleFunc(root+"/api/get/user-share-link", routes.ApiGetUserShareLink)
+	router.HandleFunc(root+"/api/delete/user-share-link", routes.ApiDeleteUserShareLink)
 
 	// Get stats route
-	router.HandleFunc("/api/get/statistics", routes.ApiWrapperGetStatistics)
+	router.HandleFunc(root+"/api/get/statistics", routes.ApiWrapperGetStatistics)
 
 	// Static routes
-	router.PathPrefix("/").Handler(http.FileServer(http.Dir("./web/")))
+	router.PathPrefix(root).Handler(http.StripPrefix(root, http.FileServer(http.Dir("./web/"))))
 
 	// Start web-server
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))

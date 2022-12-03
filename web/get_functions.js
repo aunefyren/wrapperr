@@ -25,6 +25,6 @@ function get_functions() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", root + "api/get/functions");
+    xhttp.open("post", api_url + "get/functions");
     xhttp.send(config_data);
 }

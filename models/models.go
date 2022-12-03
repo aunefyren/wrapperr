@@ -209,6 +209,7 @@ type WrapperrVersion struct {
 	PlexAuth                  bool   `json:"plex_auth"`
 	WrapperrFrontPageTitle    string `json:"wrapperr_front_page_title"`
 	WrapperrFrontPageSubtitle string `json:"wrapperr_front_page_subtitle"`
+	WrapperrRoot              string `json:"wrapperr_root"`
 	ClientKey                 string `json:"client_key"`
 	WrapperrConfigured        bool   `json:"wrapperr_configured"`
 	WinterTheme               bool   `json:"winter_theme"`

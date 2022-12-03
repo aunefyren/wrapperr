@@ -48,6 +48,7 @@ func ApiGetWrapperrVersion(w http.ResponseWriter, r *http.Request) {
 		WinterTheme:               config.WinterTheme,
 		Message:                   "Retrieved Wrapperr version.",
 		Error:                     false,
+		WrapperrRoot:              config.WrapperrRoot,
 	}
 
 	ip_string := utilities.GetOriginIPString(w, r)

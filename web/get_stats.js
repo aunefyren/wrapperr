@@ -51,7 +51,7 @@ function get_stats() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get/statistics");
+    xhttp.open("post", api_url + "get/statistics");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(stats_data);
@@ -1057,7 +1057,7 @@ function create_wrapped_link() {
     }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/create/share-link");
+    xhttp.open("post", api_url + "create/share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(wrapped_data);
@@ -1128,7 +1128,7 @@ function delete_new_link_user() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/delete/user-share-link");
+    xhttp.open("post", api_url + "delete/user-share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(cookie_data);

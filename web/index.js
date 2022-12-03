@@ -44,7 +44,7 @@ function wrapped_link_actions(hash) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get/share-link");
+    xhttp.open("post", api_url + "get/share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(hash_data);
@@ -203,7 +203,7 @@ function check_token(code, id) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/login/plex-auth");
+    xhttp.open("post", api_url + "login/plex-auth");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send(auth_data);
 
@@ -247,7 +247,7 @@ function validate_cookie_user(cookie) {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "/api/validate/plex-auth");
+    xhttp.open("post", api_url + "validate/plex-auth");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send();
@@ -343,6 +343,11 @@ function get_wrapper_version() {
                 // Set the 'configured' option in the JS variable
                 wrapperr_configured = result.wrapperr_configured;
 
+                if(result.wrapperr_root != "") {
+                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
+                    console.log("URL: " + api_url)
+                }
+
                 // Change search function to use Plex search instead
                 if(!result.plex_auth) {
                     wrapperr_search_function();
@@ -367,7 +372,7 @@ function get_wrapper_version() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/get/wrapperr-version");
+    xhttp.open("post", window.location + "api/get/wrapperr-version");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send();
     return;
@@ -407,7 +412,7 @@ function delete_link_user() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", "api/delete/user-share-link");
+    xhttp.open("post", api_url + "delete/user-share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
     xhttp.send(cookie_data);

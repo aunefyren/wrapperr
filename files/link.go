@@ -4,6 +4,7 @@ import (
 	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -28,7 +29,7 @@ func SaveLink(link_object *models.WrapperrShareLink) error {
 
 	var link_object_path, _ = filepath.Abs(link_path + "/" + strconv.Itoa(link_object.UserID) + ".json")
 
-	err = os.WriteFile(link_object_path, file, 0644)
+	err = ioutil.WriteFile(link_object_path, file, 0644)
 	if err != nil {
 		return err
 	}
@@ -83,14 +84,12 @@ func GetLink(UserID string) (*models.WrapperrShareLink, error) {
 		return nil, errors.New("Invalid share link.")
 	}
 
-	file, err := os.Open(share_link_path)
+	file, err := ioutil.ReadFile(share_link_path)
 	if err != nil {
 		return nil, err
 	}
 
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&link_object)
+	err = json.Unmarshal(file, &link_object)
 	if err != nil {
 		return nil, err
 	}

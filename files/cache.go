@@ -5,6 +5,7 @@ import (
 	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -20,7 +21,7 @@ func SaveCache(cache *[]models.WrapperrDay) error {
 		return err
 	}
 
-	err = os.WriteFile(cache_path, file, 0644)
+	err = ioutil.WriteFile(cache_path, file, 0644)
 	if err != nil {
 		return err
 	}
@@ -70,15 +71,16 @@ func GetCache() ([]models.WrapperrDay, error) {
 		}
 	}
 
-	// Load cache file for alterations, information
+	// Define cache
 	var cache []models.WrapperrDay
-	file, err := os.Open(cache_path)
+
+	// Load cache file
+	file, err := ioutil.ReadFile(cache_path)
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&cache)
+
+	err = json.Unmarshal(file, &cache)
 	if err != nil {
 		return nil, err
 	}

@@ -60,17 +60,17 @@ func GetAdminConfig() (*models.AdminConfig, error) {
 	}
 
 	// Load config file for alterations, information
-	file, err := os.Open(admin_config_path)
+	file, err := ioutil.ReadFile(admin_config_path)
 	if err != nil {
-		log.Println("Admin config opening threw error.")
+		log.Println("Admin config opening threw error. Error: " + err.Error())
 		return nil, err
 	}
-	defer file.Close()
-	decoder := json.NewDecoder(file)
+
 	admin_config := models.AdminConfig{}
-	err = decoder.Decode(&admin_config)
+
+	err = json.Unmarshal(file, &admin_config)
 	if err != nil {
-		log.Println("Admin config parsing threw error.")
+		log.Println("Admin config parsing threw error. Error: " + err.Error())
 		return nil, err
 	}
 

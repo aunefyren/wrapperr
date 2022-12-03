@@ -71,6 +71,8 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 			utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve Wrapperr configuration."), 500)
 		} else {
 
+			original_root := config.WrapperrRoot
+
 			// Read payload from Post input
 			reqBody, err := ioutil.ReadAll(r.Body)
 			if err != nil {
@@ -145,19 +147,17 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if config_payload.ClearCache {
+			log.Println("New Wrapperr configuration saved for type: " + config_payload.DataType + ".")
+			utilities.RespondDefaultOkay(w, r, "Saved new Wrapperr config.")
 
-				log.Println("Clear cache setting set to true. Clearing cache.")
-
-				err = files.ClearCache()
+			if config.WrapperrRoot != original_root {
+				log.Println("Root changed, attempting Wrapperr restart.")
+				err = utilities.RestartSelf()
 				if err != nil {
-					log.Println("Failed to clear cache:")
-					log.Println(err)
+					log.Println("Failed to restart. Error: " + err.Error())
 				}
 			}
 
-			log.Println("New Wrapperr configuration saved for type: " + config_payload.DataType + ".")
-			utilities.RespondDefaultOkay(w, r, "Saved new Wrapperr config.")
 			return
 
 		}

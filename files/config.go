@@ -4,6 +4,7 @@ import (
 	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -104,7 +105,7 @@ func SaveConfig(config *models.WrapperrConfig) error {
 		return err
 	}
 
-	err = os.WriteFile(config_path, file, 0644)
+	err = ioutil.WriteFile(config_path, file, 0644)
 	if err != nil {
 		return err
 	}
@@ -124,6 +125,8 @@ func CreateConfigFile() error {
 
 	var tautulli_config = models.TautulliConfig{
 		TautulliGrouping: true,
+		TautulliPort:     80,
+		TautulliLength:   5000,
 	}
 	config.TautulliConfig = append(config.TautulliConfig, tautulli_config)
 
@@ -163,32 +166,29 @@ func GetConfig() (*models.WrapperrConfig, error) {
 	}
 
 	// Load config file
-	file, err := os.Open(config_path)
+	file, err := ioutil.ReadFile(config_path)
 	if err != nil {
-		log.Println("Get config file threw error trying to open the file.")
 		return nil, err
 	}
-	defer file.Close()
 
 	// Parse config file
-	decoder := json.NewDecoder(file)
 	config := models.WrapperrConfig{}
-	err = decoder.Decode(&config)
+	err = json.Unmarshal(file, &config)
+	if err != nil {
+		return nil, err
+	}
 	if err != nil {
 
 		// Parse config file
 		log.Println("Failed to parse config file. Trying legacy format. Error: " + err.Error())
 		// Load config file
-		file, err := os.Open(config_path)
+		file, err = ioutil.ReadFile(config_path)
 		if err != nil {
-			log.Println("Get config file threw error trying to open the file.")
-			return nil, err
+			log.Fatal("Error when opening file: ", err)
 		}
-		defer file.Close()
 
-		decoder := json.NewDecoder(file)
 		config_legacy := models.WrapperrConfigLegacy{}
-		err = decoder.Decode(&config_legacy)
+		err = json.Unmarshal(file, &config)
 
 		convert_failed := false
 
@@ -213,6 +213,8 @@ func GetConfig() (*models.WrapperrConfig, error) {
 		// if nothing worked, replace config file
 		if convert_failed {
 
+			log.Println("Get config file threw error trying to open the template file.")
+
 			// Backup old config
 			new_save_loc, err := BackUpConfig(config_path)
 			if err != nil {
@@ -223,17 +225,15 @@ func GetConfig() (*models.WrapperrConfig, error) {
 			}
 
 			// Load default config file
-			file, err = os.Open(default_config_path)
+			file, err := ioutil.ReadFile(default_config_path)
 			if err != nil {
 				log.Println("Get config file threw error trying to open the template file.")
 				return nil, err
 			}
-			defer file.Close()
 
 			// Parse default config file
-			decoder = json.NewDecoder(file)
 			config = models.WrapperrConfig{}
-			err = decoder.Decode(&config)
+			err = json.Unmarshal(file, &config)
 			if err != nil {
 				log.Println("Get config file threw error trying to parse the template file.")
 				return nil, err
@@ -243,17 +243,15 @@ func GetConfig() (*models.WrapperrConfig, error) {
 	}
 
 	// Load default config file
-	file, err = os.Open(default_config_path)
+	file, err = ioutil.ReadFile(default_config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the template file.")
 		return nil, err
 	}
-	defer file.Close()
 
 	// Parse default config file
-	decoder = json.NewDecoder(file)
 	config_default := models.WrapperrConfig{}
-	err = decoder.Decode(&config_default)
+	err = json.Unmarshal(file, &config_default)
 	if err != nil {
 		log.Println("Get config file threw error trying to parse the template file.")
 		return nil, err
@@ -294,7 +292,10 @@ func GetConfig() (*models.WrapperrConfig, error) {
 		config.WrappedEnd = config_default.WrappedEnd // If no start time, set to 31 Dec
 	}
 
-	if config.TautulliConfig == nil {
+	if config.TautulliConfig == nil || len(config.TautulliConfig) == 0 {
+
+		log.Println("Tautulli server array is empty, adding a new one.")
+
 		config.TautulliConfig = []models.TautulliConfig{}
 
 		NewTautulliConfig := models.TautulliConfig{
@@ -307,13 +308,81 @@ func GetConfig() (*models.WrapperrConfig, error) {
 
 	// Set Tautulli length to 5000 if zero is set
 	if config.TautulliConfig[0].TautulliLength == 0 {
+		log.Println("Tautulli item length on server number 1 is 0, replacing with 5000.")
 		config.TautulliConfig[0].TautulliLength = config_default.TautulliConfig[0].TautulliLength
 	}
 
 	// Set Tautulli port to 80 if zero is set
 	if config.TautulliConfig[0].TautulliPort == 0 {
+		log.Println("Tautulli port on server number 1 is 0, replacing with 80.")
 		config.TautulliConfig[0].TautulliPort = config_default.TautulliConfig[0].TautulliPort
 	}
+
+	config, err = VerifyNonEmptyCustomValues(config, config_default)
+	if err != nil {
+		return nil, err
+	}
+
+	// Save new version of config json
+	err = SaveConfig(&config)
+	if err != nil {
+		return nil, err
+	}
+
+	// Return config object
+	return &config, nil
+}
+
+func BackUpConfig(ConfigPath string) (string, error) {
+	new_save_loc := ConfigPath + "." + uuid.NewString() + ".replaced"
+	err := os.Rename(config_path, new_save_loc)
+	if err != nil {
+		return "", err
+	}
+	return new_save_loc, nil
+}
+
+func ConvertLegacyToCurrentConfig(config models.WrapperrConfig, config_legacy models.WrapperrConfigLegacy) (models.WrapperrConfig, error) {
+
+	var NewTautulli models.TautulliConfig
+
+	NewTautulli.TautulliApiKey = config_legacy.TautulliConfig.TautulliApiKey
+	NewTautulli.TautulliIP = config_legacy.TautulliConfig.TautulliIP
+	NewTautulli.TautulliLibraries = config_legacy.TautulliConfig.TautulliLibraries
+	NewTautulli.TautulliRoot = config_legacy.TautulliConfig.TautulliRoot
+	NewTautulli.TautulliGrouping = config_legacy.TautulliConfig.TautulliGrouping
+	NewTautulli.TautulliHttps = config_legacy.TautulliConfig.TautulliHttps
+	NewTautulli.TautulliLength = config_legacy.TautulliConfig.TautulliLength
+	NewTautulli.TautulliPort = config_legacy.TautulliConfig.TautulliPort
+
+	NewTautulli.TautulliName = "Server 1"
+
+	config.TautulliConfig = append(config.TautulliConfig, NewTautulli)
+
+	config.WrapperrCustomize = config_legacy.WrapperrCustomize
+	config.WrapperrVersion = config_legacy.WrapperrVersion
+	config.Timezone = config_legacy.Timezone
+	config.ApplicationName = config_legacy.ApplicationName
+	config.ApplicationURL = config_legacy.ApplicationURL
+	config.UseCache = config_legacy.UseCache
+	config.UseLogs = config_legacy.UseLogs
+	config.ClientKey = config_legacy.ClientKey
+	config.WrapperrRoot = config_legacy.WrapperrRoot
+	config.PrivateKey = config_legacy.PrivateKey
+	config.CreateShareLinks = config_legacy.CreateShareLinks
+	config.WrappedStart = config_legacy.WrappedStart
+	config.WrappedEnd = config_legacy.WrappedEnd
+	config.WrapperrPort = config_legacy.WrapperrPort
+	config.PlexAuth = config_legacy.PlexAuth
+	config.WinterTheme = config_legacy.WinterTheme
+
+	log.Println("Config migrated.")
+
+	return config, nil
+}
+
+// verify values and replace empty ones
+func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default models.WrapperrConfig) (models.WrapperrConfig, error) {
 
 	if config.WrapperrCustomize.StatsTopListLength < 0 {
 		config.WrapperrCustomize.StatsTopListLength = config_default.WrapperrCustomize.StatsTopListLength
@@ -663,60 +732,6 @@ func GetConfig() (*models.WrapperrConfig, error) {
 		config.WrapperrCustomize.WrapperrSortDuration = config_default.WrapperrCustomize.WrapperrSortDuration
 	}
 
-	// Save new version of config json
-	err = SaveConfig(&config)
-	if err != nil {
-		return nil, err
-	}
-
-	// Return config object
-	return &config, nil
-}
-
-func BackUpConfig(ConfigPath string) (string, error) {
-	new_save_loc := ConfigPath + "." + uuid.NewString() + ".replaced"
-	err := os.Rename(config_path, new_save_loc)
-	if err != nil {
-		return "", err
-	}
-	return new_save_loc, nil
-}
-
-func ConvertLegacyToCurrentConfig(config models.WrapperrConfig, config_legacy models.WrapperrConfigLegacy) (models.WrapperrConfig, error) {
-
-	var NewTautulli models.TautulliConfig
-
-	NewTautulli.TautulliApiKey = config_legacy.TautulliConfig.TautulliApiKey
-	NewTautulli.TautulliIP = config_legacy.TautulliConfig.TautulliIP
-	NewTautulli.TautulliLibraries = config_legacy.TautulliConfig.TautulliLibraries
-	NewTautulli.TautulliRoot = config_legacy.TautulliConfig.TautulliRoot
-	NewTautulli.TautulliGrouping = config_legacy.TautulliConfig.TautulliGrouping
-	NewTautulli.TautulliHttps = config_legacy.TautulliConfig.TautulliHttps
-	NewTautulli.TautulliLength = config_legacy.TautulliConfig.TautulliLength
-	NewTautulli.TautulliPort = config_legacy.TautulliConfig.TautulliPort
-
-	NewTautulli.TautulliName = "Server 1"
-
-	config.TautulliConfig = append(config.TautulliConfig, NewTautulli)
-
-	config.WrapperrCustomize = config_legacy.WrapperrCustomize
-	config.WrapperrVersion = config_legacy.WrapperrVersion
-	config.Timezone = config_legacy.Timezone
-	config.ApplicationName = config_legacy.ApplicationName
-	config.ApplicationURL = config_legacy.ApplicationURL
-	config.UseCache = config_legacy.UseCache
-	config.UseLogs = config_legacy.UseLogs
-	config.ClientKey = config_legacy.ClientKey
-	config.WrapperrRoot = config_legacy.WrapperrRoot
-	config.PrivateKey = config_legacy.PrivateKey
-	config.CreateShareLinks = config_legacy.CreateShareLinks
-	config.WrappedStart = config_legacy.WrappedStart
-	config.WrappedEnd = config_legacy.WrappedEnd
-	config.WrapperrPort = config_legacy.WrapperrPort
-	config.PlexAuth = config_legacy.PlexAuth
-	config.WinterTheme = config_legacy.WinterTheme
-
-	log.Println("Config migrated.")
-
 	return config, nil
+
 }
