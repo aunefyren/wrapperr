@@ -147,6 +147,17 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
+			if config_payload.ClearCache {
+
+				log.Println("Clear cache setting set to true. Clearing cache.")
+
+				err = files.ClearCache()
+				if err != nil {
+					log.Println("Failed to clear cache:")
+					log.Println(err)
+				}
+			}
+
 			log.Println("New Wrapperr configuration saved for type: " + config_payload.DataType + ".")
 			utilities.RespondDefaultOkay(w, r, "Saved new Wrapperr config.")
 
