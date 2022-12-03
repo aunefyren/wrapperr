@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.1.0"
+var wrapperr_version_parameter = "v3.1.1"
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
 
