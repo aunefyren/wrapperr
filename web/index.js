@@ -372,7 +372,17 @@ function get_wrapper_version() {
         }
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", window.location + "api/get/wrapperr-version");
+
+    var url_current = window.location.toString();
+    var last_char = url_current.charAt(window.location.length-1);
+    if(last_char == "/") {
+        var init_url = window.location
+    } else {
+        var init_url = window.location + "/"
+    }
+
+    xhttp.open("post", init_url + "api/get/wrapperr-version");
+
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send();
     return;

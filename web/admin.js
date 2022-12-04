@@ -827,6 +827,8 @@ function set_wrapperr_settings() {
 
 function set_wrapperr_settings_call() {
 
+    var wrapperr_root_original = wrapperr_root;
+
     document.getElementById("set_wrapperr_settings_form_button").disabled = true;
     document.getElementById("set_wrapperr_settings_form_button").style.opacity = '0.5';
 
@@ -842,6 +844,25 @@ function set_wrapperr_settings_call() {
     timezone = document.getElementById('timezone').value;
     clear_cache = document.getElementById('clear_cache').checked;
     winter_theme = document.getElementById('winter_theme').checked;
+
+    if(wrapperr_root_original !== wrapperr_root) {
+        if(!confirm("You have changed the Wrapperr root/base URL. Wrapperr will attempt to restart and the interface to access this webpage will change. If you are using an URL base you must use a trailing '/' at the end of your new URL.")){
+            return;
+        }
+    }
+
+    if(wrapperr_root !== "") {
+        var wrapperr_root_last_char = wrapperr_root.charAt(wrapperr_root.length-1);
+        var wrapperr_root_first_char = wrapperr_root.charAt(0);
+
+        if(wrapperr_root_last_char == "/" || wrapperr_root_first_char == "/") {
+            document.getElementById("set_wrapperr_settings_form_button").disabled = false;
+            document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
+            alert("No trailing or initial '/' needed for URL base.");
+            document.getElementById('wrapperr_root').focus();
+            return;
+        }
+    }
 
     if(timezone === '') {
         document.getElementById("set_wrapperr_settings_form_button").disabled = false;
