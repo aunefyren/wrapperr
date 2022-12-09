@@ -124,8 +124,31 @@ func main() {
 	// Get stats route
 	router.HandleFunc(root+"/api/get/statistics", routes.ApiWrapperGetStatistics)
 
-	// Static routes
-	router.PathPrefix(root).Handler(http.StripPrefix(root, http.FileServer(http.Dir("./web/"))))
+	// Assets route
+	assetsFileServer := http.FileServer(http.Dir("./web/assets/"))
+	router.PathPrefix(root + "/assets").Handler(http.StripPrefix(root+"/assets", assetsFileServer))
+
+	// JS route
+	jsFileServer := http.FileServer(http.Dir("./web/js/"))
+	router.PathPrefix(root + "/js").Handler(http.StripPrefix(root+"/js", jsFileServer))
+
+	// HTML frontpage route
+	router.HandleFunc(root+"/", func(w http.ResponseWriter, r *http.Request) {
+		// Using the http.ServeFile function to serve the frontpage.html file
+		http.ServeFile(w, r, "./web/html/frontpage.html")
+	})
+
+	// HTML admin route
+	router.HandleFunc(root+"/admin", func(w http.ResponseWriter, r *http.Request) {
+		// Using the http.ServeFile function to serve the admin.html file
+		http.ServeFile(w, r, "./web/html/admin.html")
+	})
+
+	// TXT robots route
+	router.HandleFunc(root+"/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		// Using the http.ServeFile function to serve the robots.txt file
+		http.ServeFile(w, r, "./web/txt/robots.txt")
+	})
 
 	// Start web-server
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))

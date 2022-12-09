@@ -24,7 +24,7 @@ function login_menu() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" id="log_in_button"><img src="../assets/done.svg" class="btn_logo"><p2>Log in</p2></button>';
+    html += '<button type="submit" class="form-control btn" id="log_in_button"><img src="./assets/done.svg" class="btn_logo"><p2>Log in</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -103,7 +103,7 @@ function set_password_form() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" id="create_admin_button"><img src="../assets/done.svg" class="btn_logo"><p2>Create account</p2></button>';
+    html += '<button type="submit" class="form-control btn" id="create_admin_button"><img src="./assets/done.svg" class="btn_logo"><p2>Create account</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -168,7 +168,7 @@ function update_password_form() {
     topFunction();
 
     var html = '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -197,7 +197,7 @@ function update_password_form() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" onclick="update_password();" id="update_admin_button"><img src="../assets/done.svg" class="btn_logo"><p2>Update account</p2></button>';
+    html += '<button type="submit" class="form-control btn" onclick="update_password();" id="update_admin_button"><img src="./assets/done.svg" class="btn_logo"><p2>Update account</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -303,11 +303,11 @@ function sign_out() {
 function admin_menu() {
 
     var html = '<div class="form-group">';
-    html += '<button class="form-control btn" onclick="update_password_form()"><img src="../assets/config.svg" class="btn_logo"><p2>Admin settings</p2></button>';
+    html += '<button class="form-control btn" onclick="update_password_form()"><img src="./assets/config.svg" class="btn_logo"><p2>Admin settings</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<button class="form-control btn" name="plex_signout_button" id="plex_signout_button" onclick="sign_out()"><img src="../assets/close.svg" class="btn_logo"></img><p2 id="plex_signout_button_text">Sign Out</p2></button>';
+    html += '<button class="form-control btn" name="plex_signout_button" id="plex_signout_button" onclick="sign_out()"><img src="./assets/close.svg" class="btn_logo"></img><p2 id="plex_signout_button_text">Sign Out</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -315,23 +315,23 @@ function admin_menu() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" onclick="set_tautulli_settings()" id="set_tautulli_settings"><img src="../assets/config.svg" class="btn_logo"><p2>Tautulli settings</p2></button>';
+    html += '<button class="form-control btn" onclick="set_tautulli_settings()" id="set_tautulli_settings"><img src="./assets/config.svg" class="btn_logo"><p2>Tautulli settings</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" onclick="set_wrapperr_settings()" id="set_wrapperr_settings"><img src="../assets/config.svg" class="btn_logo"><p2>Wrapperr settings</p2></button>';
+    html += '<button class="form-control btn" onclick="set_wrapperr_settings()" id="set_wrapperr_settings"><img src="./assets/config.svg" class="btn_logo"><p2>Wrapperr settings</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" onclick="set_wrapperr_customization()" id="set_wrapperr_customization"><img src="../assets/config.svg" class="btn_logo"><p2>Wrapperr customization</p2></button>';
+    html += '<button class="form-control btn" onclick="set_wrapperr_customization()" id="set_wrapperr_customization"><img src="./assets/config.svg" class="btn_logo"><p2>Wrapperr customization</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" onclick="caching_menu()" id="caching_menu"><img src="../assets/download.svg" class="btn_logo"><p2>Caching</p2></button>';
+    html += '<button class="form-control btn" onclick="caching_menu()" id="caching_menu"><img src="./assets/download.svg" class="btn_logo"><p2>Caching</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" onclick="log_menu()" id="log_menu"><img src="../assets/document.svg" class="btn_logo"><p2>Log</p2></button>';
+    html += '<button class="form-control btn" onclick="log_menu()" id="log_menu"><img src="./assets/document.svg" class="btn_logo"><p2>Log</p2></button>';
     html += '</div>';
 
     document.getElementById("setup").innerHTML = html;
@@ -366,7 +366,7 @@ function set_tautulli_settings() {
 
     var html = '<div>';
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -379,7 +379,7 @@ function set_tautulli_settings() {
 
         if(tautulli.length > 1) {
             html += '<div class="form-group newline">';
-            html += '<button style="" type="button" class="form-control btn" id="remove_tautulli_ ' + i + '" onclick="remove_tautulli_server(' + i + ');"><img src="../assets/trash.svg" class="btn_logo"><p2 id="test_tautulli_text">Remove Tautulli server</p2></button>';
+            html += '<button style="" type="button" class="form-control btn" id="remove_tautulli_ ' + i + '" onclick="remove_tautulli_server(' + i + ');"><img src="./assets/trash.svg" class="btn_logo"><p2 id="test_tautulli_text">Remove Tautulli server</p2></button>';
             html += '</div>';
         }
 
@@ -440,7 +440,7 @@ function set_tautulli_settings() {
         html += '</div>';
 
         html += '<div class="form-group newline">';
-        html += '<button style="background-color: lightgrey;" type="button" class="form-control btn" id="test_connection_' + i + '" onclick="test_tautulli_connection(' + i + ')"><img src="../assets/synchronize.svg" class="btn_logo"><p2 id="test_tautulli_text">Test Tautulli connection</p2></button>';
+        html += '<button style="background-color: lightgrey;" type="button" class="form-control btn" id="test_connection_' + i + '" onclick="test_tautulli_connection(' + i + ')"><img src="./assets/synchronize.svg" class="btn_logo"><p2 id="test_tautulli_text">Test Tautulli connection</p2></button>';
         html += '</div>';
 
         html += '<div class="form-group newline">';
@@ -450,7 +450,7 @@ function set_tautulli_settings() {
     }
 
     html += '<div class="form-group newline">';
-    html += '<button style="" type="button" class="form-control btn" id="add_tautulli_server" onclick="additional_tautulli_server();"><img src="../assets/plus.svg" class="btn_logo"><p2 id="test_tautulli_text">Add Tautulli server</p2></button>';
+    html += '<button style="" type="button" class="form-control btn" id="add_tautulli_server" onclick="additional_tautulli_server();"><img src="./assets/plus.svg" class="btn_logo"><p2 id="test_tautulli_text">Add Tautulli server</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -467,7 +467,7 @@ function set_tautulli_settings() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" onclick="set_tautulli_settings_call();" id="set_tautulli_form_button"><img src="../assets/done.svg" class="btn_logo"></img><p2 id="set_tautulli_form_button_text">Save</p2></button>';
+    html += '<button type="submit" class="form-control btn" onclick="set_tautulli_settings_call();" id="set_tautulli_form_button"><img src="./assets/done.svg" class="btn_logo"></img><p2 id="set_tautulli_form_button_text">Save</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -684,7 +684,7 @@ function set_wrapperr_settings() {
     topFunction();
 
     var html = '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -817,7 +817,7 @@ function set_wrapperr_settings() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" onclick="set_wrapperr_settings_call();" id="set_wrapperr_settings_form_button"><img src="../assets/done.svg" class="btn_logo"></img><p2 id="set_wrapperr_settings_form_button_text">Save</p2></button>';
+    html += '<button type="submit" class="form-control btn" onclick="set_wrapperr_settings_call();" id="set_wrapperr_settings_form_button"><img src="./assets/done.svg" class="btn_logo"></img><p2 id="set_wrapperr_settings_form_button_text">Save</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -954,7 +954,7 @@ function set_wrapperr_customization() {
     topFunction();
 
     var html = '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1196,7 +1196,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="get_user_movie_stats_custom_button" id="get_user_movie_stats_custom_button" onclick="toggle_hidden_form(\'get_user_movie_stats_custom\')"><img src="../assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_movie_stats_custom_button_text">Custom text</p2></button>';
+    html += '<button class="form-control btn" name="get_user_movie_stats_custom_button" id="get_user_movie_stats_custom_button" onclick="toggle_hidden_form(\'get_user_movie_stats_custom\')"><img src="./assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_movie_stats_custom_button_text">Custom text</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1342,7 +1342,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'get_user_show_stats_custom\')"><img src="../assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Custom text</p2></button>';
+    html += '<button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'get_user_show_stats_custom\')"><img src="./assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Custom text</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1466,7 +1466,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="get_user_music_stats_custom_button" id="get_user_music_stats_custom_button" onclick="toggle_hidden_form(\'get_user_music_stats_custom\')"><img src="../assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_music_stats_custom_button_text">Custom text</p2></button>';
+    html += '<button class="form-control btn" name="get_user_music_stats_custom_button" id="get_user_music_stats_custom_button" onclick="toggle_hidden_form(\'get_user_music_stats_custom\')"><img src="./assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_music_stats_custom_button_text">Custom text</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1593,7 +1593,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="get_year_stats_custom_button" id="get_year_stats_custom_button" onclick="toggle_hidden_form(\'get_year_stats_custom\')"><img src="../assets/tweak.svg" class="btn_logo"></img><p2 id="get_year_stats_custom_button_text">Custom text</p2></button>';
+    html += '<button class="form-control btn" name="get_year_stats_custom_button" id="get_year_stats_custom_button" onclick="toggle_hidden_form(\'get_year_stats_custom\')"><img src="./assets/tweak.svg" class="btn_logo"></img><p2 id="get_year_stats_custom_button_text">Custom text</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1712,7 +1712,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="wrapperr_language_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'wrapperr_language\')"><img src="../assets/tweak.svg" class="btn_logo"></img><p2 id="wrapperr_language_button_text">Custom language</p2></button>';
+    html += '<button class="form-control btn" name="wrapperr_language_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'wrapperr_language\')"><img src="./assets/tweak.svg" class="btn_logo"></img><p2 id="wrapperr_language_button_text">Custom language</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -1729,7 +1729,7 @@ function set_wrapperr_customization() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
-    html += '<button type="submit" class="form-control btn" onclick="set_wrapperr_customization_call();" id="set_wrapperr_customization_form_button"><img src="../assets/done.svg" class="btn_logo"></img><p2 id="set_wrapperr_customization_form_button_text">Save</p2></button>';
+    html += '<button type="submit" class="form-control btn" onclick="set_wrapperr_customization_call();" id="set_wrapperr_customization_form_button"><img src="./assets/done.svg" class="btn_logo"></img><p2 id="set_wrapperr_customization_form_button_text">Save</p2></button>';
     html += '</div>';
 
     html += '</form>';
@@ -2071,7 +2071,7 @@ function set_wrapperr_customization_call() {
 function caching_menu() {
 
     var html = '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -2106,7 +2106,7 @@ function caching_menu() {
                 </div>
 
                 <div class="form-group newline">
-                    <button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'caching_desc\')"><img src="../assets/about.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Info</p2></button>
+                    <button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'caching_desc\')"><img src="./assets/about.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Info</p2></button>
                 </div>
             </div>
 
@@ -2118,7 +2118,7 @@ function caching_menu() {
             </div>
 
             <div class="form-group newline">
-                <button class="form-control btn" type="submit" name="cache_button" id="cache_button"><img src="../assets/download.svg" class="btn_logo"></img><p2 id="cache_button_text">Cache</p2></button>
+                <button class="form-control btn" type="submit" name="cache_button" id="cache_button"><img src="./assets/download.svg" class="btn_logo"></img><p2 id="cache_button_text">Cache</p2></button>
             </div>
 
             <div id="cache"></div>
@@ -2158,7 +2158,7 @@ function cache_initiate() {
         <form id='stats_form' class='form' onsubmit='return false' action="" method="post">
 
             <div class='form-group newline'>
-                <img id="loading_icon" src="../assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em; width: 4em; height: 4em; display: inline;">
+                <img id="loading_icon" src="./assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em; width: 4em; height: 4em; display: inline;">
             </div>
 
             <h3>Caching log:</h3>
@@ -2268,7 +2268,7 @@ function get_stats(days) {
 function log_menu() {
 
     var html = '<div class="form-group newline">';
-    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="../assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
+    html += '<button class="form-control btn" name="admin_menu_return_button" id="admin_menu_return_button" onclick="get_config(get_cookie(\'wrapperr-admin\'));"><img src="./assets/trash.svg" class="btn_logo"></img><p2 id="admin_menu_return_button_text">Return</p2></button>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -2303,7 +2303,7 @@ function log_menu() {
             </div>
 
             <div class="form-group newline">
-                <button class="form-control btn" name="log_button" id="log_button" onclick="get_log();" style="opacity: 0.5;" disabled><img src="../assets/synchronize.svg" class="btn_logo"></img><p2 id="cache_button_text">Refresh</p2></button>
+                <button class="form-control btn" name="log_button" id="log_button" onclick="get_log();" style="opacity: 0.5;" disabled><img src="./assets/synchronize.svg" class="btn_logo"></img><p2 id="cache_button_text">Refresh</p2></button>
             </div>
 
         </form>
@@ -2477,7 +2477,12 @@ function get_wrapper_version() {
 
     root = window.location.pathname.replace('/admin', '')
 
-    xhttp.open("post", window.location.origin + "/" + root + "api/get/wrapperr-version");
+    var trailingslash = ""
+    if(window.location.origin.charAt(window.location.origin.length-1) != "/") {
+        trailingslash = "/"
+    }
+
+    xhttp.open("post", window.location.origin + "/" + root + trailingslash + "api/get/wrapperr-version");
     xhttp.send();
     return;
 }
