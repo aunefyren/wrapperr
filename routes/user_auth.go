@@ -55,7 +55,7 @@ func ApiGetLoginURL(w http.ResponseWriter, r *http.Request) {
 
 	// Confirm username length
 	if homeurl_payload.HomeURL == "" {
-		log.Println("Cannot retrieve Plex Auth login URL. Invalid HomeURL recieved.")
+		log.Println("Cannot retrieve Plex Auth login URL. Invalid HomeURL received.")
 		utilities.RespondDefaultError(w, r, errors.New("HomeURL specified is invalid."), 400)
 		return
 	}
@@ -131,7 +131,7 @@ func ApiLoginPlexAuth(w http.ResponseWriter, r *http.Request) {
 
 	// Confirm username length
 	if payload.ID == 0 || payload.Code == "" {
-		log.Println("Cannot retrieve Plex Auth login state. Invalid ID or Code recieved.")
+		log.Println("Cannot retrieve Plex Auth login state. Invalid ID or Code received.")
 		utilities.RespondDefaultError(w, r, errors.New("Login ID and/or Code is invalid."), 400)
 		return
 	}
@@ -144,7 +144,7 @@ func ApiLoginPlexAuth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if plex_auth.AuthToken == "" {
-		log.Println("Plex Auth response invalid. No Authtoken recieved.")
+		log.Println("Plex Auth response invalid. No Authtoken received.")
 		utilities.RespondDefaultError(w, r, errors.New("Plex Auth response invalid."), 400)
 		return
 	}
@@ -184,8 +184,8 @@ func ApiValidatePlexAuth(w http.ResponseWriter, r *http.Request) {
 		utilities.RespondDefaultError(w, r, errors.New("Failed to parse login token."), 500)
 		return
 	} else if payload.Admin {
-		log.Println("Recieved JWT token is for admin use.")
-		utilities.RespondDefaultError(w, r, errors.New("Recieved JWT token is for admin use."), 401)
+		log.Println("Received JWT token is for admin use.")
+		utilities.RespondDefaultError(w, r, errors.New("Received JWT token is for admin use."), 401)
 		return
 	}
 

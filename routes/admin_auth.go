@@ -87,7 +87,7 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 
 			// Confirm username length
 			if config_payload.DataType == "" {
-				log.Println("Cannot set new config. Invalid data type recieved.")
+				log.Println("Cannot set new config. Invalid data type received.")
 				utilities.RespondDefaultError(w, r, errors.New("Data type specified is invalid."), 400)
 				return
 			}
@@ -142,7 +142,7 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 				time.Local = new_time
 
 			} else {
-				log.Println("Cannot set new config. Invalid data type recieved. Type: " + config_payload.DataType)
+				log.Println("Cannot set new config. Invalid data type received. Type: " + config_payload.DataType)
 				utilities.RespondDefaultError(w, r, errors.New("Failed to save new Wrapperr confguration."), 400)
 				return
 			}
