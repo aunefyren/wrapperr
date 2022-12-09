@@ -297,7 +297,7 @@ func ApiGetTautulliConncection(w http.ResponseWriter, r *http.Request) {
 	json.Unmarshal(reqBody, &tautulli_connection)
 
 	if tautulli_connection.TautulliApiKey == "" || tautulli_connection.TautulliIP == "" || tautulli_connection.TautulliPort == 0 {
-		log.Println("Cannot test Tautulli connection. Invalid Tautulli connection details recieved.")
+		log.Println("Cannot test Tautulli connection. Invalid Tautulli connection details received.")
 		utilities.RespondDefaultError(w, r, errors.New("Tautulli connection details specified are invalid."), 400)
 		return
 	}
