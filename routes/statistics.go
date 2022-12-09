@@ -142,7 +142,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// If caching mode is true and user is not admin, return bad request error
 	if wrapperr_request.CachingMode && !admin {
-		log.Println("Caching mode recieved, but user was not verified as admin.")
+		log.Println("Caching mode received, but user was not verified as admin.")
 		utilities.RespondDefaultError(w, r, errors.New("Only the admin can perform caching."), 401)
 		return
 	}
