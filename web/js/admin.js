@@ -2475,13 +2475,16 @@ function get_wrapper_version() {
     };
     xhttp.withCredentials = true;
 
+    // Get the root without "/admin"
     root = window.location.pathname.replace('/admin', '')
 
+    // Maybe add trailing slash depending on the end of "window.location.origin"
     var trailingslash = ""
     if(window.location.origin.charAt(window.location.origin.length-1) != "/") {
         trailingslash = "/"
     }
 
+    // Reach the API to get URL base
     xhttp.open("post", window.location.origin + "/" + root + trailingslash + "api/get/wrapperr-version");
     xhttp.send();
     return;

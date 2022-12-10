@@ -376,25 +376,27 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				// Loop through retrieved data from Tautulli
 				for j := 0; j < len(tautulli_data); j++ {
 					if tautulli_data[j].MediaType == "movie" || tautulli_data[j].MediaType == "episode" || tautulli_data[j].MediaType == "track" {
+
 						tautulli_entry := models.TautulliEntry{
-							Date:                 tautulli_data[j].Date,
-							RowID:                tautulli_data[j].RowID,
-							Duration:             tautulli_data[j].Duration,
-							FriendlyName:         tautulli_data[j].FriendlyName,
-							FullTitle:            tautulli_data[j].FullTitle,
-							GrandparentRatingKey: tautulli_data[j].GrandparentRatingKey,
-							GrandparentTitle:     tautulli_data[j].GrandparentTitle,
-							OriginalTitle:        tautulli_data[j].OriginalTitle,
-							MediaType:            tautulli_data[j].MediaType,
-							ParentRatingKey:      tautulli_data[j].ParentRatingKey,
-							ParentTitle:          tautulli_data[j].ParentTitle,
-							PausedCounter:        tautulli_data[j].PausedCounter,
-							PercentComplete:      tautulli_data[j].PercentComplete,
-							RatingKey:            tautulli_data[j].RatingKey,
-							Title:                tautulli_data[j].Title,
-							User:                 tautulli_data[j].User,
-							UserID:               tautulli_data[j].UserID,
-							Year:                 tautulli_data[j].Year,
+							Date:                  tautulli_data[j].Date,
+							RowID:                 tautulli_data[j].RowID,
+							Duration:              tautulli_data[j].Duration,
+							FriendlyName:          tautulli_data[j].FriendlyName,
+							FullTitle:             tautulli_data[j].FullTitle,
+							GrandparentRatingKey:  tautulli_data[j].GrandparentRatingKey,
+							GrandparentTitle:      tautulli_data[j].GrandparentTitle,
+							OriginalTitle:         tautulli_data[j].OriginalTitle,
+							MediaType:             tautulli_data[j].MediaType,
+							ParentRatingKey:       tautulli_data[j].ParentRatingKey,
+							ParentTitle:           tautulli_data[j].ParentTitle,
+							PausedCounter:         tautulli_data[j].PausedCounter,
+							PercentComplete:       tautulli_data[j].PercentComplete,
+							RatingKey:             tautulli_data[j].RatingKey,
+							Title:                 tautulli_data[j].Title,
+							User:                  tautulli_data[j].User,
+							UserID:                tautulli_data[j].UserID,
+							Year:                  tautulli_data[j].Year,
+							OriginallyAvailableAt: tautulli_data[j].OriginallyAvailableAt,
 						}
 
 						// Append to day data
@@ -490,7 +492,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for movie within pre-defined array
 				for d := 0; d < len(wrapperr_user_movie); d++ {
-					if wrapperr_user_movie[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_user_movie[d].Title == wrapperr_data[i].Data[j].Title {
+					if ((wrapperr_user_movie[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_movie[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_movie[d].Title == wrapperr_data[i].Data[j].Title {
 						wrapperr_user_movie[d].Plays += 1
 						wrapperr_user_movie[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_movie[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -515,7 +517,8 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for episode within pre-defined array
 				for d := 0; d < len(wrapperr_user_episode); d++ {
-					if wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title {
+
+					if ((wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_episode[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
 						wrapperr_user_episode[d].Plays += 1
 						wrapperr_user_episode[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_episode[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -558,7 +561,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for track within pre-defined array
 				for d := 0; d < len(wrapperr_user_track); d++ {
-					if wrapperr_user_track[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_user_track[d].Title == wrapperr_data[i].Data[j].Title {
+					if ((wrapperr_user_track[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_track[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_track[d].Title == wrapperr_data[i].Data[j].Title {
 						wrapperr_user_track[d].Plays += 1
 						wrapperr_user_track[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_track[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -580,7 +583,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for album within pre-defined array
 				for d := 0; d < len(wrapperr_user_album); d++ {
-					if wrapperr_user_album[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_user_album[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle {
+					if ((wrapperr_user_album[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_album[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_album[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle {
 						wrapperr_user_album[d].Plays += 1
 						wrapperr_user_album[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_album[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -627,7 +630,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for movie within pre-defined array
 				for d := 0; d < len(wrapperr_year_movie); d++ {
-					if wrapperr_year_movie[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_year_movie[d].Title == wrapperr_data[i].Data[j].Title {
+					if ((wrapperr_year_movie[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_year_movie[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_year_movie[d].Title == wrapperr_data[i].Data[j].Title {
 						wrapperr_year_movie[d].Plays += 1
 						wrapperr_year_movie[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_year_movie[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -677,7 +680,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 				// Look for show within pre-defined array
 				for d := 0; d < len(wrapperr_year_show); d++ {
-					if wrapperr_year_show[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_year_show[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
+					if wrapperr_year_show[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
 						wrapperr_year_show[d].Plays += 1
 						wrapperr_year_show[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_year_show[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -859,7 +862,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 			count += 1
 		}
 
-		// Find longest pause
+		// Find the longest duration spent on a certain episode
 		sortutil.DescByField(wrapperr_user_episode, "Duration")
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Duration = wrapperr_user_episode[0].Duration
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.GrandparentTitle = wrapperr_user_episode[0].GrandparentTitle
