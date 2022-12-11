@@ -24,22 +24,18 @@ func main() {
 	// Create and define file for logging
 	file, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		log.Println("Failed to load configuration file. Error: ")
-		log.Println(err)
+		log.Println("Failed to load configuration file. Error: " + err.Error())
 
-		fmt.Println("Failed to load configuration file. Error: ")
-		fmt.Println(err)
+		fmt.Println("Failed to load configuration file. Error: " + err.Error())
 
 		os.Exit(1)
 	}
 
 	config, err := files.GetConfig()
 	if err != nil {
-		log.Println("Failed to load configuration file. Error: ")
-		log.Println(err)
+		log.Println("Failed to load configuration file. Error: " + err.Error())
 
-		fmt.Println("Failed to load configuration file. Error: ")
-		fmt.Println(err)
+		fmt.Println("Failed to load configuration file. Error: " + err.Error())
 
 		os.Exit(1)
 	}
@@ -48,19 +44,16 @@ func main() {
 	if config.Timezone != "" {
 		loc, err := time.LoadLocation(config.Timezone)
 		if err != nil {
-			fmt.Println("Failed to set time zone from config. Error: ")
-			fmt.Println(err)
+			fmt.Println("Failed to set time zone from config. Error: " + err.Error())
 			fmt.Println("Removing value...")
 
-			log.Println("Failed to set time zone from config. Error: ")
-			log.Println(err)
+			log.Println("Failed to set time zone from config. Error: " + err.Error())
 			log.Println("Removing value...")
 
 			config.Timezone = ""
 			err = files.SaveConfig(config)
 			if err != nil {
-				log.Println("Failed to set new time zone in the config. Error: ")
-				log.Println(err)
+				log.Println("Failed to set new time zone in the config. Error: " + err.Error())
 				log.Println("Exiting...")
 				os.Exit(1)
 			}

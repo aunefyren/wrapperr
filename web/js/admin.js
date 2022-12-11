@@ -732,7 +732,7 @@ function set_wrapperr_settings() {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="timezone" title="The timezone the data is located in, like \'Europe/Oslo\'. Type it exactly as it is specified in the PHP documentation.">Timezone: <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">(List)</a></label>';
+    html += '<label for="timezone" title="The timezone the data is located in, like \'Europe/Oslo\'. Type it exactly as it is specified in the IANA Time Zone database.">Timezone: <a href="https://en.wikipedia.org/wiki/List_of_tz_database_time_zones" target="_blank">(List)</a></label>';
     html += '<input type="text" class="form-control" id="timezone" value="' + timezone + '" autocomplete="off" placeholder="" required /><br>';
     html += '</div>';
 
