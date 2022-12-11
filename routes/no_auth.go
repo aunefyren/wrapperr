@@ -304,8 +304,7 @@ func ApiGetTautulliConncection(w http.ResponseWriter, r *http.Request) {
 
 	tautulli_state, err := modules.TautulliTestConnection(tautulli_connection.TautulliPort, tautulli_connection.TautulliIP, tautulli_connection.TautulliHttps, tautulli_connection.TautulliRoot, tautulli_connection.TautulliApiKey)
 	if err != nil {
-		log.Println(err)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to reach Tautulli server."), 500)
+		utilities.RespondDefaultError(w, r, err, 500)
 		return
 	}
 

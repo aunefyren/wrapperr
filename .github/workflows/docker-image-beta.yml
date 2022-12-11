@@ -20,7 +20,7 @@ jobs:
         tags: |
           type-raw,value=beta
         flavor: |
-          latest=true
+          latest=false
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v2
       with:

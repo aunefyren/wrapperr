@@ -422,25 +422,26 @@ type WrapperrDay struct {
 }
 
 type TautulliEntry struct {
-	Date                 int    `json:"date"`
-	Duration             int    `json:"duration"`
-	RowID                int    `json:"row_id"`
-	FriendlyName         string `json:"friendly_name"`
-	FullTitle            string `json:"full_title"`
-	GrandparentRatingKey int    `json:"grandparent_rating_key"`
-	GrandparentTitle     string `json:"grandparent_title"`
-	OriginalTitle        string `json:"original_title"`
-	MediaType            string `json:"media_type"`
-	ParentRatingKey      int    `json:"parent_rating_key"`
-	ParentTitle          string `json:"parent_title"`
-	PausedCounter        int    `json:"paused_counter"`
-	PercentComplete      int    `json:"percent_complete"`
-	RatingKey            int    `json:"rating_key"`
-	Title                string `json:"title"`
-	User                 string `json:"user"`
-	UserID               int    `json:"user_id"`
-	Year                 int    `json:"year"`
-	Plays                int    `json:"plays"`
+	Date                  int    `json:"date"`
+	Duration              int    `json:"duration"`
+	RowID                 int    `json:"row_id"`
+	FriendlyName          string `json:"friendly_name"`
+	FullTitle             string `json:"full_title"`
+	GrandparentRatingKey  int    `json:"grandparent_rating_key"`
+	GrandparentTitle      string `json:"grandparent_title"`
+	OriginalTitle         string `json:"original_title"`
+	MediaType             string `json:"media_type"`
+	ParentRatingKey       int    `json:"parent_rating_key"`
+	ParentTitle           string `json:"parent_title"`
+	PausedCounter         int    `json:"paused_counter"`
+	PercentComplete       int    `json:"percent_complete"`
+	RatingKey             int    `json:"rating_key"`
+	Title                 string `json:"title"`
+	User                  string `json:"user"`
+	UserID                int    `json:"user_id"`
+	Year                  int    `json:"year"`
+	OriginallyAvailableAt string `json:"originally_available_at"`
+	Plays                 int    `json:"plays"`
 }
 
 type WrapperrYearUserEntry struct {
