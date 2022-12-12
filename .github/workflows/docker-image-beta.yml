@@ -19,7 +19,7 @@ jobs:
       with:
         images: |
           aunefyren/wrapperr
-          ghcr.io${{ github.github.repository }}/wrapperr
+          ghcr.io/${{ github.repository }}/wrapperr
         tags: |
           type-raw,value=beta
         flavor: |
