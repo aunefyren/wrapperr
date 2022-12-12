@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
     - uses: actions/checkout@v3
@@ -16,7 +19,7 @@ jobs:
       with:
         images: |
           aunefyren/wrapperr
-          ghcr.io/${{ github.repository_owner }}/wrapperr
+          ghcr.io/${{ github.github.repository }}/wrapperr
         tags: |
           type-raw,value=${{ github.ref_name }}
         flavor: |
