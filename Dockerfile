@@ -1,5 +1,7 @@
 FROM golang:1.19-alpine
 
+LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
+
 ENV port=8282
 
 RUN apk update
