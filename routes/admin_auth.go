@@ -143,7 +143,7 @@ func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 
 			} else {
 				log.Println("Cannot set new config. Invalid data type received. Type: " + config_payload.DataType)
-				utilities.RespondDefaultError(w, r, errors.New("Failed to save new Wrapperr confguration."), 400)
+				utilities.RespondDefaultError(w, r, errors.New("Failed to save new Wrapperr configuration."), 400)
 				return
 			}
 

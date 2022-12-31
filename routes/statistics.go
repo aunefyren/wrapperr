@@ -25,7 +25,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	bool_state, err := files.GetConfigState()
 	if err != nil {
 		log.Println(err)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve confguration state."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve configuration state."), 500)
 		return
 	} else if !bool_state {
 		log.Println("Wrapperr get statistics failed. Configuration state function retrieved false response.")
@@ -104,7 +104,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	var wrapperr_request models.SearchWrapperrRequest
 	json.Unmarshal(reqBody, &wrapperr_request)
 
-	// If auth is not passed, caching mode is false, and no PlexIdentity was recieved, mark it as a bad request
+	// If auth is not passed, caching mode is false, and no PlexIdentity was received, mark it as a bad request
 	if wrapperr_request.PlexIdentity == "" && !auth_passed && !wrapperr_request.CachingMode {
 		log.Println("Cannot retrieve statistics because search parameter is invalid.")
 		utilities.RespondDefaultError(w, r, errors.New("Invalid search parameter."), 400)
@@ -202,7 +202,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	log.Println("7. Cache saving stage completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ip_string)
 
-	// If caching mode is in use, stop the proccess here and return the result to the user
+	// If caching mode is in use, stop the process here and return the result to the user
 	if wrapperr_request.CachingMode {
 
 		boolean_reply := models.BooleanReply{
@@ -305,7 +305,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 					found_date_index = j
 					found_date = true
 
-					// Look at proccessed servers for current server
+					// Look at processed servers for current server
 					for y := 0; y < len(wrapperr_data[j].TautulliServers); y++ {
 						if wrapperr_data[j].TautulliServers[y] == config.TautulliConfig[q].TautulliName {
 							tautulli_server_processed = true
@@ -406,7 +406,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 
 			}
 
-			// If the date is the current day, mark as imcomplete so it can be refreshed the next time
+			// If the date is the current day, mark as incomplete so it can be refreshed the next time
 			if loop_time.Format("2006-01-02") == now.Format("2006-01-02") {
 				wrapperr_day.DataComplete = false
 			}

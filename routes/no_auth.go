@@ -184,7 +184,7 @@ func ApiWrapperrConfigured(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		log.Panicln(err)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve confguration state."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve configuration state."), 500)
 		return
 
 	} else {

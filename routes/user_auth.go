@@ -24,7 +24,7 @@ func ApiGetLoginURL(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 
 		log.Println(err)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve confguration state."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to retrieve configuration state."), 500)
 		return
 
 	} else if !config_bool {
@@ -38,7 +38,7 @@ func ApiGetLoginURL(w http.ResponseWriter, r *http.Request) {
 	config, err := files.GetConfig()
 	if err != nil {
 		log.Println(err)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to load Wrapperr confguration."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to load Wrapperr configuration."), 500)
 		return
 	}
 
@@ -152,7 +152,7 @@ func ApiLoginPlexAuth(w http.ResponseWriter, r *http.Request) {
 	token, err := modules.CreateToken("Plex Auth", false, plex_auth.AuthToken)
 	if err != nil {
 		log.Println(err)
-		utilities.RespondDefaultError(w, r, errors.New("Faield to create JWT token."), 500)
+		utilities.RespondDefaultError(w, r, errors.New("Failed to create JWT token."), 500)
 		return
 	}
 
