@@ -18,11 +18,11 @@ func GetAdminState() (bool, error) {
 	// Retrieve config object from function
 	admin_config, err := GetAdminConfig()
 	if err != nil {
-		log.Println("Admin config state retrival threw error.")
+		log.Println("Admin config state retrieval threw error.")
 		return false, err
 	}
 
-	// Check if certain parameters are set. These are essential paramteres the user must configure for basic functionality.
+	// Check if certain parameters are set. These are essential parameters the user must configure for basic functionality.
 	if admin_config.AdminUsername != "" && admin_config.AdminPassword != "" {
 		return true, nil
 	} else {

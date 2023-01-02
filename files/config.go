@@ -37,7 +37,7 @@ func GetConfigState() (bool, error) {
 		return false, err
 	}
 
-	// Check if certain parameters are set. These are essential paramteres the user must configure for basic functionality.
+	// Check if certain parameters are set. These are essential parameters the user must configure for basic functionality.
 	if config.TautulliConfig[0].TautulliApiKey != "" && config.TautulliConfig[0].TautulliIP != "" && config.TautulliConfig[0].TautulliLength != 0 && config.Timezone != "" && config.WrappedStart != 0 && config.WrappedEnd != 0 && config.WrapperrVersion != "" {
 		return true, nil
 	} else {
@@ -118,7 +118,7 @@ func CreateConfigFile() error {
 
 	var config models.WrapperrConfig
 
-	// Define default boolean values since they are harder to seperate from deliberate boolean values
+	// Define default boolean values since they are harder to separate from deliberate boolean values
 	config.UseCache = true
 	config.PlexAuth = true
 	config.UseLogs = true

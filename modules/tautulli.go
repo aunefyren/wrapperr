@@ -76,8 +76,8 @@ func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps b
 	} else if body_reply.Response.Result == "error" {
 
 		errString := strings.Replace(body_reply.Response.Message, TautulliApiKey, "REDACTED", -1)
-		log.Println("Tautulli server responsed with an error. Error: " + errString)
-		return false, errors.New("Tautulli server responsed with an error. Error: " + errString)
+		log.Println("Tautulli server responded with an error. Error: " + errString)
+		return false, errors.New("Tautulli server responded with an error. Error: " + errString)
 
 	}
 

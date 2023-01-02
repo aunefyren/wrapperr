@@ -1163,7 +1163,7 @@ function set_wrapperr_customization() {
             html += '</div>';
 
             html += '<div class="form-group">';
-            html += '<label for="get_user_movie_stats_oldest_subtitle" title="Subtitle of the oldest movie section. Applied if the other spesfic ones are not applicable.">Movie oldest subtitle:<br>';
+            html += '<label for="get_user_movie_stats_oldest_subtitle" title="Subtitle of the oldest movie section. Applied if the other specific ones are not applicable.">Movie oldest subtitle:<br>';
             html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_oldest_subtitle" name="get_user_movie_stats_oldest_subtitle" value="" autocomplete="off"></textarea></label>';
             html += '</div>';
 
