@@ -381,7 +381,7 @@ function get_wrapper_version(link_mode, hash) {
 
     var url_current = window.location.toString();
     
-    if(window.location.includes("?") {
+    if(window.location.includes("?")) {
         url_array = window.location.split("?")
         init_url = url_array[0]
     } else {
