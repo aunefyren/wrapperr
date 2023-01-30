@@ -378,22 +378,29 @@ function get_wrapper_version(link_mode, hash) {
         }
     };
     xhttp.withCredentials = true;
-
-    var url_current = window.location.toString();
     
-    if(window.location.includes("?")) {
-        url_array = window.location.split("?")
-        init_url = url_array[0]
-    } else {
-        init_url = window.location
-    }
+    // Try to guess API URL from current URL
+    Try {
 
-    var last_char = url_current.charAt(init_url.length-1);
-    
-    if(last_char == "/") {
-        var final_url = init_url
-    } else {
-        var final_url = init_url + "/"
+        var window_location_str = window.location.toString();
+
+        if(window.location.includes("?")) {
+            url_array = window_location_str.split("?")
+            var init_url = url_array[0]
+        } else {
+            var init_url = window_location_str
+        }
+
+        var last_char = init_url.charAt(init_url.length-1);
+
+        if(last_char == "/") {
+            var final_url = init_url
+        } else {
+            var final_url = init_url + "/"
+        }
+    } Catch(e) {
+        console.log("Error occured while guessing API URL. Error: " + e);
+        var final_url = window.location.toString() + "/"
     }
 
     xhttp.open("post", final_url + "api/get/wrapperr-version");
