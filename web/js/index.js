@@ -380,14 +380,23 @@ function get_wrapper_version(link_mode, hash) {
     xhttp.withCredentials = true;
 
     var url_current = window.location.toString();
-    var last_char = url_current.charAt(window.location.length-1);
-    if(last_char == "/") {
-        var init_url = window.location
+    
+    if(window.location.includes("?") {
+        url_array = window.location.split("?")
+        init_url = url_array[0]
     } else {
-        var init_url = window.location + "/"
+        init_url = window.location
     }
 
-    xhttp.open("post", init_url + "api/get/wrapperr-version");
+    var last_char = url_current.charAt(init_url.length-1);
+    
+    if(last_char == "/") {
+        var final_url = init_url
+    } else {
+        var final_url = init_url + "/"
+    }
+
+    xhttp.open("post", final_url + "api/get/wrapperr-version");
 
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send();
