@@ -380,7 +380,7 @@ function get_wrapper_version(link_mode, hash) {
     xhttp.withCredentials = true;
     
     // Try to guess API URL from current URL
-    Try {
+    try {
 
         var window_location_str = window.location.toString();
 
@@ -398,7 +398,8 @@ function get_wrapper_version(link_mode, hash) {
         } else {
             var final_url = init_url + "/"
         }
-    } Catch(e) {
+        
+    } catch(e) {
         console.log("Error occured while guessing API URL. Error: " + e);
         var final_url = window.location.toString() + "/"
     }
