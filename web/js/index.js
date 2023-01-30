@@ -289,7 +289,7 @@ function get_user_links(cookie) {
 }
 
 // Contact the Wrapperr API and get configuration details. Start processes based on the result
-function get_wrapper_version() {
+function get_wrapper_version(link_mode, hash) {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -342,12 +342,18 @@ function get_wrapper_version() {
 
                 // Set the 'configured' option in the JS variable
                 wrapperr_configured = result.wrapperr_configured;
-
+            
                 if(result.wrapperr_root != "") {
                     api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
                     console.log("URL: " + api_url)
                 }
-
+                
+                // If link mode, call the API and return form here
+                if(link_mode) {
+                    wrapped_link_actions(hash);
+                    return;
+                }
+                
                 // Change search function to use Plex search instead
                 if(!result.plex_auth) {
                     wrapperr_search_function();
