@@ -369,6 +369,11 @@ function get_wrapper_version(link_mode, hash) {
                 
             } else if(!result.error && link_mode) {
                 
+                if(result.wrapperr_root != "") {
+                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
+                    console.log("URL: " + api_url)
+                }
+                
                 console.log("Getting link page...");
                 wrapped_link_actions(hash);
                 
