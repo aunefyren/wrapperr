@@ -347,13 +347,7 @@ function get_wrapper_version(link_mode, hash) {
                     api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
                     console.log("URL: " + api_url)
                 }
-                
-                // If link mode, call the API and return form here
-                if(link_mode) {
-                    wrapped_link_actions(hash);
-                    return;
-                }
-                
+        
                 // Change search function to use Plex search instead
                 if(!result.plex_auth) {
                     wrapperr_search_function();
@@ -372,6 +366,11 @@ function get_wrapper_version(link_mode, hash) {
                 setTimeout(function(){
                     document.getElementById('loading').style.display = "none";
                 },1000);
+                
+            } else if(!result.error && link_mode) {
+                
+                console.log("Getting link page...");
+                wrapped_link_actions(hash);
                 
             }
 
