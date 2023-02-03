@@ -1154,7 +1154,14 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 				if currentUserID == 0 {
 					newName = "Managed user"
 				} else {
-					newName = nameGenerator.Generate()
+					// Generate random name
+					newNameGen := nameGenerator.Generate()
+
+					// Try to improve random name
+					newNameGenArray := strings.Split(newNameGen, "-")
+					newNamePartOne := newNameGenArray[0]
+					newNamePartTwo := newNameGenArray[1]
+					newName = strings.Title(newNamePartOne) + " " + strings.Title(newNamePartTwo)
 				}
 
 				// Create obfucasted struct type
@@ -1177,11 +1184,12 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 					obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
 				}
 
-				// Obfuscate user in dataset
-				wrapperr_year_user[d].FriendlyName = newName
-				wrapperr_year_user[d].User = newName
-				wrapperr_year_user[d].UserID = 0
-
+				// Obfuscate user in dataset if it is not themself
+				if currentUserID != user_id {
+					wrapperr_year_user[d].FriendlyName = newName
+					wrapperr_year_user[d].User = newName
+					wrapperr_year_user[d].UserID = 0
+				}
 			}
 
 			wrapperr_year_user_summed = append(wrapperr_year_user_summed, wrapperr_year_user[d])
