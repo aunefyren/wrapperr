@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.1.3"
+var wrapperr_version_parameter = "v3.1.4"
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
 
@@ -133,6 +133,7 @@ func CreateConfigFile() error {
 	config.CreateShareLinks = true
 	config.WinterTheme = true
 	config.WrapperrCustomize.StatsTopListLength = 10
+	config.WrapperrCustomize.ObfuscateOtherUsers = true
 	config.WrapperrCustomize.StatsOrderByDuration = true
 	config.WrapperrCustomize.StatsOrderByPlays = true
 	config.WrapperrCustomize.GetUserMovieStats = true

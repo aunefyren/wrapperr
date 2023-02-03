@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goombaio/namegenerator"
 	"github.com/patrickmn/sortutil"
 )
 
@@ -1122,13 +1123,67 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 		wrapperr_reply.YearStats.YearMusic.Message = "No tracks processed."
 	}
 
+	// Create userID to obfuscated name struct
+	type obfuscatedUser struct {
+		userID  int
+		newName string
+	}
+	// Create array to store userIDs and their obfucasted name
+	obfuscateCatalog := []obfuscatedUser{}
+
+	// Create name generator engine
+	seed := time.Now().UTC().UnixNano()
+	nameGenerator := namegenerator.NewNameGenerator(seed)
+
 	// Format reply for universal user details
 	if (config.WrapperrCustomize.GetYearStatsMusic || config.WrapperrCustomize.GetYearStatsMovies || config.WrapperrCustomize.GetYearStatsShows) && config.WrapperrCustomize.GetYearStatsLeaderboard && len(wrapperr_year_user) > 0 {
 
 		// Create new array with duration sum, then sort year users array by duration
 		var wrapperr_year_user_summed []models.WrapperrYearUserEntry
+
 		for d := 0; d < len(wrapperr_year_user); d++ {
 			wrapperr_year_user[d].Duration = wrapperr_year_user[d].DurationMovies + wrapperr_year_user[d].DurationShows + wrapperr_year_user[d].DurationArtists
+
+			if config.WrapperrCustomize.ObfuscateOtherUsers {
+
+				// Declare variables
+				var newName string
+				currentUserID := wrapperr_year_user[d].UserID
+
+				// Give new name
+				if currentUserID == 0 {
+					newName = "Managed user"
+				} else {
+					newName = nameGenerator.Generate()
+				}
+
+				// Create obfucasted struct type
+				obfuscatedUser := obfuscatedUser{
+					userID:  wrapperr_year_user[d].UserID,
+					newName: newName,
+				}
+
+				// Verify user is not already in catalog
+				userIDFound := false
+				for o := 0; o < len(obfuscateCatalog); o++ {
+					if obfuscateCatalog[o].userID == currentUserID {
+						userIDFound = true
+						break
+					}
+				}
+
+				// If not found, push to catalog
+				if !userIDFound {
+					obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
+				}
+
+				// Obfuscate user in dataset
+				wrapperr_year_user[d].FriendlyName = newName
+				wrapperr_year_user[d].User = newName
+				wrapperr_year_user[d].UserID = 0
+
+			}
+
 			wrapperr_year_user_summed = append(wrapperr_year_user_summed, wrapperr_year_user[d])
 		}
 		sortutil.DescByField(wrapperr_year_user, "Duration")
@@ -1189,7 +1244,7 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 			wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
 		} else {
 
-			err, buddy_name, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
+			err, buddy_name, buddy_id, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
 
 			var show_buddy models.WrapperrShowBuddy
 
@@ -1199,9 +1254,36 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 				show_buddy.Message = "Failed to retrieve show buddy."
 				show_buddy.Error = true
 			} else {
+
+				// Obfuscate username of buddy if enabled
+				if config.WrapperrCustomize.ObfuscateOtherUsers {
+					// Verify user is not already in catalog of users to maintain name consistancy
+					userIDFound := false
+					userNameFound := ""
+					for o := 0; o < len(obfuscateCatalog); o++ {
+						if obfuscateCatalog[o].userID == buddy_id {
+							userIDFound = true
+							userNameFound = obfuscateCatalog[o].newName
+							break
+						}
+					}
+
+					// If not found, give random name
+					// If found, give buddy that username
+					if !userIDFound {
+						buddy_name = nameGenerator.Generate()
+					} else {
+						buddy_name = userNameFound
+					}
+
+					// Remove buddy id
+					buddy_id = 0
+				}
+
 				show_buddy.Message = "Show buddy retrieved."
 				show_buddy.Error = false
 				show_buddy.BuddyName = buddy_name
+				show_buddy.BuddyID = buddy_id
 				show_buddy.BuddyDuration = buddy_duration
 				show_buddy.BuddyFound = buddy_found
 
@@ -1221,10 +1303,11 @@ func WrapperrLoopData(user_id int, config *models.WrapperrConfig, wrapperr_data 
 
 }
 
-func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, bool, int) {
+func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, int, bool, int) {
 
 	var top_show_users []models.WrapperrYearUserEntry
 	var top_show_buddy_name = "Something went wrong."
+	var top_show_buddy_id = 0
 	var top_show_buddy_duration = 0
 	var top_show_buddy_found = false
 	var error_bool = errors.New("Something went wrong.")
@@ -1277,7 +1360,7 @@ func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEnt
 	}
 
 	if len(top_show_users) < 2 {
-		return nil, "None", false, 0
+		return nil, "None", 0, false, 0
 	}
 
 	sortutil.DescByField(top_show_users, "Duration")
@@ -1296,6 +1379,7 @@ func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEnt
 
 		if user.UserID != user_id && len(top_show_users) == 2 {
 			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
 			error_bool = nil
@@ -1304,6 +1388,7 @@ func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEnt
 
 		if user.UserID != user_id && index == user_index-1 {
 			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
 			error_bool = nil
@@ -1312,6 +1397,7 @@ func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEnt
 
 		if user.UserID != user_id && index == user_index+1 {
 			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
 			error_bool = nil
@@ -1320,6 +1406,6 @@ func GetUserShowBuddy(config *models.WrapperrConfig, top_show models.TautulliEnt
 
 	}
 
-	return error_bool, top_show_buddy_name, top_show_buddy_found, top_show_buddy_duration
+	return error_bool, top_show_buddy_name, top_show_buddy_id, top_show_buddy_found, top_show_buddy_duration
 
 }
