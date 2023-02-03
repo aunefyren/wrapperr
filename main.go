@@ -24,8 +24,6 @@ func main() {
 	// Create and define file for logging
 	file, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		log.Println("Failed to load configuration file. Error: " + err.Error())
-
 		fmt.Println("Failed to load configuration file. Error: " + err.Error())
 
 		os.Exit(1)
@@ -33,8 +31,6 @@ func main() {
 
 	config, err := files.GetConfig()
 	if err != nil {
-		log.Println("Failed to load configuration file. Error: " + err.Error())
-
 		fmt.Println("Failed to load configuration file. Error: " + err.Error())
 
 		os.Exit(1)
@@ -44,28 +40,36 @@ func main() {
 	if config.Timezone != "" {
 		loc, err := time.LoadLocation(config.Timezone)
 		if err != nil {
+
 			fmt.Println("Failed to set time zone from config. Error: " + err.Error())
 			fmt.Println("Removing value...")
-
-			log.Println("Failed to set time zone from config. Error: " + err.Error())
-			log.Println("Removing value...")
 
 			config.Timezone = ""
 			err = files.SaveConfig(config)
 			if err != nil {
-				log.Println("Failed to set new time zone in the config. Error: " + err.Error())
-				log.Println("Exiting...")
+				fmt.Println("Failed to set new time zone in the config. Error: " + err.Error())
+				fmt.Println("Exiting...")
 				os.Exit(1)
 			}
 
 		} else {
 			time.Local = loc
+			fmt.Println("Timezone set to " + config.Timezone + ".")
 		}
 	}
 
 	// Set log file is logging is enabled
 	if config.UseLogs {
 		log.SetOutput(file)
+
+		fmt.Println("Log file enabled.")
+		log.Println("Log file enabled.")
+	}
+
+	// Print current version
+	fmt.Println("Running version " + config.WrapperrVersion + ".")
+	if config.UseLogs {
+		log.Println("Running version " + config.WrapperrVersion + ".")
 	}
 
 	// Define port variable with the port from the config file as default
@@ -76,8 +80,10 @@ func main() {
 	flag.Parse()
 
 	// Alert what port is in use
-	log.Println("Starting Wrapperr on port: " + strconv.Itoa(port) + ".")
-	fmt.Println("Starting Wrapperr on port: " + strconv.Itoa(port) + ".")
+	fmt.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
+	if config.UseLogs {
+		log.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
+	}
 
 	// Assign routes
 	router := mux.NewRouter().StrictSlash(true)
