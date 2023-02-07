@@ -9,6 +9,7 @@
         "stats_order_by_plays":true,
         "stats_order_by_duration":true,
         "stats_top_list_length": 10,
+        "obfuscate_other_users": true,
         "get_user_movie_stats":true,
         "get_user_movie_stats_title":"Movies!",
         "get_user_movie_stats_subtitle":"You watched {movie_count} movies. That's a lot of movies!",
@@ -107,8 +108,8 @@
             "tautulli_length": 5000
         }
     ],
-    "wrapped_start": 1640991600,
-    "wrapped_end": 1672527540,
+    "wrapped_start": 1672527600,
+    "wrapped_end": 1704063540,
     "wrapperr_port" : 8282,
     "application_name" : "Wrapperr",
 	"use_cache": true,
