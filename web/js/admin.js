@@ -990,6 +990,15 @@ function set_wrapperr_customization() {
     html += '<input type="number" class="form-control" id="stats_top_list_length" value="' + stats_top_list_length + '" autocomplete="off" placeholder="" required /><br>';
     html += '</div>';
 
+    html += '<div class="form-group">';
+    html += '<label for="obfuscate_other_users" title="Replace other\'s username with randomly generated names.">Obfuscate other usernames:<br>';
+    html += '<input type="checkbox" class="form-control" id="obfuscate_other_users" ';
+    if(obfuscate_other_users) {
+        html += 'checked="' + obfuscate_other_users + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
     html += '<hr>';
     html += '</div>';
@@ -1830,6 +1839,7 @@ function set_wrapperr_customization_call() {
     stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
     stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
     stats_top_list_length = parseInt(document.getElementById("stats_top_list_length").value);
+    obfuscate_other_users = document.getElementById('obfuscate_other_users').checked;
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
     get_user_movie_stats_title = document.getElementById('get_user_movie_stats_title').value;
@@ -1940,6 +1950,7 @@ function set_wrapperr_customization_call() {
                                     "stats_order_by_plays" : stats_order_by_plays,
                                     "stats_order_by_duration" : stats_order_by_duration,
                                     "stats_top_list_length" : stats_top_list_length,
+                                    "obfuscate_other_users": obfuscate_other_users,
                                     "get_user_movie_stats" : get_user_movie_stats,
                                     "get_user_movie_stats_title" : get_user_movie_stats_title,
                                     "get_user_movie_stats_subtitle" : get_user_movie_stats_subtitle,
@@ -2604,6 +2615,7 @@ function get_config(cookie) {
                 stats_outro_title = result.data.wrapperr_customize.stats_outro_title;
                 stats_outro_subtitle = result.data.wrapperr_customize.stats_outro_subtitle;
                 stats_top_list_length = result.data.wrapperr_customize.stats_top_list_length;
+                obfuscate_other_users = result.data.wrapperr_customize.obfuscate_other_users;
 
                 get_user_movie_stats = result.data.wrapperr_customize.get_user_movie_stats;
                 get_user_movie_stats_title = result.data.wrapperr_customize.get_user_movie_stats_title;
