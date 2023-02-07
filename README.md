@@ -26,15 +26,16 @@ A website-based application and API for collecting user stats within a set timef
 <br>
 
 ### Features
-- Custom timeframes
-- Plex Auth
-- Friendly, dynamic display for statistics with nice illustrations
-- Customizable text
-- Customizable appearance
-- Movies, shows & music statistics
-- Caching of results
-- Admin interface
-- Pre-caching functionality
+- Custom timeframes for statistics
+- Plex Auth for login
+- Supports multiple Tautulli servers
+- Friendly, dynamic presentation of statistics with nice illustrations
+- Customizable text options
+- Customizable appearance/results
+- Statistics for movies, shows & music
+- Caching of Tautulli results
+- Admin interface for configuration
+- Pre-caching of results before user interaction
 - Shareable links with expiration
 
 <br>
@@ -99,7 +100,7 @@ If successful, Wrapperr should be accessible on ```http://localhost:8282```. Fro
 ### Essential configuration options
 A couple of configuration options are necessary for Wrapperr to function. First of all, Tautulli connection details. There is a test button available on the page to ensure you have entered the correct details. The second one is the time zone option on the ```Wrapperr Settings``` page.
 
-It is recommended to keep ```Cache results for later use``` enabled on the ```Wrapperr Settings``` page, and head to the ```Caching``` page after configuration. This ensures a good, quick user experience. 
+It is recommended to keep ```Cache results for later use``` enabled on the ```Wrapperr Settings``` page, and head to the ```Caching``` page after configuration. Click the ```Cache``` button and wait for the caching to finish. This ensures a good, quick user experience. 
 
 <br>
 <br>
@@ -111,9 +112,9 @@ Wrapperr should now be functional. Based on your settings, you can now either se
 <br>
 
 ## Docker
-Docker sets up the environment, but I recommend reading the start of the 'How do I install this?' section for an explanation of the functionality/admin page! 
+Docker sets up the environment, but I recommend reading the start of the 'Essential configuration options' section for an explanation of the functionality/admin page! 
 
-Docker makes it easy, but you might want to change the setup. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
+Docker images are pre-built, but you might want to change the Dockerfile. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
 
 ```
 $ docker run -p '8282:8282' --name 'wrapperr' aunefyren/wrapperr:latest
