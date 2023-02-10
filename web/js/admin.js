@@ -2095,31 +2095,32 @@ function caching_menu() {
     }
 
     html += `
-        <form id='stats_form' class='form' onsubmit='event.preventDefault(); cache_initiate();' action="" method="post">
+        
+		<div class='form-group newline'>
+			<h3>
+				Caching Tautulli data for later use to prevent long load times.
+			</h3>
 
-            <div class='form-group newline'>
-                <h3>
-                    Caching Tautulli data for later use to prevent long load times.
-                </h3>
+			<div class="form_hidden" id="caching_desc">
+				<p style="font-size:1em;">
+					When you configured a wrapped period, you set the number of days to process. Each unique day in that period is a new API request to Tautulli, which holds the data which needs processing. 
+					<br>
+					<br>
+					Wrapperr can cache data from Tautulli to decrease load times, but it needs to be loaded once. If the time frame is long this can take several minutes. Instead of loading your own stats, you can perform caching here. Afterward, everything is cached and saved. Only additional/new data is downloaded on future Wrapperr usage.
+					<br>
+					<br>
+					The loop used on this page ensures the cache is saved after a certain amount of days are downloaded. If the value below is set to 50, it will save the cache for every 50 days downloaded.
+					<br>
+					<br>
+				</p>
+			</div>
 
-                <div class="form_hidden" id="caching_desc">
-                    <p style="font-size:1em;">
-                        When you configured a wrapped period, you set the number of days to process. Each unique day in that period is a new API request to Tautulli, which holds the data which needs processing. 
-                        <br>
-                        <br>
-                        Wrapperr can cache data from Tautulli to decrease load times, but it needs to be loaded once. If the time frame is long this can take several minutes. Instead of loading your own stats, you can perform caching here. Afterward, everything is cached and saved. Only additional/new data is downloaded on future Wrapperr usage.
-                        <br>
-                        <br>
-                        The loop used on this page ensures the cache is saved after a certain amount of days are downloaded. If the value below is set to 50, it will save the cache for every 50 days downloaded.
-                        <br>
-                        <br>
-                    </p>
-                </div>
-
-                <div class="form-group newline">
-                    <button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'caching_desc\')"><img src="./assets/about.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Info</p2></button>
-                </div>
-            </div>
+			<div class="form-group newline">
+				<button class="form-control btn" name="get_user_show_stats_custom_button" id="get_user_show_stats_custom_button" onclick="toggle_hidden_form(\'caching_desc\')"><img src="./assets/about.svg" class="btn_logo"></img><p2 id="get_user_show_stats_custom_button_text">Info</p2></button>
+			</div>
+		</div>
+			
+		<form id='stats_form' class='form' onsubmit='event.preventDefault(); cache_initiate();' action="" method="post">
 
             <div class='form-group newline'>
 
