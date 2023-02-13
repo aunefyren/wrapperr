@@ -4,9 +4,6 @@ LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
 
 ENV port=8282
 
-RUN apt update
-RUN apt add git
-
 ENV GO111MODULE=on
 
 WORKDIR /app
