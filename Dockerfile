@@ -1,4 +1,4 @@
-FROM golang:1.19-alpine
+FROM golang:1.19-buster
 
 LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
 
