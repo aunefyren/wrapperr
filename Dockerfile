@@ -1,6 +1,6 @@
 # FROM golang:1.19.0-bullseye
 
-FROM alpine:latest
+FROM ubuntu:latest
 
 ARG TARGETARCH 
 ARG TARGETOS 
@@ -8,21 +8,9 @@ ENV port=8282
 
 LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
 
-RUN apk add --no-cache git make musl-dev go
-
-# Configure Go
-ENV GOROOT /usr/lib/go
-ENV GOPATH /go
-ENV PATH /go/bin:$PATH
-
-RUN mkdir -p ${GOPATH}/src ${GOPATH}/bin
-
-# Install Glide
-RUN go get -u github.com/Masterminds/glide/...
-
-WORKDIR $GOPATH
-
-CMD ["make"]
+RUN apt update
+RUN apt upgrade
+RUN apk install -y golang-go 
 
 WORKDIR /app
 
