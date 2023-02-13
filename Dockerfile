@@ -1,10 +1,15 @@
 FROM golang
 
+ARG TARGETARCH 
+ARG TARGETOS 
+
 LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
 
 ENV port=8282
 
 ENV GO111MODULE=on
+ENV GOOS=${TARGETOS}
+ENV GOARCH=${TARGETARCH}
 
 WORKDIR /app
 
