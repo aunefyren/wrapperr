@@ -1,16 +1,10 @@
-# FROM golang:1.19.0-bullseye
-
-FROM ubuntu:latest
+FROM golang:1.19.0-bullseye
 
 ARG TARGETARCH 
 ARG TARGETOS 
 ENV port=8282
 
 LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
-
-RUN apt update
-RUN apt upgrade
-RUN apk install -y golang-go 
 
 WORKDIR /app
 
