@@ -10,7 +10,8 @@ WORKDIR /app
 
 COPY . .
 
-# RUN CGO_ENABLED=0 go build
+RUN go build 
+# CGO_ENABLED=0
 
 EXPOSE ${port}
 
