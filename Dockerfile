@@ -1,4 +1,4 @@
-FROM golang:1.19.0-bullseye
+FROM golang:1.19
 
 ARG TARGETARCH 
 ARG TARGETOS 
