@@ -262,39 +262,6 @@ function update_password() {
     return;
 }
 
-function get_admin_state() {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-        if (this.readyState == 4) {
-
-            try {
-                var result= JSON.parse(this.responseText);
-            } catch(error) {
-                console.log('Failed to parse API response. Response: ' + this.responseText)
-                return;
-            }
-            
-            if(result.error) {
-                console.log(result.message);
-            } else if(!result.configured) {
-                first_time = true;
-                set_password_form();
-            } else {
-                login_menu();
-            }
-
-        } else if(this.readyState == 4 && this.status !== 200) {
-            var html = '<h2>' + this.status + ' Error</h2>';
-            html += '<p>The API did not respond correctly.</p>';
-            document.getElementById("setup").innerHTML = html;
-        }
-    };
-    xhttp.withCredentials = true;
-    xhttp.open("post", api_url + "get_admin_state.php");
-    xhttp.send();
-    return;
-}
-
 function sign_out() {
     set_cookie("wrapperr-admin", "", 1);
     location.reload();
