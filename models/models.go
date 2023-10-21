@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 )
 
@@ -22,13 +22,11 @@ type CustomPayload struct {
 */
 
 type Payload struct {
-	jwt.Claims
+	jwt.RegisteredClaims
 	ID        uuid.UUID `json:"id"`
 	Username  string    `json:"username"`
 	Admin     bool      `json:"admin"`
 	AuthToken string    `json:"authtoken"`
-	IssuedAt  time.Time `json:"issued_at"`
-	ExpiredAt time.Time `json:"expired_at"`
 }
 
 type JWTMaker struct {

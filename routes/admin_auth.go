@@ -17,7 +17,7 @@ import (
 // API route used to retrieve the Wrapperr configuration file.
 func ApiGetConfig(w http.ResponseWriter, r *http.Request) {
 
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, true)
 
 	if err == nil && payload.Admin {
 
@@ -60,7 +60,7 @@ func ApiGetConfig(w http.ResponseWriter, r *http.Request) {
 // API route used to update the Wrapperr configuration file.
 func ApiSetConfig(w http.ResponseWriter, r *http.Request) {
 
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, true)
 
 	if err == nil && payload.Admin {
 
@@ -205,7 +205,7 @@ func ApiUpdateAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	} else {
 
-		payload, err := modules.AuthorizeToken(w, r)
+		payload, err := modules.AuthorizeToken(w, r, true)
 
 		if err == nil && payload.Admin {
 
@@ -279,7 +279,7 @@ func ApiUpdateAdmin(w http.ResponseWriter, r *http.Request) {
 // API route which validates an admin JWT token
 func ApiValidateAdmin(w http.ResponseWriter, r *http.Request) {
 
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, true)
 
 	if err == nil && payload.Admin {
 
@@ -287,7 +287,7 @@ func ApiValidateAdmin(w http.ResponseWriter, r *http.Request) {
 		utilities.RespondDefaultOkay(w, r, "The admin login session is valid.")
 		return
 
-	} else if !payload.Admin {
+	} else if err == nil && !payload.Admin {
 
 		log.Println("User not authenticated as admin.")
 		utilities.RespondDefaultError(w, r, errors.New("User not authenticated as admin."), 401)
@@ -305,7 +305,7 @@ func ApiValidateAdmin(w http.ResponseWriter, r *http.Request) {
 // API route which retrieves lines from the log file
 func ApiGetLog(w http.ResponseWriter, r *http.Request) {
 
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, true)
 
 	if err != nil {
 

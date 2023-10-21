@@ -67,7 +67,7 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 	var admin bool = false
 
 	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	// If it failed and PlexAuth is enabled, respond with and error
 	// If it didn't fail, and PlexAuth is enabled, declare auth as passed

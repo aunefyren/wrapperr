@@ -12,9 +12,15 @@ var (
 )
 
 // Valid checks if the token payload is valid or not
-func (payload *Payload) Valid() error {
-	if time.Now().After(payload.ExpiredAt) {
-		return ErrExpiredToken
+func (payload *Payload) Valid() (err error) {
+	now := time.Now()
+	if payload.RegisteredClaims.ExpiresAt.Time.Before(now) {
+		err = errors.New("Token has expired.")
+		return
+	}
+	if payload.RegisteredClaims.NotBefore.Time.After(now) {
+		err = errors.New("Token has not begun.")
+		return
 	}
 	return nil
 }

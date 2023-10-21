@@ -176,7 +176,7 @@ func ApiLoginPlexAuth(w http.ResponseWriter, r *http.Request) {
 // API route which validates an admin JWT token
 func ApiValidatePlexAuth(w http.ResponseWriter, r *http.Request) {
 
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	if err != nil {
 		log.Println("Failed to parse login token. Error: ")
@@ -257,7 +257,7 @@ func ApiCreateShareLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	var user_name string
 	var user_id int
@@ -362,7 +362,7 @@ func ApiGetUserShareLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	var user_name string
 	var user_id int
@@ -490,7 +490,7 @@ func ApiDeleteUserShareLink(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r)
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	var user_name string
 	var user_id int
