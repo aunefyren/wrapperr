@@ -94,8 +94,20 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// Set user details from Plex login
 		user_name = plex_object.Username
 		user_id = plex_object.ID
+
+		// Check for friendly name using Tautulli
+		for i := 0; i < len(config.TautulliConfig); i++ {
+			_, new_username, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, user_name)
+
+			if err == nil {
+				user_name = new_username
+			}
+			break
+		}
+
 	}
 
 	log.Println("3. Auth check passed." + ip_string)
@@ -114,7 +126,6 @@ func ApiWrapperGetStatistics(w http.ResponseWriter, r *http.Request) {
 
 	// If no auth has been passed, caching mode is false, and user is not admin, search for the Plex details using Tautulli and PlexIdentity
 	if !auth_passed && !wrapperr_request.CachingMode && !admin {
-
 		UserNameFound := false
 
 		for i := 0; i < len(config.TautulliConfig); i++ {

@@ -11,3 +11,5 @@ require (
 	github.com/patrickmn/sortutil v0.0.0-20120526081524-abeda66eb583
 	golang.org/x/crypto v0.14.0
 )
+
+require github.com/procyon-projects/chrono v1.1.2 // indirect

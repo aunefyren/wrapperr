@@ -4,6 +4,7 @@ import (
 	"aunefyren/wrapperr/files"
 	"aunefyren/wrapperr/routes"
 	"aunefyren/wrapperr/utilities"
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/procyon-projects/chrono"
 
 	_ "time/tzdata"
 )
@@ -116,9 +118,11 @@ func main() {
 	router.HandleFunc(root+"/api/get/login-url", routes.ApiGetLoginURL)
 	router.HandleFunc(root+"/api/login/plex-auth", routes.ApiLoginPlexAuth)
 	router.HandleFunc(root+"/api/validate/plex-auth", routes.ApiValidatePlexAuth)
-	router.HandleFunc(root+"/api/create/share-link", routes.ApiCreateShareLink)
 	router.HandleFunc(root+"/api/get/user-share-link", routes.ApiGetUserShareLink)
+
+	// Depends on config
 	router.HandleFunc(root+"/api/delete/user-share-link", routes.ApiDeleteUserShareLink)
+	router.HandleFunc(root+"/api/create/share-link", routes.ApiCreateShareLink)
 
 	// Get stats route
 	router.HandleFunc(root+"/api/get/statistics", routes.ApiWrapperGetStatistics)
@@ -148,6 +152,18 @@ func main() {
 		// Using the http.ServeFile function to serve the robots.txt file
 		http.ServeFile(w, r, "./web/txt/robots.txt")
 	})
+
+	// Create task scheduler for sunday reminders
+	taskScheduler := chrono.NewDefaultTaskScheduler()
+
+	_, err = taskScheduler.ScheduleWithCron(func(ctx context.Context) {
+		log.Println("Shareable link cleaner starting.")
+		files.CleanOldShareableLinks()
+	}, "0 0 0 * * *")
+
+	if err != nil {
+		log.Println("Shareable link cleaner was not scheduled successfully. Error: " + err.Error())
+	}
 
 	// Start web-server
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))

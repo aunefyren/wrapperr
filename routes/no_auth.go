@@ -350,12 +350,6 @@ func ApiGetShareLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !config.PlexAuth {
-		log.Println("Plex Auth is not enabled in the Wrapperr configuration.")
-		utilities.RespondDefaultError(w, r, errors.New("Plex Auth is not enabled in the Wrapperr configuration."), 400)
-		return
-	}
-
 	if !config.CreateShareLinks {
 		log.Println("Shareable links are not enabled in the Wrapperr configuration.")
 		utilities.RespondDefaultError(w, r, errors.New("Shareable links are not enabled in the Wrapperr configuration."), 400)
@@ -374,6 +368,9 @@ func ApiGetShareLink(w http.ResponseWriter, r *http.Request) {
 	var link_payload models.WrapperrShareLinkGetRequest
 	json.Unmarshal(reqBody, &link_payload)
 
+	var fileName string
+	var hash string
+
 	hash_array := strings.Split(link_payload.Hash, "-")
 
 	if len(hash_array) < 2 {
@@ -384,17 +381,29 @@ func ApiGetShareLink(w http.ResponseWriter, r *http.Request) {
 
 	}
 
-	user_id := hash_array[0]
-	hash := ""
+	if config.PlexAuth {
 
-	for j := 1; j < len(hash_array); j++ {
-		if j != 1 {
-			hash = hash + "-"
+		for j := 1; j < len(hash_array); j++ {
+			if j != 1 {
+				hash = hash + "-"
+			}
+			hash = hash + hash_array[j]
 		}
-		hash = hash + hash_array[j]
+
+		fileName = hash_array[0]
+	} else {
+
+		for j := 1; j < len(hash_array); j++ {
+			if j != 1 {
+				hash = hash + "-"
+			}
+			hash = hash + hash_array[j]
+		}
+
+		fileName = hash
 	}
 
-	share_link_object, err := files.GetLink(user_id)
+	share_link_object, err := files.GetLink(fileName)
 	if err != nil {
 
 		log.Println(err)
@@ -415,14 +424,14 @@ func ApiGetShareLink(w http.ResponseWriter, r *http.Request) {
 
 	linkTime = linkTime.Add(7 * 24 * time.Hour)
 
-	if !linkTime.Before(currentTime) && share_link_object.Hash == hash {
+	if !linkTime.Before(currentTime) && share_link_object.Hash == hash && !share_link_object.Expired {
 
 		share_link_object.Message = "Shared link retrieved."
 		share_link_object.Error = false
 
 		ip_string := utilities.GetOriginIPString(w, r)
 
-		log.Println("Retrieved Wrapperr share link made by User ID: " + user_id + "." + ip_string)
+		log.Println("Retrieved Wrapperr share link made by User ID/with hash: " + fileName + "." + ip_string)
 
 		utilities.RespondWithJSON(w, http.StatusOK, share_link_object)
 		return
@@ -434,7 +443,7 @@ func ApiGetShareLink(w http.ResponseWriter, r *http.Request) {
 		if linkTime.Before(currentTime) {
 
 			share_link_object.Expired = true
-			err = files.SaveLink(share_link_object)
+			err = files.SaveLink(share_link_object, config.PlexAuth)
 			if err != nil {
 				log.Println(err)
 			}

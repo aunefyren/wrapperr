@@ -975,7 +975,7 @@ function load_outro() {
 
             text += "<div class='boks2' style='margin-top:5em;'>";
                 
-            if(!link_mode && functions.create_share_links && functions.plex_auth) {
+            if(!link_mode && functions.create_share_links) {
 
                 text += "<div class='form-group' id='share_wrapped_div' style=''>";
                     text += "<button class='form-control btn' name='share_wrapped_button' id='share_wrapped_button' onclick='create_wrapped_link()'>";
@@ -992,8 +992,12 @@ function load_outro() {
                         text += "<div class='form-control btn' id='share_wrapped_delete_button' style='background-color: var(--white); cursor: default;'>";
                             text += "<span id='share_wrapped_results_url' class='share_wrapped_url' style=''></span>";
                             text += "<img id='share_wrapped_copy' src='assets/share.svg' style='' title='Click to copy the URL' onclick='copy_link_user();'>";
-                            text += "<img id='share_wrapped_delete' src='assets/trash.svg' style='' title='Click to delete this URL' onclick='delete_new_link_user();'>";
-                        text += "</div>";
+
+                            if(functions.plex_auth) {
+                                text += "<img id='share_wrapped_delete' src='assets/trash.svg' style='' title='Click to delete this URL' onclick='delete_new_link_user();'>";
+                            }
+
+                            text += "</div>";
                 text += "</div>";
 
             }
@@ -1027,6 +1031,15 @@ function create_wrapped_link() {
 
     var wrapped_data = JSON.stringify(wrapped_form);
 
+    // Debug lines
+    // console.log(wrapped_data);
+    // return;
+    
+    var bearerToken = ""
+    if(functions.plex_auth) {
+        bearerToken = "Bearer " + cookie
+    }
+
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
@@ -1046,7 +1059,6 @@ function create_wrapped_link() {
             document.getElementById("share_wrapped_button").style.opacity = '1';
 
         } else {
-
             document.getElementById('share_wrapped_results_url').innerHTML = window.location.href.split('?')[0] + '?hash=' + result.data;
             document.getElementById('share_wrapped_results_title_div').style.display = 'block';
             document.getElementById('share_wrapped_results_div').style.display = 'flex';
@@ -1059,7 +1071,7 @@ function create_wrapped_link() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "create/share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", bearerToken);
     xhttp.send(wrapped_data);
 }
 

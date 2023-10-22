@@ -244,39 +244,35 @@ func ApiCreateShareLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !config.PlexAuth {
-		log.Println("Plex Auth is not enabled in the Wrapperr configuration.")
-		utilities.RespondDefaultError(w, r, errors.New("Plex Auth is not enabled in the Wrapperr configuration."), 400)
-		return
-	}
-
 	if !config.CreateShareLinks {
 		log.Panicln("Shareable links are not enabled in the Wrapperr configuration.")
 		utilities.RespondDefaultError(w, r, errors.New("Shareable links are not enabled in the Wrapperr configuration."), 400)
 		return
 	}
 
-	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r, false)
-
 	var user_name string
 	var user_id int
 
-	if err != nil || payload.Admin {
-		log.Println(err)
-		log.Println(payload.Admin)
-		utilities.RespondDefaultError(w, r, errors.New("Failed to authorize request."), 401)
-		return
-	} else {
-		plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
-		if err != nil {
-			log.Println(err)
-			utilities.RespondDefaultError(w, r, errors.New("Could not validate Plex Auth login."), 500)
-			return
-		}
+	// Try to authorize bearer token from header
+	if config.PlexAuth {
+		payload, err := modules.AuthorizeToken(w, r, false)
 
-		user_name = plex_object.Username
-		user_id = plex_object.ID
+		if err != nil || payload.Admin {
+			log.Println(err)
+			log.Println(payload.Admin)
+			utilities.RespondDefaultError(w, r, errors.New("Failed to authorize request."), 401)
+			return
+		} else {
+			plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
+			if err != nil {
+				log.Println(err)
+				utilities.RespondDefaultError(w, r, errors.New("Could not validate Plex Auth login."), 500)
+				return
+			}
+
+			user_name = plex_object.Username
+			user_id = plex_object.ID
+		}
 	}
 
 	// Read payload from Post input
@@ -292,6 +288,11 @@ func ApiCreateShareLink(w http.ResponseWriter, r *http.Request) {
 	currentTime := time.Now()
 	hash_value := uuid.New().String()
 
+	if !config.PlexAuth {
+		user_name = link_payload.Data.User.Name
+		user_id = 0
+	}
+
 	link_object := models.WrapperrShareLink{
 		Content:         link_payload,
 		UserID:          user_id,
@@ -301,7 +302,7 @@ func ApiCreateShareLink(w http.ResponseWriter, r *http.Request) {
 		Expired:         false,
 	}
 
-	err = files.SaveLink(&link_object)
+	err = files.SaveLink(&link_object, config.PlexAuth)
 	if err != nil {
 		log.Println(err)
 		utilities.RespondDefaultError(w, r, errors.New("Failed to save new link."), 500)
@@ -477,30 +478,30 @@ func ApiDeleteUserShareLink(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !config.PlexAuth {
-		log.Println("Plex Auth is not enabled in the Wrapperr configuration.")
-		utilities.RespondDefaultError(w, r, errors.New("Plex Auth is not enabled in the Wrapperr configuration."), 400)
-		return
-	}
-
 	if !config.CreateShareLinks {
 		log.Println("Shareable links are not enabled in the Wrapperr configuration.")
 		utilities.RespondDefaultError(w, r, errors.New("Shareable links are not enabled in the Wrapperr configuration."), 400)
 		return
 	}
 
-	// Try to authorize bearer token from header
-	payload, err := modules.AuthorizeToken(w, r, false)
+	if !config.PlexAuth {
+		log.Println("Shareable links are are only deleteable if made through Plex Auth login.")
+		utilities.RespondDefaultError(w, r, errors.New("Shareable links are are only deleteable if made through Plex Auth login."), 400)
+		return
+	}
 
 	var user_name string
 	var user_id int
+
+	// Try to authorize bearer token from header
+	payload, err := modules.AuthorizeToken(w, r, false)
 
 	if err != nil || payload.Admin {
 		log.Println(err)
 		log.Println(payload.Admin)
 		utilities.RespondDefaultError(w, r, errors.New("Failed to authorize request."), 401)
 		return
-	} else {
+	} else if config.PlexAuth {
 		plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
 		if err != nil {
 			log.Println(err)
@@ -523,7 +524,7 @@ func ApiDeleteUserShareLink(w http.ResponseWriter, r *http.Request) {
 
 	share_link_object.Date = "1970-01-01"
 
-	err = files.SaveLink(share_link_object)
+	err = files.SaveLink(share_link_object, config.PlexAuth)
 	if err != nil {
 
 		log.Println(err)
