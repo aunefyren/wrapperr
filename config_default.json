@@ -48,7 +48,7 @@
         "get_user_show_stats_top_show_plural":"Your top shows",
         "get_user_show_stats_spent_title":"You spent {show_sum_duration} watching shows.",
         "get_user_show_stats_most_played_title":"You really liked the episode {show_episode} from {show_title}.",
-        "get_user_show_stats_most_played_subtitle":"It received {episode_play_sum} and was endured for {episode_duration_sum}.",
+        "get_user_show_stats_most_played_subtitle":"It recieved {episode_play_sum} and was endured for {episode_duration_sum}.",
         "get_user_show_stats_buddy_title":"Your top show was {top_show_title}. And you're not alone! Your {top_show_title}-buddy is {buddy_username}!",
         "get_user_show_stats_buddy_subtitle":"Your combined efforts resulted in {buddy_duration_sum} of {top_show_title}!",
         "get_user_show_stats_buddy_title_none":"Your top show was {top_show_title}.",

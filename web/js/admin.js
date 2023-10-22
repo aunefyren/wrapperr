@@ -970,6 +970,14 @@ function set_wrapperr_customization() {
     html += '<hr>';
     html += '</div>';
 
+    html += '<div class="form-group newline">';
+    html += '<div class="warning">!<br>You can use string variables within the custom text.<br><a style="text-decoration: underline; cursor: pointer;" href="https://github.com/aunefyren/wrapperr/wiki/Wrapperr-customization" target="_blank">Read more here</a>.</div>';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
+    html += '<hr>';
+    html += '</div>';
+
     html += '<div class="form-group">';
     html += '<label for="wrapperr_front_page_title" title="Introduction title that is shown on top of the front page.">Introduction title for the front page:<br>';
     html += '<textarea cols="40" rows="5" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 5em;" id="wrapperr_front_page_title" name="wrapperr_front_page_title" value="" autocomplete="off"></textarea></label>';

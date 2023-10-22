@@ -310,11 +310,13 @@ function get_wrapper_version(link_mode, hash) {
 
                 // Set the current version in the footer
                 document.getElementById('github_link').innerHTML = 'GitHub (' + result.wrapperr_version + ')';
+                wrapperr_version = result.wrapperr_version;
 
                 // Change the application name based on Wrapperr configuration
                 if(result.application_name && result.application_name !== '') {
                     document.getElementById('application_name').innerHTML = result.application_name;
                     document.title = result.application_name;
+                    application_name = result.application_name;
                 }
 
                 // Set the client key in the JS variable
@@ -332,12 +334,12 @@ function get_wrapper_version(link_mode, hash) {
 
                 // Change the title based based on Wrapperr configuration
                 if(result.wrapperr_front_page_title !== '') {
-                    document.getElementById('wrapperr_front_page_title').innerHTML = result.wrapperr_front_page_title;
+                    document.getElementById('wrapperr_front_page_title').innerHTML = ReplaceStandardStrings(result.wrapperr_front_page_title);
                 }
 
                 // Change the subtitle based based on Wrapperr configuration
                 if(result.wrapperr_front_page_subtitle !== '') {
-                    document.getElementById('wrapperr_front_page_subtitle').innerHTML = result.wrapperr_front_page_subtitle;
+                    document.getElementById('wrapperr_front_page_subtitle').innerHTML = ReplaceStandardStrings(result.wrapperr_front_page_subtitle);
                 }
 
                 // Set the 'configured' option in the JS variable

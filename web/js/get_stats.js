@@ -123,8 +123,8 @@ function load_introduction() {
             text += "</div>";
 
             text += "<div class='boks2' style='margin: auto 0;'>";
-                text += "<h1>" + functions.stats_intro_title.replaceAll('{user}', results.user.name) + "</h1>";
-                text += "<h2>" + functions.stats_intro_subtitle + "</h2>";
+                text += "<h1>" + ReplaceStandardStrings(functions.stats_intro_title) + "</h1>";
+                text += "<h2>" + ReplaceStandardStrings(functions.stats_intro_subtitle) + "</h2>";
             text += "</div>";
 
         text += "</div>";
@@ -168,11 +168,11 @@ function load_movies() {
 
             // Replace custom string with movie plays
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_movie_stats_subtitle.replaceAll('{movie_count}', number_with_spaces(results.user.user_movies.data.movie_plays)) + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_movie_stats_subtitle) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_movie_stats_subsubtitle + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_movie_stats_subsubtitle) + "</p>";
             text += "</div>";
 
             // Place stats
@@ -222,15 +222,15 @@ function load_movies() {
         text += "<div class='boks' data-color='orangered' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>" + functions.get_user_movie_stats_title + "</h1>";
+                text += "<h1>" + ReplaceStandardStrings(functions.get_user_movie_stats_title) + "</h1>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_movie_stats_subtitle_one + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_movie_stats_subtitle_one) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_movie_stats_subsubtitle_one + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_movie_stats_subsubtitle_one) + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -261,9 +261,9 @@ function load_movies() {
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
 					text += "<div class='status'>";
-						text += "<h1>" + functions.get_user_movie_stats_title + "</h1>";
-						text += "<h2>" + functions.get_user_movie_stats_subtitle_none + "</h2>";
-                        text += "<p>" + functions.get_user_movie_stats_subsubtitle_none + "</p>";
+						text += "<h1>" + ReplaceStandardStrings(functions.get_user_movie_stats_title) + "</h1>";
+						text += "<h2>" + ReplaceStandardStrings(functions.get_user_movie_stats_subtitle_none) + "</h2>";
+                        text += "<p>" + ReplaceStandardStrings(functions.get_user_movie_stats_subsubtitle_none) + "</p>";
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -286,11 +286,11 @@ function load_shows() {
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_show_stats_subtitle.replaceAll('{show_count}', number_with_spaces(results.user.user_shows.data.show_plays)) + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_show_stats_subtitle) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_show_stats_subsubtitle + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_show_stats_subsubtitle) + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -337,15 +337,15 @@ function load_shows() {
         text += "<div class='boks' data-color='orangeyellow' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>" + functions.get_user_show_stats_title + "</h1>";
+                text += "<h1>" + ReplaceStandardStrings(functions.get_user_show_stats_title) + "</h1>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_show_stats_subtitle_one + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_show_stats_subtitle_one) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_show_stats_subsubtitle_one + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_show_stats_subsubtitle_one) + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -376,9 +376,9 @@ function load_shows() {
             text += "<div class='boks3'>";
 				text += "<div class='boks2'>";
 					text += "<div class='status'>";
-                        text += "<h1>" + functions.get_user_show_stats_title + "</h1>";
-						text += "<h2>" + functions.get_user_show_stats_subtitle_none + "</h2>";
-                        text += "<p>" + functions.get_user_show_stats_subsubtitle_none + "</p>";
+                        text += "<h1>" + ReplaceStandardStrings(functions.get_user_show_stats_title) + "</h1>";
+						text += "<h2>" + ReplaceStandardStrings(functions.get_user_show_stats_subtitle_none) + "</h2>";
+                        text += "<p>" + ReplaceStandardStrings(functions.get_user_show_stats_subsubtitle_none) + "</p>";
 						text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 					text += "</div>";
 				text += "</div>";
@@ -398,15 +398,15 @@ function load_music() {
         text += "<div class='boks' data-color='mango' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
+                text += "<h1>" + ReplaceStandardStrings(functions.get_user_music_stats_title) + "</h1>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_music_stats_subtitle.replaceAll('{track_count}', number_with_spaces(results.user.user_music.data.track_plays)) + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_music_stats_subtitle.replaceAll('{track_count}', number_with_spaces(results.user.user_music.data.track_plays))) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_music_stats_subsubtitle + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_music_stats_subsubtitle) + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -479,15 +479,15 @@ function load_music() {
         text += "<div class='boks' data-color='mango' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color:none;'>";
 
             text += "<div class='boks3'>";
-                text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
+                text += "<h1>" + ReplaceStandardStrings(functions.get_user_music_stats_title) + "</h1>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<h2>" + functions.get_user_music_stats_subtitle_one + "</h2>";
+                text += "<h2>" + ReplaceStandardStrings(functions.get_user_music_stats_subtitle_one) + "</h2>";
             text += "</div>";
 
             text += "<div class='boks3'>";
-                text += "<p>" + functions.get_user_music_stats_subsubtitle_one + "</p>";
+                text += "<p>" + ReplaceStandardStrings(functions.get_user_music_stats_subsubtitle_one) + "</p>";
             text += "</div>";
 
             text += "<div class='boks3'>";
@@ -505,9 +505,9 @@ function load_music() {
                 text += "<div class='boks3'>";
 					text += "<div class='boks2'>";
 						text += "<div class='status'>";
-							text += "<h1>" + functions.get_user_music_stats_title + "</h1>";
-							text += "<h2>" + functions.get_user_music_stats_subtitle_none + "</h2>";
-                            text += "<p>" + functions.get_user_music_stats_subsubtitle_none + "</p>";
+							text += "<h1>" + ReplaceStandardStrings(functions.get_user_music_stats_title) + "</h1>";
+							text += "<h2>" + ReplaceStandardStrings(functions.get_user_music_stats_subtitle_none) + "</h2>";
+                            text += "<p>" + ReplaceStandardStrings(functions.get_user_music_stats_subsubtitle_none) + "</p>";
 							text += '<img src="assets/img/bored.svg" style="margin: auto; display: block; width: 15em;">';
 						text += "</div>";
 					text += "</div>";
@@ -524,19 +524,19 @@ function oldest_movie(array, functions_data) {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += functions_data.get_user_movie_stats_oldest_title.replaceAll('{movie_title}', '<b>' + array.title + "</b> (" + array.year + ")");
+            html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_title.replaceAll('{movie_title}', '<b>' + array.title + "</b> (" + array.year + ")"));
             
             html += '<br>';
             html += '<br>';
 
             if(array.year < 1950) {
-                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_1950;
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_1950);
             } else if(array.year < 1975) {
-                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_1975;
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_1975);
             } else if(array.year < 2000) {
-                html += functions_data.get_user_movie_stats_oldest_subtitle_pre_2000;
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_2000);
             } else {
-                html += functions_data.get_user_movie_stats_oldest_subtitle;
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle);
             }
 
             html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
@@ -551,9 +551,9 @@ function oldest_album(album, functions_data) {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += functions_data.get_user_music_stats_oldest_album_title.replaceAll('{album_title}', '<b>' + album.parent_title + "</b> (" + album.year + ")</b>").replaceAll('{album_artist}', album.grandparent_title);
+            html += ReplaceStandardStrings(functions_data.get_user_music_stats_oldest_album_title.replaceAll('{album_title}', '<b>' + album.parent_title + "</b> (" + album.year + ")</b>").replaceAll('{album_artist}', album.grandparent_title));
 			html += "<br><br>";
-            html += functions_data.get_user_music_stats_oldest_album_subtitle; 
+            html += ReplaceStandardStrings(functions_data.get_user_music_stats_oldest_album_subtitle); 
 			html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
             
         html += "</div>";
@@ -577,9 +577,9 @@ function completion_movie(user_movie_finishing_percent, single, functions_data) 
             }
 
             if(!single) {
-                html += "<b>" + functions_data.get_user_movie_stats_movie_completion_title_plural.replaceAll('{movie_finish_percent}', percent) + "</b>";
+                html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_movie_completion_title_plural.replaceAll('{movie_finish_percent}', percent)) + "</b>";
             } else {
-                html += "<b>" + functions_data.get_user_movie_stats_movie_completion_title.replaceAll('{movie_finish_percent}', percent) + "</b>";
+                html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_movie_completion_title.replaceAll('{movie_finish_percent}', percent)) + "</b>";
             }
             
             if(user_movie_finishing_percent >= 90.0) {
@@ -602,25 +602,25 @@ function paused_movie(array, single, functions_data) {
             var pause_time = seconds_to_time(array.paused_counter, false);
             if(!single) {
                 html += "<div class='stats'>";
-                    html += functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')');
+                    html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')'));
                     html += "<br>";
                     html += "<br>";
-                    html += functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time);
+                    html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             } else {
                 html += "<div class='stats'>";
-                    html += functions_data.get_user_movie_stats_pause_title_one;
+                    html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title_one);
                     html += "<br>";
                     html += "<br>";
-                    html += functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time);
+                    html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             }
         } else {
             html += "<div class='stats'>";
-                html += '<b>' + functions_data.get_user_movie_stats_pause_title_none + '</b>';
+                html += '<b>' + ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title_none) + '</b>';
                 html += '<br><img src="assets/img/awards.svg" style="margin: auto; display: block; width: 15em;">';
                 html += "<br>";
-                html += functions_data.get_user_movie_stats_pause_subtitle_none;
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_none);
             html += "</div>";
         }
     html += "</div>";
@@ -635,15 +635,15 @@ function load_showbuddy(buddy_object, top_show, functions_data) {
         html += "<div class='stats'>";
             if(!buddy_object.error) {
                 if(!buddy_object.buddy_found) {
-                    html += functions_data.get_user_show_stats_buddy_title_none.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>');
+                    html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title_none.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>'));
                     html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;"><br>';
-                    html += functions_data.get_user_show_stats_buddy_subtitle_none;
+                    html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle_none);
                 } else {
-                    html += functions_data.get_user_show_stats_buddy_title.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>').replaceAll('{buddy_username}', buddy_object.buddy_name);
+                    html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>').replaceAll('{buddy_username}', buddy_object.buddy_name));
                     var combined = parseInt(top_show.duration) + parseInt(buddy_object.buddy_duration);
                     var combined_2 = seconds_to_time(combined);
                     html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
-                    html += functions_data.get_user_show_stats_buddy_subtitle.replaceAll('{buddy_duration_sum}', combined_2).replaceAll('{top_show_title}', top_show.grandparent_title);
+                    html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle.replaceAll('{buddy_duration_sum}', combined_2).replaceAll('{top_show_title}', top_show.grandparent_title));
                 }
             }
         html += "</div>";
@@ -657,9 +657,9 @@ function load_longest_episode(array, functions_data) {
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
-            html += functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title);
+            html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title));
 			html += '<br><br>';
-            html += functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false));
+            html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false)));
         html += "</div>";
     html += "</div>";
 
@@ -675,7 +675,7 @@ function you_spent(time, category, functions_data) {
         html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
             html += "<div class='stats'>";
 
-                html += functions_data.get_user_movie_stats_spent_title.replaceAll('{movie_sum_duration}', time_str);
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_spent_title.replaceAll('{movie_sum_duration}', time_str));
 
                 html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
 
@@ -684,7 +684,7 @@ function you_spent(time, category, functions_data) {
     } else if(category === 'shows') {
         html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
             
-            html += functions_data.get_user_show_stats_spent_title.replaceAll('{show_sum_duration}', time_str);
+            html += ReplaceStandardStrings(functions_data.get_user_show_stats_spent_title.replaceAll('{show_sum_duration}', time_str));
 
             html += '<br><img src="assets/img/watching-tv.svg" style="margin: auto; display: block; width: 15em;">';
 
@@ -692,11 +692,11 @@ function you_spent(time, category, functions_data) {
     } else if(category === 'music') {
         html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
             html += "<div class='stats'>";
-                html += functions_data.get_user_music_stats_spent_title.replaceAll('{music_sum_duration}', time_str);
+                html += ReplaceStandardStrings(functions_data.get_user_music_stats_spent_title.replaceAll('{music_sum_duration}', time_str));
                 if(time > 3600) {
                     var time_min = Math.floor(time / 60);
                     html += '<br><br>';
-                    html += functions_data.get_user_music_stats_spent_subtitle.replaceAll('{music_sum_minutes}', number_with_spaces(time_min));
+                    html += ReplaceStandardStrings(functions_data.get_user_music_stats_spent_subtitle.replaceAll('{music_sum_minutes}', number_with_spaces(time_min)));
                 }
                 html += '<br><img src="assets/img/music.svg" style="margin: auto; display: block; width: 15em;">';
                 html += "</div>";
@@ -715,7 +715,7 @@ function top_list(array, title, music, show, year, div_id) {
 
     html += "<div class='status' id='" + div_id + "'>";
         html += "<div class='stats'>";
-            html += "<div class='status-title'>" + title + "</div>";
+            html += "<div class='status-title'>" + ReplaceStandardStrings(title) + "</div>";
             html += "<div class='stats-list'>";
                 for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
@@ -767,7 +767,7 @@ function top_list_names(array, title, div_id) {
 
     html += "<div class='status' id='" + div_id + "'>";
         html += "<div class='stats'>";
-            html += "<div class='status-title'>" + title + "</div>";
+            html += "<div class='status-title'>" + ReplaceStandardStrings(title) + "</div>";
             html += "<div class='stats-list'>";
             for(i = 0; i < array.length; i++) {
                 if(i == 0) {
@@ -831,9 +831,9 @@ function load_users() {
     var text = "";
 
     text += "<div class='boks' data-color='pistach' style='height: auto !important; width: 100%; padding-bottom: 25em; padding-top: 25em; height:10em; background-color: none;'>";
-        text += "<h1>" + functions.get_year_stats_title + "</h1>";
-        text += "<h2>" + functions.get_year_stats_subtitle + "</h2>";
-        text += "<p>" + functions.get_year_stats_subsubtitle + "</p>";
+        text += "<h1>" + ReplaceStandardStrings(functions.get_year_stats_title) + "</h1>";
+        text += "<h2>" + ReplaceStandardStrings(functions.get_year_stats_subtitle) + "</h2>";
+        text += "<p>" + ReplaceStandardStrings(functions.get_year_stats_subsubtitle) + "</p>";
 
         text += "<div class='boks3'>";
 
@@ -864,21 +864,21 @@ function load_users() {
                         text += "<div class='stats'>";
 
                             if(functions.get_year_stats_movies && results.year_stats.year_movies.data.movie_plays > 0) {
-                                text += functions.get_year_stats_movies_duration_title.replaceAll('{movie_duration_sum}', '<b>' + time_movies + '</b>');
+                                text += ReplaceStandardStrings(functions.get_year_stats_movies_duration_title.replaceAll('{movie_duration_sum}', '<b>' + time_movies + '</b>'));
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_movies.data.movie_duration;
                             }
 
                             if(functions.get_year_stats_shows && results.year_stats.year_shows.data.show_plays > 0) {
-                                text += functions.get_year_stats_shows_duration_title.replaceAll('{show_duration_sum}', '<b>' + time_shows + '</b>');
+                                text += ReplaceStandardStrings(functions.get_year_stats_shows_duration_title.replaceAll('{show_duration_sum}', '<b>' + time_shows + '</b>'));
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_shows.data.show_duration;
                             }
 
                             if(functions.get_year_stats_music && results.year_stats.year_music.data.music_plays > 0) {
-                                text += functions.get_year_stats_music_duration_title.replaceAll('{music_duration_sum}', '<b>' + time_artists + '</b>');
+                                text += ReplaceStandardStrings(functions.get_year_stats_music_duration_title.replaceAll('{music_duration_sum}', '<b>' + time_artists + '</b>'));
                                 text += "<br><br>";
 								function_sum += 1;
                                 time += results.year_stats.year_music.data.music_duration;
@@ -886,7 +886,7 @@ function load_users() {
 
                             if(function_sum > 1) {
                                 var time_all = seconds_to_time(Math.floor(time), false);
-                                text += functions.get_year_stats_duration_sum_title.replaceAll('{all_duration_sum}', '<b>' + time_all + '</b>');
+                                text += ReplaceStandardStrings(functions.get_year_stats_duration_sum_title.replaceAll('{all_duration_sum}', '<b>' + time_all + '</b>'));
                             }
 
                             text += '<img src="assets/img/home.svg" style="margin: auto; display: block; width: 15em;">';
@@ -966,8 +966,8 @@ function load_outro() {
             text += "</div>";
 
             text += "<div class='boks2' style='margin: auto 0;'>";
-                text += "<h1>" + functions.stats_outro_title + "</h1>";
-                text += "<h2>" + functions.stats_outro_subtitle + "</h2>";
+                text += "<h1>" + ReplaceStandardStrings(functions.stats_outro_title) + "</h1>";
+                text += "<h2>" + ReplaceStandardStrings(functions.stats_outro_subtitle) + "</h2>";
             text += "</div>";
         
         text += "</div>";
@@ -1181,3 +1181,66 @@ $(window).scroll(function() {
     }
     
   }).scroll();
+
+  function ReplaceStandardStrings(string) {
+
+    var currentTime = new Date()
+
+    try {
+        string = string.replaceAll('{track_count}', number_with_spaces(results.user.user_music.data.track_plays))
+    } catch (e) {
+        console.log('{track_count} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{movie_count}', number_with_spaces(results.user.user_movies.data.movie_plays))
+    } catch (e) {
+        console.log('{movie_count} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{show_count}', number_with_spaces(results.user.user_shows.data.show_plays))
+    } catch (e) {
+        console.log('{show_count} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{user}', results.user.name)
+    } catch (e) {
+        console.log('{user} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{user_id}', results.user.id)
+    } catch (e) {
+        console.log('{user_id} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{wrapperr_version}', wrapperr_version)
+    } catch (e) {
+        console.log('{wrapperr_version} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{application_name}', application_name)
+    } catch (e) {
+        console.log('{application_name} replace failed')
+    }
+
+    try {
+        const splits = results.date.split('-');
+        string = string.replaceAll('{current_year}', splits[0])
+    } catch (e) {
+        console.log('{current_year} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{current_date}', results.date)
+    } catch (e) {
+        console.log('{current_date} replace failed')
+    }
+
+    return string
+
+  }
