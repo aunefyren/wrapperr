@@ -375,6 +375,15 @@ function get_wrapper_version(link_mode, hash) {
                     api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
                     console.log("URL: " + api_url)
                 }
+
+                // Set the current version in the footer
+                wrapperr_version = result.wrapperr_version;
+
+                // Change the application name based on Wrapperr configuration
+                if(result.application_name && result.application_name !== '') {
+                    document.title = result.application_name;
+                    application_name = result.application_name;
+                }
                 
                 console.log("Getting link page...");
                 wrapped_link_actions(hash);
