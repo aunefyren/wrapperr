@@ -55,6 +55,7 @@ type WrapperrConfig struct {
 	WrappedEnd        int               `json:"wrapped_end"`
 	WrapperrPort      int               `json:"wrapperr_port"`
 	PlexAuth          bool              `json:"plex_auth"`
+	BasicAuth         bool              `json:"basic_auth"`
 	WinterTheme       bool              `json:"winter_theme"`
 }
 
@@ -212,6 +213,7 @@ type WrapperrVersion struct {
 	ClientKey                 string `json:"client_key"`
 	WrapperrConfigured        bool   `json:"wrapperr_configured"`
 	WinterTheme               bool   `json:"winter_theme"`
+	BasicAuth                 bool   `json:"basic_auth"`
 	Message                   string `json:"message"`
 	Error                     bool   `json:"error"`
 }

@@ -132,6 +132,7 @@ func CreateConfigFile() error {
 
 	config.CreateShareLinks = true
 	config.WinterTheme = true
+	config.BasicAuth = false
 	config.WrapperrCustomize.StatsTopListLength = 10
 	config.WrapperrCustomize.ObfuscateOtherUsers = true
 	config.WrapperrCustomize.StatsOrderByDuration = true

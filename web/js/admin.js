@@ -3,21 +3,26 @@ function topFunction() {
   document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
 }
 
-function login_menu() {
+function login_menu(basic_auth) {
     topFunction();
     var html = '<h2>Admin Login</h2>';
     
-    html += '<form id="password_login_form" onsubmit="log_in();return false">'
+    html += '<form id="password_login_form" onsubmit="log_in(' + basic_auth + ');return false">'
 
-    html += '<div class="form-group newline">';
-    html += '<label for="username" title="The username chosen during first-time setup.">Username:</label>';
-    html += '<input type="text" class="form-control" id="username" value="" placeholder="" minlength=4 autocomplete="on" required />';
-    html += '</div>';
 
-    html += '<div class="form-group newline">';
-    html += '<label for="password" title="The password chosen during first-time setup.">Password:</label>';
-    html += '<input type="password" class="form-control" id="password" value="" autocomplete="off" required />';
-    html += '</div>';
+    if(!basic_auth) {
+
+        html += '<div class="form-group newline">';
+        html += '<label for="username" title="The username chosen during first-time setup.">Username:</label>';
+        html += '<input type="text" class="form-control" id="username" value="" placeholder="" minlength=4 autocomplete="on" required />';
+        html += '</div>';
+
+        html += '<div class="form-group newline">';
+        html += '<label for="password" title="The password chosen during first-time setup.">Password:</label>';
+        html += '<input type="password" class="form-control" id="password" value="" autocomplete="off" required />';
+        html += '</div>';
+
+    }
 
     html += '<div class="form-group newline">';
     html += '<div id="password_login_form_error"></div>';
@@ -31,19 +36,23 @@ function login_menu() {
     document.getElementById("setup").innerHTML = html;
 }
 
-function log_in() {
+function log_in(basic_auth) {
 
     // Disable button
     document.getElementById("log_in_button").disabled = true;
     document.getElementById("log_in_button").style.opacity = '0.5';
 
     // Get variables
-    password = document.getElementById('password').value;
-    username = document.getElementById('username').value;
+    if(!basic_auth) {
+        password = document.getElementById('password').value;
+        username = document.getElementById('username').value;
 
-    admin_login_form = {"admin_password" : password, "admin_username" : username};
+        admin_login_form = {"admin_password" : password, "admin_username" : username};
 
-    var admin_login_data = JSON.stringify(admin_login_form);
+        var admin_login_data = JSON.stringify(admin_login_form);
+    } else {
+        var admin_login_data = ""
+    }
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
@@ -2451,7 +2460,7 @@ function get_wrapper_version() {
                     console.log("URL: " + api_url)
                 }
 
-                get_admin_state();
+                get_admin_state(result.basic_auth);
             }
 
         } else if(this.readyState == 4 && this.status !== 200) {
@@ -2478,7 +2487,7 @@ function get_wrapper_version() {
 }
 
 // Get admin configuration state
-function get_admin_state() {
+function get_admin_state(basic_auth) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -2499,9 +2508,9 @@ function get_admin_state() {
                 cookie = get_cookie('wrapperr-admin');
 
                 if(cookie) {
-                    validate_cookie_admin(cookie);
+                    validate_cookie_admin(cookie, basic_auth);
                 } else {
-                    login_menu();
+                    login_menu(basic_auth);
                 }
             }
 
@@ -2514,7 +2523,7 @@ function get_admin_state() {
 }
 
 // Validate admin login
-function validate_cookie_admin(cookie) {
+function validate_cookie_admin(cookie, basic_auth) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
@@ -2527,7 +2536,7 @@ function validate_cookie_admin(cookie) {
             
             if(result.error) {
                 set_cookie("wrapperr-admin", "", 1);
-                login_menu();
+                login_menu(basic_auth);
                 document.getElementById("password_login_form_error").innerHTML = result.message;
             } else {
                 get_config(get_cookie('wrapperr-admin'));

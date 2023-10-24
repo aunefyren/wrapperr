@@ -49,6 +49,7 @@ func ApiGetWrapperrVersion(w http.ResponseWriter, r *http.Request) {
 		Message:                   "Retrieved Wrapperr version.",
 		Error:                     false,
 		WrapperrRoot:              config.WrapperrRoot,
+		BasicAuth:                 config.BasicAuth,
 	}
 
 	ip_string := utilities.GetOriginIPString(w, r)
@@ -217,6 +218,13 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	config, err := files.GetConfig()
+	if err != nil {
+		log.Println("Failed to load configuration file. Error: " + err.Error())
+		fmt.Println("Failed to load configuration file.")
+		return
+	}
+
 	if !admin {
 		log.Println("Admin login failed. Admin is not configured.")
 		utilities.RespondDefaultError(w, r, errors.New("No admin configured."), 400)
@@ -231,30 +239,48 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Read payload from Post input
-		reqBody, _ := ioutil.ReadAll(r.Body)
-		var admin_payload models.AdminConfig
-		json.Unmarshal(reqBody, &admin_payload)
+		var username string
+		var password string
+
+		if !config.BasicAuth {
+			// Read payload from Post input
+			reqBody, _ := ioutil.ReadAll(r.Body)
+			var admin_payload models.AdminConfig
+			json.Unmarshal(reqBody, &admin_payload)
+
+			username = admin_payload.AdminUsername
+			password = admin_payload.AdminPassword
+		} else {
+			usernameTwo, passwordTwo, okay := r.BasicAuth()
+			if !okay {
+				w.Header().Add("WWW-Authenticate", `Basic realm="Give username and password"`)
+				w.WriteHeader(http.StatusUnauthorized)
+				w.Write([]byte(`{"message": "No basic auth present"}`))
+				return
+			}
+			username = usernameTwo
+			password = passwordTwo
+		}
 
 		// Confirm username length
-		if len(admin_payload.AdminUsername) < 4 {
+		if len(username) < 4 {
 			log.Println("Admin creation failed. Admin username requires four or more characters.")
 			utilities.RespondDefaultError(w, r, errors.New("Admin username is too short. Four characters or more required."), 500)
 			return
 		}
 
 		// Confirm password length
-		if len(admin_payload.AdminPassword) < 8 {
+		if len(password) < 8 {
 			log.Println("Admin creation failed. Admin password requires eight or more characters.")
 			utilities.RespondDefaultError(w, r, errors.New("Admin password is too short. Eight characters or more required."), 500)
 			return
 		}
 
 		// Hash new password
-		password_validity := utilities.ComparePasswords(admin_config.AdminPassword, admin_payload.AdminPassword)
+		password_validity := utilities.ComparePasswords(admin_config.AdminPassword, password)
 
 		// Validate admin username and password
-		if !password_validity || admin_config.AdminUsername != admin_payload.AdminUsername {
+		if !password_validity || admin_config.AdminUsername != username {
 			ip_string := utilities.GetOriginIPString(w, r)
 			log.Println("Admin login failed. Incorrect admin username or password." + ip_string)
 			fmt.Println("Admin login failed. Incorrect admin username or password." + ip_string)
