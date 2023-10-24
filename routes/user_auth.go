@@ -7,7 +7,6 @@ import (
 	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -86,7 +85,6 @@ func ApiGetLoginURL(w http.ResponseWriter, r *http.Request) {
 	ip_string := utilities.GetOriginIPString(w, r)
 
 	log.Println("Created and retrieved Plex Auth login URL." + ip_string)
-	fmt.Println("Created and retrieved Plex Auth login URL." + ip_string)
 
 	utilities.RespondWithJSON(w, http.StatusOK, url_reply)
 	return
@@ -165,8 +163,6 @@ func ApiLoginPlexAuth(w http.ResponseWriter, r *http.Request) {
 	ip_string := utilities.GetOriginIPString(w, r)
 
 	log.Println("Created and retrieved Plex Auth login JWT Token." + ip_string)
-
-	fmt.Println("Created and retrieved Plex Auth login JWT Token." + ip_string)
 
 	utilities.RespondWithJSON(w, http.StatusOK, string_reply)
 	return

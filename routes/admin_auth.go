@@ -7,7 +7,6 @@ import (
 	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -254,7 +253,6 @@ func ApiUpdateAdmin(w http.ResponseWriter, r *http.Request) {
 			}
 
 			log.Println("New admin account created. Server is now claimed.")
-			fmt.Println("New admin account created. Server is now claimed.")
 
 			utilities.RespondDefaultOkay(w, r, "Admin created.")
 			return

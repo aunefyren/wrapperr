@@ -7,6 +7,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -24,55 +25,66 @@ func main() {
 	utilities.PrintASCII()
 
 	// Create and define file for logging
-	file, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
+	logFile, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
 	if err != nil {
-		fmt.Println("Failed to load configuration file. Error: " + err.Error())
-
+		fmt.Println("Failed to load log file. Error: " + err.Error())
 		os.Exit(1)
 	}
 
+	// Set log file as log destination
+	log.SetOutput(logFile)
+	fmt.Println("Log file set.")
+
+	// Load config file
 	config, err := files.GetConfig()
 	if err != nil {
 		fmt.Println("Failed to load configuration file. Error: " + err.Error())
-
 		os.Exit(1)
 	}
+
+	var mw io.Writer
+	// Set log file is logging is enabled
+	if config.UseLogs {
+		out := os.Stdout
+		mw = io.MultiWriter(out, logFile)
+	} else {
+		out := os.Stdout
+		mw = io.MultiWriter(out)
+	}
+	// Get pipe reader and writer | writes to pipe writer come out pipe reader
+	_, w, _ := os.Pipe()
+
+	// Replace stdout,stderr with pipe writer | all writes to stdout, stderr will go through pipe instead (log.print, log)
+	os.Stdout = w
+	os.Stderr = w
+
+	// writes with log.Print should also write to mw
+	log.SetOutput(mw)
 
 	// Set time zone from config if it is not empty
 	if config.Timezone != "" {
 		loc, err := time.LoadLocation(config.Timezone)
 		if err != nil {
 
-			fmt.Println("Failed to set time zone from config. Error: " + err.Error())
-			fmt.Println("Removing value...")
+			log.Println("Failed to set time zone from config. Error: " + err.Error())
+			log.Println("Removing value...")
 
 			config.Timezone = ""
 			err = files.SaveConfig(config)
 			if err != nil {
-				fmt.Println("Failed to set new time zone in the config. Error: " + err.Error())
-				fmt.Println("Exiting...")
+				log.Println("Failed to set new time zone in the config. Error: " + err.Error())
+				log.Println("Exiting...")
 				os.Exit(1)
 			}
 
 		} else {
 			time.Local = loc
-			fmt.Println("Timezone set to " + config.Timezone + ".")
+			log.Println("Timezone set to " + config.Timezone + ".")
 		}
 	}
 
-	// Set log file is logging is enabled
-	if config.UseLogs {
-		log.SetOutput(file)
-
-		fmt.Println("Log file enabled.")
-		log.Println("Log file enabled.")
-	}
-
 	// Print current version
-	fmt.Println("Running version " + config.WrapperrVersion + ".")
-	if config.UseLogs {
-		log.Println("Running version " + config.WrapperrVersion + ".")
-	}
+	log.Println("Running version " + config.WrapperrVersion + ".")
 
 	// Define port variable with the port from the config file as default
 	var port int
@@ -82,10 +94,7 @@ func main() {
 	flag.Parse()
 
 	// Alert what port is in use
-	fmt.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
-	if config.UseLogs {
-		log.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
-	}
+	log.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
 
 	// Assign routes
 	router := mux.NewRouter().StrictSlash(true)

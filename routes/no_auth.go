@@ -7,7 +7,6 @@ import (
 	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -93,7 +92,6 @@ func ApiGetFunctions(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		log.Println("Failed to load configuration file.")
-		fmt.Println("Failed to load configuration file.")
 		return
 	}
 
@@ -120,7 +118,6 @@ func ApiCreateAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		log.Println("Failed to load admin state.")
-		fmt.Println("Failed to load admin state.")
 		return
 	}
 
@@ -169,7 +166,6 @@ func ApiCreateAdmin(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println("New admin account created. Server is now claimed.")
-		fmt.Println("New admin account created. Server is now claimed.")
 
 		utilities.RespondDefaultOkay(w, r, "Admin created.")
 		return
@@ -214,14 +210,12 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 		log.Println("Failed to load admin state.")
-		fmt.Println("Failed to load admin state.")
 		return
 	}
 
 	config, err := files.GetConfig()
 	if err != nil {
 		log.Println("Failed to load configuration file. Error: " + err.Error())
-		fmt.Println("Failed to load configuration file.")
 		return
 	}
 
@@ -235,7 +229,6 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err)
 			log.Println("Failed to load admin config.")
-			fmt.Println("Failed to load admin config.")
 			return
 		}
 
@@ -283,7 +276,6 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 		if !password_validity || admin_config.AdminUsername != username {
 			ip_string := utilities.GetOriginIPString(w, r)
 			log.Println("Admin login failed. Incorrect admin username or password." + ip_string)
-			fmt.Println("Admin login failed. Incorrect admin username or password." + ip_string)
 			utilities.RespondDefaultError(w, r, errors.New("Login failed. Username or password is incorrect."), 401)
 			return
 		}
@@ -304,8 +296,6 @@ func ApiLogInAdmin(w http.ResponseWriter, r *http.Request) {
 		ip_string := utilities.GetOriginIPString(w, r)
 
 		log.Println("Created and retrieved admin login JWT Token." + ip_string)
-
-		fmt.Println("Created and retrieved admin login JWT Token." + ip_string)
 
 		utilities.RespondWithJSON(w, http.StatusOK, string_reply)
 		return
