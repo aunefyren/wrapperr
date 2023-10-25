@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.1.5"
+var wrapperr_version_parameter = "v3.2.0"
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
 
@@ -98,14 +98,15 @@ func UpdatePrivateKey() (string, error) {
 }
 
 // Saves the given config struct as config.json
-func SaveConfig(config *models.WrapperrConfig) error {
+func SaveConfig(config models.WrapperrConfig) (err error) {
+	err = nil
 
 	file, err := json.MarshalIndent(config, "", "	")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(config_path, file, 0644)
+	err = os.WriteFile(config_path, file, 0644)
 	if err != nil {
 		return err
 	}
@@ -147,7 +148,7 @@ func CreateConfigFile() error {
 	config.WrapperrCustomize.GetYearStatsLeaderboard = true
 	config.WrapperrCustomize.GetYearStatsLeaderboardNumbers = false
 
-	err := SaveConfig(&config)
+	err := SaveConfig(config)
 	if err != nil {
 		return err
 	}
@@ -156,28 +157,31 @@ func CreateConfigFile() error {
 }
 
 // Read the config file and return the file as an object
-func GetConfig() (*models.WrapperrConfig, error) {
+func GetConfig() (config models.WrapperrConfig, err error) {
+	config = models.WrapperrConfig{}
+	err = nil
+
 	// Create config.json if it doesn't exist
 	if _, err := os.Stat(config_path); errors.Is(err, os.ErrNotExist) {
 		log.Println("Config file does not exist. Creating.")
 
-		err := CreateConfigFile()
+		err = CreateConfigFile()
 		if err != nil {
-			return nil, err
+			return config, err
 		}
 	}
 
 	// Load config file
 	file, err := ioutil.ReadFile(config_path)
 	if err != nil {
-		return nil, err
+		return config, err
 	}
 
 	// Parse config file
-	config := models.WrapperrConfig{}
+	config = models.WrapperrConfig{}
 	err = json.Unmarshal(file, &config)
 	if err != nil {
-		return nil, err
+		return config, err
 	}
 	if err != nil {
 
@@ -195,11 +199,9 @@ func GetConfig() (*models.WrapperrConfig, error) {
 		convert_failed := false
 
 		if err != nil {
-
 			// Back up old config as legacy didn't work
 			log.Println("Failed to parse config file as legacy. Replacing, but saving backup. Error: " + err.Error())
 			convert_failed = true
-
 		}
 
 		if !convert_failed {
@@ -209,19 +211,17 @@ func GetConfig() (*models.WrapperrConfig, error) {
 				log.Println("Failed to convert config from legacy to modern. Replacing, but saving backup. Error: " + err.Error())
 				convert_failed = true
 			}
-
 		}
 
 		// if nothing worked, replace config file
 		if convert_failed {
-
 			log.Println("Get config file threw error trying to open the template file.")
 
 			// Backup old config
 			new_save_loc, err := BackUpConfig(config_path)
 			if err != nil {
 				log.Println("Failed to rename old config file.")
-				return nil, err
+				return config, err
 			} else {
 				log.Println("Old config file saved to '" + new_save_loc + "'.")
 			}
@@ -230,7 +230,7 @@ func GetConfig() (*models.WrapperrConfig, error) {
 			file, err := ioutil.ReadFile(default_config_path)
 			if err != nil {
 				log.Println("Get config file threw error trying to open the template file.")
-				return nil, err
+				return config, err
 			}
 
 			// Parse default config file
@@ -238,7 +238,7 @@ func GetConfig() (*models.WrapperrConfig, error) {
 			err = json.Unmarshal(file, &config)
 			if err != nil {
 				log.Println("Get config file threw error trying to parse the template file.")
-				return nil, err
+				return config, err
 			}
 		}
 
@@ -248,7 +248,7 @@ func GetConfig() (*models.WrapperrConfig, error) {
 	file, err = ioutil.ReadFile(default_config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the template file.")
-		return nil, err
+		return config, err
 	}
 
 	// Parse default config file
@@ -256,7 +256,7 @@ func GetConfig() (*models.WrapperrConfig, error) {
 	err = json.Unmarshal(file, &config_default)
 	if err != nil {
 		log.Println("Get config file threw error trying to parse the template file.")
-		return nil, err
+		return config, err
 	}
 
 	// Update the Wrapperr version the config file is created for
@@ -322,17 +322,17 @@ func GetConfig() (*models.WrapperrConfig, error) {
 
 	config, err = VerifyNonEmptyCustomValues(config, config_default)
 	if err != nil {
-		return nil, err
+		return config, err
 	}
 
 	// Save new version of config json
-	err = SaveConfig(&config)
+	err = SaveConfig(config)
 	if err != nil {
-		return nil, err
+		return config, err
 	}
 
 	// Return config object
-	return &config, nil
+	return config, nil
 }
 
 func BackUpConfig(ConfigPath string) (string, error) {

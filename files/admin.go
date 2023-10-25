@@ -4,7 +4,6 @@ import (
 	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -14,7 +13,6 @@ var admin_config_path, _ = filepath.Abs("./config/admin.json")
 
 // Check if the config file has been configured for usage
 func GetAdminState() (bool, error) {
-
 	// Retrieve config object from function
 	admin_config, err := GetAdminConfig()
 	if err != nil {
@@ -31,23 +29,26 @@ func GetAdminState() (bool, error) {
 }
 
 // Saves the given admin config struct as admin.json
-func SaveAdminConfig(config models.AdminConfig) error {
+func SaveAdminConfig(config models.AdminConfig) (err error) {
+	err = nil
 
 	file, err := json.MarshalIndent(config, "", "    ")
 	if err != nil {
 		return err
 	}
 
-	err = ioutil.WriteFile(admin_config_path, file, 0644)
+	err = os.WriteFile(admin_config_path, file, 0644)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return
 }
 
 // Read the config file and return the file as an object
-func GetAdminConfig() (*models.AdminConfig, error) {
+func GetAdminConfig() (adminConfig models.AdminConfig, err error) {
+	adminConfig = models.AdminConfig{}
+	err = nil
 
 	// Create admin.json if it doesn't exist
 	if _, err := os.Stat(admin_config_path); errors.Is(err, os.ErrNotExist) {
@@ -55,15 +56,15 @@ func GetAdminConfig() (*models.AdminConfig, error) {
 
 		err := CreateAdminConfigFile()
 		if err != nil {
-			return nil, err
+			return adminConfig, err
 		}
 	}
 
 	// Load config file for alterations, information
-	file, err := ioutil.ReadFile(admin_config_path)
+	file, err := os.ReadFile(admin_config_path)
 	if err != nil {
 		log.Println("Admin config opening threw error. Error: " + err.Error())
-		return nil, err
+		return adminConfig, err
 	}
 
 	admin_config := models.AdminConfig{}
@@ -71,21 +72,22 @@ func GetAdminConfig() (*models.AdminConfig, error) {
 	err = json.Unmarshal(file, &admin_config)
 	if err != nil {
 		log.Println("Admin config parsing threw error. Error: " + err.Error())
-		return nil, err
+		return adminConfig, err
 	}
 
-	return &admin_config, nil
+	return admin_config, nil
 }
 
 // Creates empty admin.json
-func CreateAdminConfigFile() error {
+func CreateAdminConfigFile() (err error) {
+	err = nil
 
 	var admin_config models.AdminConfig
 
-	err := SaveAdminConfig(admin_config)
+	err = SaveAdminConfig(admin_config)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	return
 }

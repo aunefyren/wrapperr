@@ -6,7 +6,8 @@ function get_stats() {
 
     stats_form = {
 						"caching" : false,
-                        "plex_identity" : plex_identity
+                        "cache_limit": 0,
+                        "plex_identity": plex_identity
                    };
 
     var stats_data = JSON.stringify(stats_form);
@@ -42,7 +43,7 @@ function get_stats() {
                 document.getElementById("search_wrapped_button").style.opacity = '1';
                 document.getElementById("plex_signout_button").disabled = false;
                 document.getElementById("plex_signout_button").style.opacity = '1';
-                document.getElementById('results_error').innerHTML = result.message;
+                document.getElementById('results_error').innerHTML = result.error;
 
             } else {    
                 results = result;
@@ -53,7 +54,7 @@ function get_stats() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "get/statistics");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(stats_data);
 
     loading_icon.style.display = "inline";
@@ -1037,12 +1038,12 @@ function create_wrapped_link() {
     
     var bearerToken = ""
     if(functions.plex_auth) {
-        bearerToken = "Bearer " + cookie
+        bearerToken = cookie
     }
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
+    if (this.readyState == 4 && (this.status == 200 || this.status == 201 || this.status == 400 || this.status == 500)) {
         try {
             var result= JSON.parse(this.responseText);
         } catch(error) {
@@ -1142,7 +1143,7 @@ function delete_new_link_user() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "delete/user-share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(cookie_data);
     return;
 }

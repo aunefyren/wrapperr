@@ -69,12 +69,17 @@ function log_in(basic_auth) {
             }
             
             if(result.error) {
-                document.getElementById("password_login_form_error").innerHTML = result.message;
-                document.getElementById("log_in_button").disabled = false;
-                document.getElementById("log_in_button").style.opacity = '1';
-                document.getElementById('password').value = '';
+                try {
+                    document.getElementById("password_login_form_error").innerHTML = result.error;
+                    document.getElementById("log_in_button").disabled = false;
+                    document.getElementById("log_in_button").style.opacity = '1';
+                    document.getElementById('password').value = '';
+                } catch(e) {
+                    console.log("Failed to reset input fields. Error: " + e)
+                }
             } else {
-                set_cookie("wrapperr-admin", result.data, 3);
+                tokenPrefix = "Bearer "
+                set_cookie("wrapperr-admin", tokenPrefix+result.data, 3);
                 location.reload();
             }
 
@@ -158,7 +163,7 @@ function set_password() {
             }
             
             if(result.error) {
-                document.getElementById("password_form_error").innerHTML = result.message;
+                document.getElementById("password_form_error").innerHTML = result.error;
                 document.getElementById("create_admin_button").disabled = false;
                 document.getElementById("create_admin_button").style.opacity = '1';
             } else {
@@ -202,6 +207,11 @@ function update_password_form() {
     html += '</div>';
 
     html += '<div class="form-group newline">';
+    html += '<label for="password_original" title="The current login password.">Current password:</label>';
+    html += '<input type="password" class="form-control" id="password_original" value="" placeholder="" autocomplete="off" required />';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
     html += '<div id="password_form_error"></div>';
     html += '</div>';
 
@@ -231,10 +241,11 @@ function update_password() {
         return false;
     } else {
         password = document.getElementById('password').value;
+        password_original = document.getElementById('password_original').value;
         username = document.getElementById('username').value;
     }
 
-    admin_create_form = {"admin_password" : password, "admin_username" : username};
+    admin_create_form = {"admin_password" : password, "admin_password_original" : password_original, "admin_username" : username};
 
     var admin_create_data = JSON.stringify(admin_create_form);
 
@@ -253,7 +264,7 @@ function update_password() {
             }
             
             if(result.error) {
-                document.getElementById("password_form_error").innerHTML = result.message;
+                document.getElementById("password_form_error").innerHTML = result.error;
                 document.getElementById("update_admin_button").disabled = false;
                 document.getElementById("update_admin_button").style.opacity = '1';
             } else {   
@@ -266,7 +277,7 @@ function update_password() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "update/admin");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(admin_create_data);
     return;
 }
@@ -639,7 +650,7 @@ function set_tautulli_settings_call() {
             }
             
             if(result.error) {
-                alert(result.message);
+                alert(result.error);
                 document.getElementById("set_tautulli_form_button").disabled = false;
                 document.getElementById("set_tautulli_form_button").style.opacity = '1';
             } else {
@@ -651,7 +662,7 @@ function set_tautulli_settings_call() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(tautulli_settings_data);
     return;
 }
@@ -740,10 +751,19 @@ function set_wrapperr_settings() {
     html += '</div>';
 	
 	html += '<div class="form-group">';
-    html += '<label for="use_logs" title="Logs every API action into a log-file in the config folder. Requires a Wrapperr restart.">Log API actions:<br>';
+    html += '<label for="use_logs" title="Logs most actions into a log-file in the config folder. Requires a Wrapperr restart.">Log to file:<br>';
     html += '<input type="checkbox" class="form-control" id="use_logs" ';
     if(use_logs) {
         html += 'checked="' + use_logs + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="basic_auth" title="Whether the admin can login in using the HTTP Basic standard.">Use Basic Auth:<br>';
+    html += '<input type="checkbox" class="form-control" id="basic_auth" ';
+    if(basic_auth) {
+        html += 'checked="' + basic_auth + '" ';
     }
     html += '/><br>';
     html += '</div>';
@@ -813,6 +833,7 @@ function set_wrapperr_settings_call() {
     use_cache = document.getElementById('use_cache').checked;
     use_logs = document.getElementById('use_logs').checked;
     plex_auth = document.getElementById('plex_auth').checked;
+    basic_auth = document.getElementById('basic_auth').checked;
     wrapperr_root = document.getElementById('wrapperr_root').value;
     application_name_str = document.getElementById('application_name_str').value;
     application_url_str = document.getElementById('application_url_str').value;
@@ -881,6 +902,7 @@ function set_wrapperr_settings_call() {
                                     "use_cache" : use_cache,
                                     "use_logs" : use_logs,
                                     "plex_auth" : plex_auth,
+                                    "basic_auth" : basic_auth,
                                     "wrapperr_root" : wrapperr_root,
                                     "create_share_links" : create_share_links,
                                     "timezone" : timezone,
@@ -909,7 +931,7 @@ function set_wrapperr_settings_call() {
             }
             
             if(result.error) {
-                alert(result.message);
+                alert(result.error);
                 document.getElementById("set_wrapperr_settings_form_button").disabled = false;
                 document.getElementById("set_wrapperr_settings_form_button").style.opacity = '1';
             } else {
@@ -921,7 +943,7 @@ function set_wrapperr_settings_call() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(wrapperr_settings_data);
     return;
 }
@@ -2046,7 +2068,7 @@ function set_wrapperr_customization_call() {
             }
             
             if(result.error) {
-                alert(result.message);
+                alert(result.error);
                 document.getElementById("set_wrapperr_customization_form_button").disabled = false;
                 document.getElementById("set_wrapperr_customization_form_button").style.opacity = '1';
             } else {
@@ -2058,7 +2080,7 @@ function set_wrapperr_customization_call() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "set/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(wrapperr_customization_data);
     return;
 }
@@ -2240,7 +2262,7 @@ function get_stats(days) {
             }
 
             if(result.error) {
-                alert(result.message);
+                alert(result.error);
                 cache_log(days, false, true);
             } else {
                 if(!result.data) {
@@ -2256,7 +2278,7 @@ function get_stats(days) {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "get/statistics", );
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(stats_data);
     return;
 }
@@ -2334,7 +2356,7 @@ function get_log() {
             if(result.error) {
                 document.getElementById("log_button").disabled = false;
                 document.getElementById("log_button").style.opacity = '1';
-                alert(result.message);
+                alert(result.error);
             } else {
                 document.getElementById("log_button").disabled = false;
                 document.getElementById("log_button").style.opacity = '1';
@@ -2346,7 +2368,7 @@ function get_log() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "get/log", );
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(log_data_data);
     return;
 }
@@ -2414,7 +2436,7 @@ function test_tautulli_connection(tautulli_id) {
                 button.style.backgroundColor = 'var(--red)';
                 document.getElementById("test_connection_" + tautulli_id).disabled = false;
                 document.getElementById("test_connection_" + tautulli_id).style.opacity = '1';
-                alert(result.message);
+                alert(result.error);
                 return
             }
 
@@ -2461,6 +2483,10 @@ function get_wrapper_version() {
                 }
 
                 get_admin_state(result.basic_auth);
+            } else {
+              
+                get_admin_state(false);
+
             }
 
         } else if(this.readyState == 4 && this.status !== 200) {
@@ -2481,7 +2507,7 @@ function get_wrapper_version() {
     }
 
     // Reach the API to get URL base
-    xhttp.open("post", window.location.origin + "/" + root + trailingslash + "api/get/wrapperr-version");
+    xhttp.open("post", root + trailingslash + "api/get/wrapperr-version");
     xhttp.send();
     return;
 }
@@ -2500,7 +2526,7 @@ function get_admin_state(basic_auth) {
             }
             
             if(result.error) {
-                console.log(result.message);
+                console.log(result.error);
             } else if(!result.data) {
                 first_time = true;
                 set_password_form();
@@ -2537,7 +2563,7 @@ function validate_cookie_admin(cookie, basic_auth) {
             if(result.error) {
                 set_cookie("wrapperr-admin", "", 1);
                 login_menu(basic_auth);
-                document.getElementById("password_login_form_error").innerHTML = result.message;
+                document.getElementById("password_login_form_error").innerHTML = result.error;
             } else {
                 get_config(get_cookie('wrapperr-admin'));
             }
@@ -2547,7 +2573,7 @@ function validate_cookie_admin(cookie, basic_auth) {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "validate/admin");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send();
     return;
 }
@@ -2568,7 +2594,7 @@ function get_config(cookie) {
             }
 			
             if(result.error) {
-                alert(result.message);
+                alert(result.error);
                 location.reload();
             } else {
                 tautulli = result.data.tautulli_config;
@@ -2576,6 +2602,7 @@ function get_config(cookie) {
                 timezone = result.data.timezone;
                 create_share_links = result.data.create_share_links;
                 plex_auth = result.data.plex_auth;
+                basic_auth = result.data.basic_auth;
                 use_cache = result.data.use_cache;
 				use_logs = result.data.use_logs;
                 clientID = result.data.clientID;
@@ -2704,6 +2731,6 @@ function get_config(cookie) {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "get/config");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send();
 }

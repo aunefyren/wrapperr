@@ -46,7 +46,7 @@ function wrapped_link_actions(hash) {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "get/share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(hash_data);
 }
 
@@ -197,7 +197,8 @@ function check_token(code, id) {
             if(result.error) {
                 reset_button();
             } else {
-                set_cookie("wrapperr-user", result.data, 7);
+                tokenPrefix = "Bearer "
+                set_cookie("wrapperr-user", tokenPrefix+result.data, 7);
                 location.reload();
             }
         }
@@ -249,7 +250,7 @@ function validate_cookie_user(cookie) {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "validate/plex-auth");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send();
     return;
 }
@@ -283,7 +284,7 @@ function get_user_links(cookie) {
     xhttp.withCredentials = true;
     xhttp.open("post", "api/get/user-share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(cookie_data);
     return;
 }
@@ -388,6 +389,8 @@ function get_wrapper_version(link_mode, hash) {
                 console.log("Getting link page...");
                 wrapped_link_actions(hash);
                 
+            } else if(result.error) {
+                document.getElementById('results_error_loading_screen').innerHTML = result.error;
             }
 
         }
@@ -462,7 +465,7 @@ function delete_link_user() {
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + "delete/user-share-link");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-    xhttp.setRequestHeader("Authorization", "Bearer " + cookie);
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(cookie_data);
     return;
 }

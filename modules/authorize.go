@@ -4,100 +4,12 @@ import (
 	"aunefyren/wrapperr/files"
 	"aunefyren/wrapperr/models"
 	"aunefyren/wrapperr/utilities"
-	"encoding/base64"
 	"errors"
 	"log"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 )
-
-// AuthorizeToken validates JWT tokens using the private key.
-func AuthorizeToken(writer http.ResponseWriter, request *http.Request, admin bool) (payload *models.Payload, err error) {
-	payload = &models.Payload{}
-	err = nil
-
-	config, err := files.GetConfig()
-	if err != nil {
-		log.Println("Failed to load JWT Token settings. Error: " + err.Error())
-		return payload, errors.New("Failed to load JWT Token settings.")
-	}
-
-	adminConfig, err := files.GetAdminConfig()
-	if err != nil {
-		log.Println("Failed to load admin settings. Error: " + err.Error())
-		return payload, errors.New("Failed to load admin settings.")
-	}
-
-	// Check if Authorization header is available
-	authHeader := request.Header.Get("Authorization")
-	if authHeader == "" || !strings.Contains(authHeader, " ") {
-		log.Println("No valid Authorization token found in header during API request.")
-		return payload, errors.New("No valid Authorization token found in header.")
-	}
-
-	// Split header
-	headerParts := strings.Split(authHeader, " ")
-	if len(headerParts) < 2 {
-		log.Println("Failed to parse header. Error: " + err.Error())
-		return payload, errors.New("Failed to parse header.")
-	}
-
-	token := headerParts[1]
-	authType := ""
-
-	// Define header type
-	switch strings.TrimSpace(strings.ToLower(headerParts[0])) {
-	case "bearer":
-		authType = "bearer"
-	case "basic":
-		authType = "basic"
-	default:
-		return payload, errors.New("Authorization header not recognized.")
-	}
-
-	// Switch auth based on header type
-	switch authType {
-	case "bearer":
-		payload, err = ParseToken(token, config.PrivateKey)
-		if err != nil {
-			log.Println("Session token not accepted. Error: ")
-			log.Println(err)
-			return payload, errors.New("Session token not accepted. Please relog.")
-		}
-
-		if admin {
-			if !payload.Admin {
-				return payload, errors.New("Session is not an admin session.")
-			}
-		}
-	case "basic":
-		rawDecodedtoken, err := base64.StdEncoding.DecodeString(token)
-		if err != nil {
-			return payload, errors.New("Failed to decode Base64.")
-		}
-		authParts := strings.Split(string(rawDecodedtoken), ":")
-		if len(headerParts) < 2 {
-			log.Println("Failed to parse basic auth header. Error: " + err.Error())
-			return payload, errors.New("Failed to parse basic auth header.")
-		}
-		err = validateBasicAuth(authParts[0], authParts[1])
-		if err != nil {
-			log.Println("Failed to validate basic auth header. Error: " + err.Error())
-			return payload, errors.New("Failed to validate basic auth header.")
-		}
-		_, payloadTwo, err := CreateTokenTwo(config.PrivateKey, adminConfig.AdminUsername, true, "", time.Now())
-		if err != nil {
-			log.Println("Failed to create token. Error: " + err.Error())
-			return payload, errors.New("Failed to create token.")
-		}
-		payload = &payloadTwo
-	}
-
-	return payload, nil
-}
 
 func ValidateToken(signedToken string, privateKey string) (err error) {
 	token, err := jwt.ParseWithClaims(
@@ -203,7 +115,7 @@ func CreateTokenTwo(PrivateKey string, username string, admin bool, authtoken st
 	return token, payload, err
 }
 
-func validateBasicAuth(username string, password string) (err error) {
+func ValidateBasicAuth(username string, password string) (err error) {
 	err = nil
 
 	adminConfig, err := files.GetAdminConfig()

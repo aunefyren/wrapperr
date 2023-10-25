@@ -3,7 +3,7 @@ package utilities
 import (
 	"aunefyren/wrapperr/models"
 	"encoding/base64"
-	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/big"
@@ -15,6 +15,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/gin-gonic/gin"
 	"github.com/kardianos/osext"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,48 +38,6 @@ func checkScopes(requiredScopes []string, providedScopes string) bool {
 	}
 
 	return true
-}
-
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, err := json.Marshal(payload)
-	if err != nil {
-		log.Println(err)
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	w.Write(response)
-	return
-}
-
-func RespondDefaultError(writer http.ResponseWriter, request *http.Request, error_reply error, http_code int) {
-
-	ip_string := GetOriginIPString(writer, request)
-
-	log.Println("Returned error: '" + error_reply.Error() + "'" + ip_string)
-
-	reply := models.Default_Reply{
-		Message: error_reply.Error(),
-		Error:   true,
-	}
-
-	RespondWithJSON(writer, http_code, reply)
-	return
-}
-
-func RespondDefaultOkay(writer http.ResponseWriter, request *http.Request, reply_string string) {
-
-	ip_string := GetOriginIPString(writer, request)
-
-	log.Println("Returned reply: '" + reply_string + "'" + ip_string)
-
-	reply := models.Default_Reply{
-		Message: reply_string,
-		Error:   false,
-	}
-
-	RespondWithJSON(writer, http.StatusOK, reply)
-	return
 }
 
 func HashAndSalt(pwd_string string) (string, error) {
@@ -136,22 +95,10 @@ func RestartSelf() error {
 	return syscall.Exec(self, args, env)
 }
 
-func GetOriginIPString(writer http.ResponseWriter, request *http.Request) string {
-	ip := request.RemoteAddr
-	xforward := request.Header.Get("X-Forwarded-For")
-	real_ip := request.Header.Get("X-Real-Ip")
-
-	string_reply := " - Origin: " + string(ip) + " "
-
-	if xforward != "" {
-		string_reply = string_reply + "(Forwarded for: " + string(xforward) + ") "
-	}
-
-	if real_ip != "" {
-		string_reply = string_reply + "(Real IP: " + string(real_ip) + ") "
-	}
-
-	return string_reply
+func GetOriginIPString(context *gin.Context) (stringReply string) {
+	ip := context.ClientIP()
+	stringReply = " - Origin: " + string(ip) + " "
+	return
 }
 
 func BuildURL(port int, domain_ip string, https bool, url_base string) (string, error) {
@@ -203,4 +150,26 @@ func PrintASCII() {
 	fmt.Println(`|\____________\|\____________\|\____________\|\____________\|\____________\|\____________\|\____________\`)
 	fmt.Println(`\|____________|\|____________|\|____________|\|____________|\|____________|\|____________|\|____________|`)
 	fmt.Println(``)
+}
+
+func ValidateBasicAuth(context *gin.Context, adminConfig models.AdminConfig) (err error) {
+	err = nil
+
+	username, password, okay := context.Request.BasicAuth()
+	if !okay {
+		context.Writer.Header().Add("WWW-Authenticate", `Basic realm="Give username and password"`)
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "No basic auth present."})
+		context.Abort()
+		return
+	}
+
+	// Hash new password
+	passwordValidity := ComparePasswords(adminConfig.AdminPassword, password)
+
+	// Validate admin username and password
+	if !passwordValidity || adminConfig.AdminUsername != username {
+		return errors.New("Invalid username or password.")
+	}
+
+	return
 }

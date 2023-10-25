@@ -38,6 +38,12 @@ type AdminConfig struct {
 	AdminPassword string `json:"admin_password"`
 }
 
+type AdminConfigUpdateRequest struct {
+	AdminUsername         string `json:"admin_username"`
+	AdminPassword         string `json:"admin_password"`
+	AdminPasswordOriginal string `json:"admin_password_original"`
+}
+
 type WrapperrConfig struct {
 	TautulliConfig    []TautulliConfig  `json:"tautulli_config"`
 	WrapperrCustomize WrapperrCustomize `json:"wrapperr_customize"`
@@ -253,6 +259,7 @@ type SetWrapperrConfig struct {
 		UseCache         bool   `json:"use_cache"`
 		UseLogs          bool   `json:"use_logs"`
 		PlexAuth         bool   `json:"plex_auth"`
+		BasicAuth        bool   `json:"basic_auth"`
 		WrapperrRoot     string `json:"wrapperr_root"`
 		CreateShareLinks bool   `json:"create_share_links"`
 		Timezone         string `json:"timezone"`

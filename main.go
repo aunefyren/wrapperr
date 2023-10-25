@@ -2,9 +2,10 @@ package main
 
 import (
 	"aunefyren/wrapperr/files"
+	"aunefyren/wrapperr/middlewares"
+	"aunefyren/wrapperr/models"
 	"aunefyren/wrapperr/routes"
 	"aunefyren/wrapperr/utilities"
-	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -14,15 +15,15 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
-	"github.com/procyon-projects/chrono"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 
 	_ "time/tzdata"
 )
 
 func main() {
-
 	utilities.PrintASCII()
+	gin.SetMode(gin.ReleaseMode)
 
 	// Create and define file for logging
 	logFile, err := os.OpenFile("config/wrapperr.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0666)
@@ -96,9 +97,12 @@ func main() {
 	// Alert what port is in use
 	log.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
 
-	// Assign routes
-	router := mux.NewRouter().StrictSlash(true)
+	// Initialize Router
+	router := initRouter(config)
+	log.Fatal(router.Run(":" + strconv.Itoa(config.WrapperrPort)))
+}
 
+func initRouter(config models.WrapperrConfig) *gin.Engine {
 	var root string
 	if config.WrapperrRoot != "" {
 		root = "/" + config.WrapperrRoot
@@ -106,74 +110,87 @@ func main() {
 		root = ""
 	}
 
-	// Admin auth routes
-	router.HandleFunc(root+"/api/validate/admin", routes.ApiValidateAdmin)
-	router.HandleFunc(root+"/api/get/config", routes.ApiGetConfig)
-	router.HandleFunc(root+"/api/get/log", routes.ApiGetLog)
-	router.HandleFunc(root+"/api/set/config", routes.ApiSetConfig)
-	router.HandleFunc(root+"/api/update/admin", routes.ApiUpdateAdmin)
+	router := gin.Default()
 
-	// No-auth routes
-	router.HandleFunc(root+"/api/get/config-state", routes.ApiWrapperrConfigured)
-	router.HandleFunc(root+"/api/login/admin", routes.ApiLogInAdmin)
-	router.HandleFunc(root+"/api/get/wrapperr-version", routes.ApiGetWrapperrVersion)
-	router.HandleFunc(root+"/api/get/admin-state", routes.ApiGetAdminState)
-	router.HandleFunc(root+"/api/get/functions", routes.ApiGetFunctions)
-	router.HandleFunc(root+"/api/create/admin", routes.ApiCreateAdmin)
-	router.HandleFunc(root+"/api/get/tautulli-connection", routes.ApiGetTautulliConncection)
-	router.HandleFunc(root+"/api/get/share-link", routes.ApiGetShareLink)
+	router.LoadHTMLGlob("web/*/*.html")
 
-	// User auth routes
-	router.HandleFunc(root+"/api/get/login-url", routes.ApiGetLoginURL)
-	router.HandleFunc(root+"/api/login/plex-auth", routes.ApiLoginPlexAuth)
-	router.HandleFunc(root+"/api/validate/plex-auth", routes.ApiValidatePlexAuth)
-	router.HandleFunc(root+"/api/get/user-share-link", routes.ApiGetUserShareLink)
+	// API endpoint
+	api := router.Group(root + "/api")
+	{
+		// Requires no auth token
+		open := api.Group("")
+		{
+			open.POST("/get/wrapperr-version", routes.ApiGetWrapperrVersion)
+			open.POST("/get/admin-state", routes.ApiGetAdminState)
+			open.POST("/get/functions", routes.ApiGetFunctions)
+			open.POST("/create/admin", routes.ApiCreateAdmin)
+			open.POST("/get/config-state", routes.ApiWrapperrConfigured)
+			open.POST("/login/admin", routes.ApiLogInAdmin)
+			open.POST("/get/tautulli-connection", routes.ApiGetTautulliConncection)
+			open.POST("/get/share-link", routes.ApiGetShareLink)
+			open.POST("/login/plex-auth", routes.ApiLoginPlexAuth)
+		}
 
-	// Depends on config
-	router.HandleFunc(root+"/api/delete/user-share-link", routes.ApiDeleteUserShareLink)
-	router.HandleFunc(root+"/api/create/share-link", routes.ApiCreateShareLink)
+		// Can be user auth based on config
+		both := api.Group("")
+		{
+			both.POST("/create/share-link", routes.ApiCreateShareLink)
+			both.POST("/get/statistics", routes.ApiWrapperGetStatistics)
+		}
 
-	// Get stats route
-	router.HandleFunc(root+"/api/get/statistics", routes.ApiWrapperGetStatistics)
+		// Must include an auth token (With Plex auth)
+		auth := api.Group("").Use(middlewares.AuthMiddleware(false))
+		{
+			auth.POST("/get/login-url", routes.ApiGetLoginURL)
+			auth.POST("/validate/plex-auth", routes.ApiValidatePlexAuth)
+			auth.POST("/get/user-share-link", routes.ApiGetUserShareLink)
+			auth.POST("/delete/user-share-link", routes.ApiDeleteUserShareLink)
+		}
 
-	// Assets route
-	assetsFileServer := http.FileServer(http.Dir("./web/assets/"))
-	router.PathPrefix(root + "/assets").Handler(http.StripPrefix(root+"/assets", assetsFileServer))
-
-	// JS route
-	jsFileServer := http.FileServer(http.Dir("./web/js/"))
-	router.PathPrefix(root + "/js").Handler(http.StripPrefix(root+"/js", jsFileServer))
-
-	// HTML frontpage route
-	router.HandleFunc(root+"/", func(w http.ResponseWriter, r *http.Request) {
-		// Using the http.ServeFile function to serve the frontpage.html file
-		http.ServeFile(w, r, "./web/html/frontpage.html")
-	})
-
-	// HTML admin route
-	router.HandleFunc(root+"/admin", func(w http.ResponseWriter, r *http.Request) {
-		// Using the http.ServeFile function to serve the admin.html file
-		http.ServeFile(w, r, "./web/html/admin.html")
-	})
-
-	// TXT robots route
-	router.HandleFunc(root+"/robots.txt", func(w http.ResponseWriter, r *http.Request) {
-		// Using the http.ServeFile function to serve the robots.txt file
-		http.ServeFile(w, r, "./web/txt/robots.txt")
-	})
-
-	// Create task scheduler for sunday reminders
-	taskScheduler := chrono.NewDefaultTaskScheduler()
-
-	_, err = taskScheduler.ScheduleWithCron(func(ctx context.Context) {
-		log.Println("Shareable link cleaner starting.")
-		files.CleanOldShareableLinks()
-	}, "0 0 0 * * *")
-
-	if err != nil {
-		log.Println("Shareable link cleaner was not scheduled successfully. Error: " + err.Error())
+		// Must include an auth token (With admin)
+		admin := api.Group("").Use(middlewares.AuthMiddleware(true))
+		{
+			admin.POST("/validate/admin", routes.ApiValidateAdmin)
+			admin.POST("/get/config", routes.ApiGetConfig)
+			admin.POST("/set/config", routes.ApiSetConfig)
+			admin.POST("/update/admin", routes.ApiUpdateAdmin)
+			admin.POST("/get/log", routes.ApiGetLog)
+		}
 	}
 
-	// Start web-server
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), router))
+	router.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		// AllowAllOrigins:  true,
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Access-Control-Allow-Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc:  func(origin string) bool { return true },
+		MaxAge:           12 * time.Hour,
+	}))
+
+	// Static endpoint for different directories
+	router.Static(root+"/assets", "./web/assets")
+	router.Static(root+"/js", "./web/js")
+
+	// Static endpoint for homepage
+	router.GET(root+"/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "frontpage.html", nil)
+	})
+
+	// Static endpoint for admin functions
+	router.GET(root+"/admin", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "admin.html", nil)
+	})
+
+	// Static endpoint for robots.txt
+	router.GET(root+"/robots.txt", func(c *gin.Context) {
+		TXTfile, err := os.ReadFile("./web/txt/robots.txt")
+		if err != nil {
+			fmt.Println("Reading robots.txt threw error trying to open the file. Error: " + err.Error())
+		}
+		c.Data(http.StatusOK, "text/plain", TXTfile)
+	})
+
+	return router
 }
