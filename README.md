@@ -1,7 +1,7 @@
 # Wrapperr
 [![Github Stars](https://img.shields.io/github/stars/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr)
 [![Github Forks](https://img.shields.io/github/forks/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr)
-[![Docker Pulls](https://img.shields.io/docker/pulls/aunefyren/wrapperr?style=for-the-badge)](https://hub.docker.com/r/aunefyren/wrapperr)
+[![Docker Hub Pulls](https://img.shields.io/docker/pulls/aunefyren/wrapperr?style=for-the-badge)](https://hub.docker.com/r/aunefyren/wrapperr)
 [![Newest Release](https://img.shields.io/github/v/release/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/aunefyren/wrapperr?style=for-the-badge)](https://go.dev/dl/)
 
@@ -114,10 +114,10 @@ Wrapperr should now be functional. Based on your settings, you can now either se
 ## Docker
 Docker sets up the environment, but I recommend reading the start of the 'Essential configuration options' section for an explanation of the functionality/admin page! 
 
-Docker images are pre-built, but you might want to change the Dockerfile. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://hub.docker.com/r/aunefyren/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
+Docker images are pre-built, but you might want to change the Dockerfile. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://github.com/aunefyren/wrapperr/pkgs/container/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
 
 ```
-$ docker run -p '8282:8282' --name 'wrapperr' aunefyren/wrapperr:latest
+$ docker run -p '8282:8282' --name 'wrapperr' ghcr.io/aunefyren/wrapperr:latest
 ```
 
 It should now be accessible on: ```http://localhost:8282```
@@ -134,7 +134,7 @@ services:
         ports:
             - '8282:8282'
         container_name: wrapperr
-        image: aunefyren/wrapperr:latest
+        image: ghcr.io/aunefyren/wrapperr:latest
         restart: unless-stopped
 ```
 
@@ -156,7 +156,7 @@ services:
         ports:
             - '8282:8282'
         container_name: wrapperr
-        image: aunefyren/wrapperr:latest
+        image: ghcr.io/aunefyren/wrapperr:latest
         restart: unless-stopped
         volumes:
             - './my-folder:/app/config'
