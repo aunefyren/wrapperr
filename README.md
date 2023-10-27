@@ -34,7 +34,7 @@ A website-based application and API for collecting user stats within a set timef
 - Customizable appearance/results
 - Statistics for movies, shows & music
 - Caching of Tautulli results
-- Admin interface for configuration
+- Admin interface for configuration (with regular and HTTP Basic login)
 - Pre-caching of results before user interaction
 - Shareable links with expiration
 
@@ -170,6 +170,22 @@ Afterward, remember to ```chmod``` the mounted folder on the host so the Wrapper
 
 ```
 $ sudo chmod -R 0777 ./my-folder
+```
+
+<br>
+<br>
+
+## TLS using PEM
+All configurable files are placed within the ```config``` directory. If you want Wrapperr to utilize HTTPS instead of HTTP, place your certificate files there. 
+
+- Create your certificate file, name it ```cert.pem```, place it in the directory.
+- Create your certificate private key file, name it ```key.pem```, place it in the directory.
+- Restart Wrapperr and notice it says it started using HTTPS.
+
+Here is how to create your PEM certificate files using OpenSSL:
+
+```
+$ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
 ```
 
 <br>

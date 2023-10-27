@@ -4,7 +4,6 @@ import (
 	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -12,11 +11,13 @@ import (
 	"github.com/google/uuid"
 )
 
-var wrapperr_version_parameter = "v3.2.0"
+const wrapperr_version_parameter = "v3.2.0"
+const minSecretKeySize = 32
+
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./config_default.json")
-
-const minSecretKeySize = 32
+var certPath, _ = filepath.Abs("./config/cert.pem")
+var certKeyPath, _ = filepath.Abs("./config/key.pem")
 
 // Check if the config file has been configured for usage
 func GetConfigState() (bool, error) {
@@ -172,7 +173,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 	}
 
 	// Load config file
-	file, err := ioutil.ReadFile(config_path)
+	file, err := os.ReadFile(config_path)
 	if err != nil {
 		return config, err
 	}
@@ -188,7 +189,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 		// Parse config file
 		log.Println("Failed to parse config file. Trying legacy format. Error: " + err.Error())
 		// Load config file
-		file, err = ioutil.ReadFile(config_path)
+		file, err = os.ReadFile(config_path)
 		if err != nil {
 			log.Fatal("Error when opening file: ", err)
 		}
@@ -227,7 +228,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 			}
 
 			// Load default config file
-			file, err := ioutil.ReadFile(default_config_path)
+			file, err := os.ReadFile(default_config_path)
 			if err != nil {
 				log.Println("Get config file threw error trying to open the template file.")
 				return config, err
@@ -245,7 +246,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 	}
 
 	// Load default config file
-	file, err = ioutil.ReadFile(default_config_path)
+	file, err = os.ReadFile(default_config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the template file.")
 		return config, err
@@ -736,4 +737,25 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 
 	return config, nil
 
+}
+
+func GetCertPaths() (string, string) {
+	return certPath, certKeyPath
+}
+
+// Get private key from the config file
+func CheckCertFiles() (certFound bool) {
+	certFound = false
+
+	// Create config.json if it doesn't exist
+	if _, err := os.Stat(certPath); errors.Is(err, os.ErrNotExist) {
+		return
+	}
+
+	if _, err := os.Stat(certKeyPath); errors.Is(err, os.ErrNotExist) {
+		return
+	}
+
+	certFound = true
+	return
 }

@@ -99,7 +99,19 @@ func main() {
 
 	// Initialize Router
 	router := initRouter(config)
-	log.Fatal(router.Run(":" + strconv.Itoa(config.WrapperrPort)))
+
+	// Get TSL
+	certFound := files.CheckCertFiles()
+
+	// Start server
+	if certFound {
+		log.Println("Starting using HTTPS.")
+		certPath, certKeyPath := files.GetCertPaths()
+		log.Fatal(router.RunTLS(":"+strconv.Itoa(port), certPath, certKeyPath))
+	} else {
+		log.Println("Starting using HTTP.")
+		log.Fatal(router.Run(":" + strconv.Itoa(port)))
+	}
 }
 
 func initRouter(config models.WrapperrConfig) *gin.Engine {
