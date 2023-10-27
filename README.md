@@ -4,6 +4,7 @@
 [![Docker Hub Pulls](https://img.shields.io/docker/pulls/aunefyren/wrapperr?style=for-the-badge)](https://hub.docker.com/r/aunefyren/wrapperr)
 [![Newest Release](https://img.shields.io/github/v/release/aunefyren/wrapperr?style=for-the-badge)](https://github.com/aunefyren/wrapperr/releases)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/aunefyren/wrapperr?style=for-the-badge)](https://go.dev/dl/)
+[![Wiki hyperlink](https://img.shields.io/badge/Go_To-Wiki-page?style=for-the-badge&labelColor=%23555555&color=%23007ec6)](https://github.com/aunefyren/wrapperr/wiki)
 
 <br>
 <br>
@@ -68,7 +69,7 @@ Most text is customizable through the Wrapperr admin interface which allows for 
 <br>
 
 ## Instructions - How do I install this?
-There are two main ways. Docker information can be found further below.
+There are two main ways. Docker information is in the wiki.
 
 <br>
 <br>
@@ -111,95 +112,11 @@ Wrapperr should now be functional. Based on your settings, you can now either se
 <br>
 <br>
 
-## Docker
-Docker sets up the environment, but I recommend reading the start of the 'Essential configuration options' section for an explanation of the functionality/admin page! 
+## More documentation
 
-Docker images are pre-built, but you might want to change the Dockerfile. The pre-configured Dockerfile is in the docker folder of this repo. It's a really simple configuration, so modify it as preferred and then build it. If you just want to launch the [pre-built image](https://github.com/aunefyren/wrapperr/pkgs/container/wrapperr) of Wrapperr, simply execute this docker command, pulling the image from Docker Hub and exposing it on port ```8282```:
+Docker, TLS, setup information and more can be found in the documentation at the Wiki!
 
-```
-$ docker run -p '8282:8282' --name 'wrapperr' ghcr.io/aunefyren/wrapperr:latest
-```
-
-It should now be accessible on: ```http://localhost:8282```
-
-<br>
-<br>
-
-If you use Docker Compose you could do something like this in your ```docker-compose.yml```:
-
-```
-version: '3.3'
-services:
-    wrapperr:
-        ports:
-            - '8282:8282'
-        container_name: wrapperr
-        image: ghcr.io/aunefyren/wrapperr:latest
-        restart: unless-stopped
-```
-
-And launch the file with:
-
-```
-$ docker-compose up
-```
-
-<br>
-<br>
-
-If you want to mount a volume for the config folder, you can do something like this:
-
-```
-version: '3.3'
-services:
-    wrapperr:
-        ports:
-            - '8282:8282'
-        container_name: wrapperr
-        image: ghcr.io/aunefyren/wrapperr:latest
-        restart: unless-stopped
-        volumes:
-            - './my-folder:/app/config'
-```
-
-<br>
-<br>
-
-Afterward, remember to ```chmod``` the mounted folder on the host so the Wrapperr can write to it:
-
-
-```
-$ sudo chmod -R 0777 ./my-folder
-```
-
-<br>
-<br>
-
-## TLS using PEM
-All configurable files are placed within the ```config``` directory. If you want Wrapperr to utilize HTTPS instead of HTTP, place your certificate files there. 
-
-- Create your certificate file, name it ```cert.pem```, place it in the directory.
-- Create your certificate private key file, name it ```key.pem```, place it in the directory.
-- Restart Wrapperr and notice it says it started using HTTPS.
-
-Here is how to create your PEM certificate files using OpenSSL:
-
-```
-$ openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes
-```
-
-<br>
-<br>
-
-## Frequently asked questions
-
-### Q: Why are the plays different on Wrapperr compared to Tautulli
-
-A: Data is retrieved from the Tautulli API, but not necessarily processed in the same manner. The difference could for example be that you have history entries for the same media (a movie for example) split over different Tautulli items. For example, you could have two items for the movie 'Black Widow' from updating the file on Plex, leading Tautulli to interpret it as a new item/media. The easiest way to check for this is by going to the 'History' tab and searching for the title. This might display more entries than clicking into the movie item, which displays all history items for that particular item. 
-
-There is an option to merge different Tautulli items if this is your case.
-
-What also could confuse is related to the Tautulli grouping feature. When you have grouping enabled, different plays are grouped on an API call basis. Meaning that when you display all history items for a movie on Tautulli, six different plays spanning three days might be placed into one group. Wrapperr calls the Tautulli API on 'day' based loop, meaning Tautulli's grouping never spans multiple days, potentially leading to an increase in plays because the groups are smaller in size.
+[![Wiki hyperlink](https://img.shields.io/badge/Go_To-Wiki-page?style=for-the-badge&labelColor=%23555555&color=%23007ec6)](https://github.com/aunefyren/wrapperr/wiki)
 
 <br>
 <br>
