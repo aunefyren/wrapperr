@@ -366,7 +366,7 @@ func ApiGetShareLink(context *gin.Context) {
 
 	if len(hash_array) < 2 {
 		log.Println("Failed to split hash string while looking for user ID.")
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to parse payload hash for Wrapperr link."})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid shared link."})
 		context.Abort()
 		return
 	}
@@ -394,7 +394,7 @@ func ApiGetShareLink(context *gin.Context) {
 	share_link_object, err := files.GetLink(fileName)
 	if err != nil {
 		log.Println("Failed to get link file. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get link file."})
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid shared link."})
 		context.Abort()
 		return
 	}
@@ -402,8 +402,8 @@ func ApiGetShareLink(context *gin.Context) {
 	currentTime := time.Now()
 	linkTime, err := time.Parse("2006-01-02", share_link_object.Date)
 	if err != nil {
-		log.Println("Failed to get link file. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get link file."})
+		log.Println("Failed to parse link date. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Invalid shared link."})
 		context.Abort()
 		return
 	}
@@ -420,7 +420,7 @@ func ApiGetShareLink(context *gin.Context) {
 		context.JSON(http.StatusCreated, share_link_object)
 		return
 	} else {
-		returnError := errors.New("Invalid share link.")
+		returnError := errors.New("Invalid shared link.")
 
 		if linkTime.Before(currentTime) {
 
@@ -429,7 +429,7 @@ func ApiGetShareLink(context *gin.Context) {
 			if err != nil {
 				log.Println("Failed to save share link. Error: " + err.Error())
 			}
-			returnError = errors.New("This Wrapped link has expired.")
+			returnError = errors.New("This shared link has expired.")
 		}
 
 		log.Println("Failed to retrieve Wrapperr share link with hash: " + link_payload.Hash + ".")

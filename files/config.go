@@ -15,9 +15,10 @@ const wrapperr_version_parameter = "v3.2.0"
 const minSecretKeySize = 32
 
 var config_path, _ = filepath.Abs("./config/config.json")
-var default_config_path, _ = filepath.Abs("./config_default.json")
+var default_config_path, _ = filepath.Abs("./files/configDefault.json")
 var certPath, _ = filepath.Abs("./config/cert.pem")
 var certKeyPath, _ = filepath.Abs("./config/key.pem")
+var timezonesPath, _ = filepath.Abs("./files/timezones.json")
 
 // Check if the config file has been configured for usage
 func GetConfigState() (bool, error) {
@@ -757,5 +758,24 @@ func CheckCertFiles() (certFound bool) {
 	}
 
 	certFound = true
+	return
+}
+
+func GetTimezones() (timezones models.Timezones, err error) {
+	timezones = models.Timezones{}
+	err = nil
+
+	// Load config file
+	file, err := os.ReadFile(timezonesPath)
+	if err != nil {
+		return timezones, err
+	}
+
+	// Parse config file
+	err = json.Unmarshal(file, &timezones)
+	if err != nil {
+		return timezones, err
+	}
+
 	return
 }

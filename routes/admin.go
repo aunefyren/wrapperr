@@ -269,3 +269,17 @@ func ApiGetLog(context *gin.Context) {
 	context.JSON(http.StatusOK, logLinesReturn)
 	return
 }
+
+// API route to get all timezones
+func ApiGetTimezones(context *gin.Context) {
+	timezones, err := files.GetTimezones()
+	if err != nil {
+		log.Println("Error trying to get timezones. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get timezones."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Timezones received.", "error": false, "data": timezones.Timezones})
+	return
+}

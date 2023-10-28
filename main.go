@@ -167,6 +167,7 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			admin.POST("/set/config", routes.ApiSetConfig)
 			admin.POST("/update/admin", routes.ApiUpdateAdmin)
 			admin.POST("/get/log", routes.ApiGetLog)
+			admin.POST("/get/timezones", routes.ApiGetTimezones)
 		}
 	}
 
@@ -193,6 +194,31 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 	// Static endpoint for admin functions
 	router.GET(root+"/admin", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "admin.html", nil)
+	})
+
+	// Static endpoint for Tautulli admin functions
+	router.GET(root+"/admin/tautulli", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "tautulli.html", nil)
+	})
+
+	// Static endpoint for admin settings functions
+	router.GET(root+"/admin/settings", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "settings.html", nil)
+	})
+
+	// Static endpoint for admin customization functions
+	router.GET(root+"/admin/customization", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "customization.html", nil)
+	})
+
+	// Static endpoint for admin caching functions
+	router.GET(root+"/admin/caching", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "caching.html", nil)
+	})
+
+	// Static endpoint for admin log functions
+	router.GET(root+"/admin/logs", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "logs.html", nil)
 	})
 
 	// Static endpoint for robots.txt

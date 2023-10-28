@@ -35,7 +35,7 @@ function wrapped_link_actions(hash) {
             }
 
             if(result.error) {
-                document.getElementById('stats').innerHTML = '<p>' + result.message + '</p><img id="bored_image" src="assets/img/bored.svg" style="width: 10em; height: 10em; display:block; margin: 1em auto;">';
+                document.getElementById('stats').innerHTML = '<p>' + result.error + '</p><img id="bored_image" src="assets/img/bored.svg" style="width: 10em; height: 10em; display:block; margin: 1em auto;">';
             } else {
                 results = result.content.data;
                 functions = result.content.functions;
@@ -457,7 +457,7 @@ function delete_link_user() {
                 document.getElementById('share_wrapped_title_div').style.display = 'none';
                 document.getElementById('share_wrapped_div').style.display = 'none';
             } else {
-                console.log(result.message);
+                console.log(result.error);
             }
 
         }

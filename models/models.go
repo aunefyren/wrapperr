@@ -687,3 +687,7 @@ type WrapperrLogLineReply struct {
 	Data    []WrapperrLogLine `json:"data"`
 	Limit   int               `json:"limit"`
 }
+
+type Timezones struct {
+	Timezones []string `json:"timezones"`
+}

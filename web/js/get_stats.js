@@ -1055,7 +1055,7 @@ function create_wrapped_link() {
         }
 
         if(result.error) {
-            alert(result.message);
+            alert(result.error);
             document.getElementById("share_wrapped_button").disabled = false;
             document.getElementById("share_wrapped_button").style.opacity = '1';
 
@@ -1135,7 +1135,7 @@ function delete_new_link_user() {
                 document.getElementById("share_wrapped_button").disabled = false;
                 document.getElementById("share_wrapped_button").style.opacity = '1';
             } else {
-                console.log(result.message);
+                console.log(result.error);
             }
 
         }

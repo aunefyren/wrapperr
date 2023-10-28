@@ -13,7 +13,7 @@ function get_functions() {
                 document.getElementById("search_wrapped_button").style.opacity = '1';
                 document.getElementById("plex_signout_button").disabled = false;
                 document.getElementById("plex_signout_button").style.opacity = '1';
-                document.getElementById('results_error').innerHTML = result.message;
+                document.getElementById('results_error').innerHTML = result.error;
             } else {
                 functions = result.wrapperr_customize;
                 functions.plex_auth = result.plex_auth
