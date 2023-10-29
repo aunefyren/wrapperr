@@ -147,5 +147,7 @@ function placeHistory(userObject) {
 
 function closeModal() {
     var modal = document.getElementById("myModal");
+    var modalContent = document.getElementById("modal-content-real");
     modal.style.display = "none";
+    modalContent.innerHTML = "";
 }
