@@ -1,209 +1,24 @@
-package routes
+package modules
 
 import (
 	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/middlewares"
 	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/modules"
-	"aunefyren/wrapperr/utilities"
 	"errors"
 	"log"
-	"net/http"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/goombaio/namegenerator"
 	"github.com/patrickmn/sortutil"
 )
 
-func ApiWrapperGetStatistics(context *gin.Context) {
-	ipString := utilities.GetOriginIPString(context)
-	log.Println("New /get/statistics request." + ipString)
+func GetWrapperStatistics(user_name string, user_friendlyname string, user_id int, user_email string, config models.WrapperrConfig, adminConfig models.AdminConfig, cachingMode bool, cacheLimit int) (wrapperrReply models.WrapperrStatisticsReply, cachingComplete *bool, err error) {
+	log.Println("Getting stats for: " + user_name + " " + user_friendlyname + " " + strconv.Itoa(user_id) + " " + user_email)
 
-	configBool, err := files.GetConfigState()
-	if err != nil {
-		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
-		context.Abort()
-		return
-	} else if !configBool {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
-		context.Abort()
-		return
-	}
-
-	config, err := files.GetConfig()
-	if err != nil {
-		log.Println("Failed to load Wrapperr configuration. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr configuration."})
-		context.Abort()
-		return
-	}
-
-	adminConfig, err := files.GetAdminConfig()
-	if err != nil {
-		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
-		context.Abort()
-		return
-	}
-
-	log.Println("1. Configuration check passed." + ipString)
-
-	// Check every Tautulli server
-	for i := 0; i < len(config.TautulliConfig); i++ {
-		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'." + ipString)
-		tautulli_state, err := modules.TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
-		if err != nil {
-			log.Println("Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'. Error: " + err.Error())
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
-			context.Abort()
-			return
-		} else if !tautulli_state {
-			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
-			context.Abort()
-			return
-		}
-	}
-
-	log.Println("2. Tautulli check passed." + ipString)
-
-	var auth_passed bool = false
-	var user_name string = ""
-	var user_id int = 0
-	var cache_limit int = 0
-	var admin bool = false
-
-	// Try to authorize bearer token from header
-	authorizationHeader := context.GetHeader("Authorization")
-	payload, _, err := middlewares.AuthGetPayloadFromAuthorization(authorizationHeader, config, adminConfig)
-
-	// If it failed and PlexAuth is enabled, respond with and error
-	// If it didn't fail, and PlexAuth is enabled, declare auth as passed
-	if err != nil && config.PlexAuth {
-		log.Println("Failed to authorize authorization header. Error: " + err.Error())
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to authorize request."})
-		context.Abort()
-		return
-	} else if config.PlexAuth {
-		auth_passed = true
-	}
-
-	// If PlexAuth is enabled and the user is admin in payload, declare admin bool as true
-	if err == nil && payload.Admin {
-		admin = true
-		auth_passed = true
-	}
-
-	// If the user is not an admin, and PlexAuth is enabled, validate and retrieve details from Plex Token in payload
-	if !admin && config.PlexAuth {
-		plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
-		if err != nil {
-			log.Println("Could not validate Plex Auth login. Error: " + err.Error())
-			context.JSON(http.StatusUnauthorized, gin.H{"error": "Could not validate Plex Auth login."})
-			context.Abort()
-			return
-		}
-
-		// Set user details from Plex login
-		user_name = plex_object.Username
-		user_id = plex_object.ID
-
-		// Check for friendly name using Tautulli
-		for i := 0; i < len(config.TautulliConfig); i++ {
-			_, new_username, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, user_name)
-
-			if err == nil {
-				user_name = new_username
-			}
-			break
-		}
-
-	}
-
-	log.Println("3. Auth check passed." + ipString)
-
-	// Read payload from Post input
-	var wrapperr_request models.SearchWrapperrRequest
-	if err := context.ShouldBindJSON(&wrapperr_request); err != nil {
-		log.Println("Failed to parse request. Error: " + err.Error())
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
-		context.Abort()
-		return
-	}
-
-	// If auth is not passed, caching mode is false, and no PlexIdentity was received, mark it as a bad request
-	if wrapperr_request.PlexIdentity == "" && !auth_passed && !wrapperr_request.CachingMode {
-		log.Println("Cannot retrieve statistics because search parameter is invalid.")
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid search parameter."})
-		context.Abort()
-		return
-	}
-
-	// If no auth has been passed, caching mode is false, and user is not admin, search for the Plex details using Tautulli and PlexIdentity
-	if !auth_passed && !wrapperr_request.CachingMode && !admin {
-		UserNameFound := false
-
-		for i := 0; i < len(config.TautulliConfig); i++ {
-			new_id, new_username, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
-
-			if err == nil {
-				UserNameFound = true
-				user_name = new_username
-				user_id = new_id
-			}
-		}
-
-		if !UserNameFound {
-			log.Println("Failed to find user in Tautulli. Error: " + err.Error())
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Could not find a matching user."})
-			context.Abort()
-			return
-		}
-	}
-
-	// If caching mode is false and user is admin, return bad request error
-	if !wrapperr_request.CachingMode && admin {
-		log.Println("Caching mode deactivated, but admin login session retrieved.")
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "You can not retrieve stats as admin."})
-		context.Abort()
-		return
-	}
-
-	// If caching mode is true and user is not admin, return bad request error
-	if wrapperr_request.CachingMode && !admin {
-		log.Println("Caching mode received, but user was not verified as admin.")
-		context.JSON(http.StatusUnauthorized, gin.H{"error": "Only the admin can perform caching."})
-		context.Abort()
-		return
-	}
-
-	// If admin and caching mode, set username and user_id to correct values
-	if wrapperr_request.CachingMode && admin {
-		user_name = "Caching-Mode"
-		user_id = 0
-		cache_limit = wrapperr_request.CachingLimit
-
-		if !config.UseCache {
-			log.Println("Admin attempted to use cache mode, but the cache feature is disabled in the config.")
-			context.JSON(http.StatusBadRequest, gin.H{"error": "Caching mode enabled, but the cache feature is disabled in the settings."})
-			context.Abort()
-			return
-		}
-	}
-
-	// If no username and no user_id has been declared at this point, something is wrong. Return error.
-	if user_name == "" && user_id == 0 {
-		log.Println("At this point the user should have been verified, but username and ID is empty.")
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
-		context.Abort()
-		return
-	}
-
-	log.Println("4. User details confirmed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
+	wrapperrReply = models.WrapperrStatisticsReply{}
+	err = nil
+	cachingComplete = nil
 
 	// Create empty array object for each day in Wrapped period. If cache is enabled, call GetCache() and replace the empty object.
 	wrapperr_data := []models.WrapperrDay{}
@@ -211,74 +26,51 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		wrapperr_data, err = files.GetCache()
 		if err != nil {
 			log.Println("Failed to load cache file. Error: " + err.Error())
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load cache file."})
-			context.Abort()
-			return
+			return wrapperrReply, cachingComplete, errors.New("Failed to load cache file.")
 		}
 	}
 
-	log.Println("5. Cache stage completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
+	log.Println("Cache stage completed for " + user_name + ".")
 
 	// Download/refresh data-set from Tautulli
-	wrapperr_data, wrapperr_data_complete, err := WrapperrDownloadDays(user_id, wrapperr_data, cache_limit, config)
+	wrapperr_data, wrapperr_data_complete, err := WrapperrDownloadDays(user_id, wrapperr_data, cacheLimit, config)
 	if err != nil {
 		log.Println("Failed to download data for wrapping. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to download data for wrapping."})
-		context.Abort()
-		return
+		return wrapperrReply, cachingComplete, errors.New("Failed to download data for wrapping.")
 	}
 
-	log.Println("6. Tautulli refresh/download stage completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
+	log.Println("Tautulli refresh/download stage completed.")
 
 	// If cache is enabled, send the object to SaveCache() for later use.
 	if config.UseCache {
 		err = files.SaveCache(&wrapperr_data)
 		if err != nil {
 			log.Println("Failed to save new cache file for " + user_name + " (" + strconv.Itoa(user_id) + "). Error: " + err.Error())
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new cache file for " + user_name + " (" + strconv.Itoa(user_id) + ")."})
-			context.Abort()
-			return
+			return wrapperrReply, cachingComplete, errors.New("Failed to save new cache file for " + user_name + " (" + strconv.Itoa(user_id) + ").")
 		}
 	}
 
-	log.Println("7. Cache saving stage completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
-
 	// If caching mode is in use, stop the process here and return the result to the user
-	if wrapperr_request.CachingMode {
-		booleanReply := models.BooleanReply{
-			Message: "Completed caching request.",
-			Error:   false,
-			Data:    wrapperr_data_complete,
-		}
-
-		ipString := utilities.GetOriginIPString(context)
-		log.Println("Caching request completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
-
-		context.JSON(http.StatusOK, booleanReply)
-		return
+	if cachingMode {
+		return wrapperrReply, &wrapperr_data_complete, nil
 	}
 
 	// Create reply object
 	var wrapperr_reply models.WrapperrStatisticsReply
 	wrapperr_reply.User.ID = user_id
 	wrapperr_reply.User.Name = user_name
+	wrapperr_reply.User.FriendlyName = user_friendlyname
 	wrapperr_reply.Date = time.Now().Format("2006-01-02")
 	wrapperr_reply.Message = "Statistics retrieved."
 
 	// Loop through Wrapperr data and format reply
-	wrapperrReply, err := WrapperrLoopData(user_id, config, wrapperr_data, wrapperr_reply)
+	wrapperrReply, err = WrapperrLoopData(user_id, config, wrapperr_data, wrapperr_reply)
 	if err != nil {
 		log.Println("Failed to wrap data. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to wrap data."})
-		context.Abort()
-		return
+		return wrapperrReply, cachingComplete, errors.New("Failed to wrap data.")
 	}
 
-	ipString = utilities.GetOriginIPString(context)
-	log.Println("8. Wrapperr request completed for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
-
-	context.JSON(http.StatusOK, wrapperrReply)
-	return
+	return wrapperrReply, cachingComplete, err
 }
 
 func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_interval int, config models.WrapperrConfig) ([]models.WrapperrDay, bool, error) {
@@ -412,7 +204,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				}
 
 				// Get data from Tautulli for server, day, and library
-				tautulli_data, err := modules.TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
+				tautulli_data, err := TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
 				if err != nil {
 					log.Println(err)
 				}

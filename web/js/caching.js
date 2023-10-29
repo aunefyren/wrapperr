@@ -189,7 +189,7 @@ function get_stats(days) {
         
     };
     xhttp.withCredentials = true;
-    xhttp.open("post", api_url + "get/statistics", );
+    xhttp.open("post", api_url + "get/cache-statistics", );
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(stats_data);

@@ -284,13 +284,17 @@ function update_password() {
 
 function loadAdminPage() {
 
-    var html = `<div class="form-group">`;
+    var html = `
+    <div class="admin-button-group">
+    <div class="form-group">`;
     html += `<button class="form-control btn" onclick="update_password_form()"><img src="${root}/assets/config.svg" class="btn_logo"><p2>Admin settings</p2></button>`;
     html += `</div>`;
 
     html += `<div class="form-group">`;
     html += `<button class="form-control btn" name="plex_signout_button" id="plex_signout_button" onclick="sign_out()"><img src="${root}/assets/close.svg" class="btn_logo"></img><p2 id="plex_signout_button_text">Sign Out</p2></button>`;
-    html += `</div>`;
+    html += `</div>
+    </div>
+    `;
 
     html += `<div class="form-group newline">`;
     html += `<hr>`;
@@ -314,6 +318,10 @@ function loadAdminPage() {
 
     html += `<div class="form-group newline">`;
     html += `<button class="form-control btn" onclick="LogsPageRedirect();" id="log_menu"><img src="${root}/assets/document.svg" class="btn_logo"><p2>Log</p2></button>`;
+    html += `</div>`;
+
+    html += `<div class="form-group newline">`;
+    html += `<button class="form-control btn" onclick="UsersPageRedirect();" id="log_menu"><img src="${root}/assets/users.svg" class="btn_logo"><p2>Users</p2></button>`;
     html += `</div>`;
 
     document.getElementById("setup").innerHTML = html;

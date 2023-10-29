@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <title>Wrapperr</title>
+
+    <!-- Bootstrap 4 CSS and custom CSS -->
+    <link rel="stylesheet" type="text/css" href="../assets/css/admin.css" />
+    <link rel="shortcut icon" href="../assets/img/favicons/favicon.ico" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="../js/functions.js"></script>
+    <script src="../js/users.js"></script>
+    <script src="../js/adminFunctions.js"></script>
+
+</head>
+
+<body>
+
+<div class="content" style="">
+
+    <div class="container">
+
+        <div class="sub_container">
+            <h1 id='application_name'>Wrapperr Setup</h1>
+        </div>
+    
+    </div>
+        
+    <div class="container">
+        <div class="sub_container" id="setup">
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <div class="footer-elements">
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="/">Wrapperr</a> |
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" href="/admin">Admin</a> |
+        <a style="color: white; font-weight: normal; font-size: 0.75em; text-decoration: none;" id="github_link" href="https://github.com/aunefyren/wrapperr" target="_blank">GitHub</a>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+var root = ""
+var api_url = window.location.origin + "/api/";
+
+var first_time = false;
+
+var wrapperr_version = '';
+var tautulli_apikey = [];
+
+var password = '';
+var username = '';
+
+var timezone = '';
+var plex_auth = '';
+var basic_auth = '';
+var use_cache = '';
+var use_logs = '';
+var wrapperr_front_page_title = '';
+var wrapperr_front_page_subtitle = '';
+var stats_intro_title = '';
+var stats_intro_subtitle = '';
+var stats_outro_title = '';
+var stats_outro_subtitle = '';
+var stats_order_by_plays = '';
+var stats_order_by_duration = '';
+var stats_top_list_length = 0;
+
+var client_id = '';
+var wrapperr_root = '';
+var winter_theme = false;
+var application_name_str = '';
+var application_url_str = '';
+
+var wrapped_start = '';
+var wrapped_end = '';
+var create_share_links = '';
+var obfuscate_other_users = false;
+
+var get_user_movie_stats = '';
+var get_user_movie_stats_title = '';
+var get_user_movie_stats_subtitle = '';
+var get_user_movie_stats_subsubtitle = '';
+var get_user_movie_stats_subtitle_one = '';
+var get_user_movie_stats_subsubtitle_one = '';
+var get_user_movie_stats_subtitle_none = '';
+var get_user_movie_stats_subsubtitle_none = '';
+var get_user_movie_stats_top_movie = '';
+var get_user_movie_stats_top_movie_plural = '';
+var get_user_movie_stats_movie_completion_title = '';
+var get_user_movie_stats_movie_completion_title_plural = '';
+var get_user_movie_stats_movie_completion_subtitle = '';
+var get_user_movie_stats_pause_title = '';
+var get_user_movie_stats_pause_subtitle = '';
+var get_user_movie_stats_pause_title_one = '';
+var get_user_movie_stats_pause_subtitle_one = '';
+var get_user_movie_stats_pause_title_none = '';
+var get_user_movie_stats_pause_subtitle_none = '';
+var get_user_movie_stats_oldest_title = '';
+var get_user_movie_stats_oldest_subtitle = '';
+var get_user_movie_stats_oldest_subtitle_pre_1950 = '';
+var get_user_movie_stats_oldest_subtitle_pre_1975 = '';
+var get_user_movie_stats_oldest_subtitle_pre_2000 = '';
+var get_user_movie_stats_spent_title = '';
+
+var get_user_show_stats = '';
+var get_user_show_stats_buddy = '';
+var get_user_show_stats_title = '';
+var get_user_show_stats_subtitle = '';
+var get_user_show_stats_subsubtitle = '';
+var get_user_show_stats_subtitle_one = '';
+var get_user_show_stats_subsubtitle_one = '';
+var get_user_show_stats_subtitle_none = '';
+var get_user_show_stats_subsubtitle_none = '';
+var get_user_show_stats_top_show = '';
+var get_user_show_stats_top_show_plural = '';
+var get_user_show_stats_spent_title = '';
+var get_user_show_stats_most_played_title = '';
+var get_user_show_stats_most_played_subtitle = '';
+var get_user_show_stats_buddy_title = '';
+var get_user_show_stats_buddy_subtitle = '';
+var get_user_show_stats_buddy_title_none = '';
+var get_user_show_stats_buddy_subtitle_none = '';
+
+var get_user_music_stats = '';
+var get_user_music_stats_title = '';
+var get_user_music_stats_subtitle = '';
+var get_user_music_stats_subsubtitle = '';
+var get_user_music_stats_subtitle_one = '';
+var get_user_music_stats_subsubtitle_one = '';
+var get_user_music_stats_subtitle_none = '';
+var get_user_music_stats_subsubtitle_none = '';
+var get_user_music_stats_top_track = '';
+var get_user_music_stats_top_track_plural = '';
+var get_user_music_stats_top_album_plural = '';
+var get_user_music_stats_top_artist_plural = '';
+var get_user_music_stats_spent_title = '';
+var get_user_music_stats_spent_subtitle = '';
+var get_user_music_stats_oldest_album_title = '';
+var get_user_music_stats_oldest_album_subtitle = '';
+
+var get_year_stats_title = '';
+var get_year_stats_subtitle = '';
+var get_year_stats_subsubtitle = '';
+var get_year_stats_movies = '';
+var get_year_stats_movies_title = '';
+var get_year_stats_movies_duration_title = '';
+var get_year_stats_shows = '';
+var get_year_stats_shows_title = '';
+var get_year_stats_shows_duration_title = '';
+var get_year_stats_music = '';
+var get_year_stats_music_title = '';
+var get_year_stats_music_duration_title = '';
+var get_year_stats_leaderboard = '';
+var get_year_stats_leaderboard_number = false;
+var get_year_stats_leaderboard_title = '';
+var get_year_stats_duration_sum_title = '';
+
+var wrapperr_and = '';
+var wrapperr_play = '';
+var wrapperr_play_plural = '';
+var wrapperr_day = '';
+var wrapperr_day_plural = '';
+var wrapperr_hour = '';
+var wrapperr_hour_plural = '';
+var wrapperr_minute = '';
+var wrapperr_minute_plural = '';
+var wrapperr_second = '';
+var wrapperr_second_plural = '';
+var wrapperr_sort_plays = '';
+var wrapperr_sort_duration = '';
+
+$(document).ready(function() {
+
+    get_wrapper_version();
+
+});
+</script>
+
+</body>
+
+
+</html>

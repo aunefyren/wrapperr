@@ -3,6 +3,9 @@ package models
 import (
 	"errors"
 	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
 // Different types of error returned by the VerifyToken function
@@ -23,4 +26,16 @@ func (payload *Payload) Valid() (err error) {
 		return
 	}
 	return nil
+}
+
+type Payload struct {
+	jwt.RegisteredClaims
+	ID        uuid.UUID `json:"id"`
+	Username  string    `json:"username"`
+	Admin     bool      `json:"admin"`
+	AuthToken string    `json:"authtoken"`
+}
+
+type JWTMaker struct {
+	secretKey string
 }

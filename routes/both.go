@@ -131,3 +131,185 @@ func ApiCreateShareLink(context *gin.Context) {
 	context.JSON(http.StatusCreated, stringReply)
 	return
 }
+
+func ApiWrapperGetStatistics(context *gin.Context) {
+	log.Println("New wrap request.")
+
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	config, err := files.GetConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr configuration."})
+		context.Abort()
+		return
+	}
+
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		context.Abort()
+		return
+	}
+
+	// Check connection to every Tautulli server
+	for i := 0; i < len(config.TautulliConfig); i++ {
+		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'.")
+		tautulli_state, err := modules.TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
+		if err != nil {
+			log.Println("Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
+			context.Abort()
+			return
+		} else if !tautulli_state {
+			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
+			context.Abort()
+			return
+		}
+	}
+
+	var userName string = ""
+	var userId int = 0
+	var userEmail string = ""
+	var userFriendlyName = ""
+
+	// Try to authorize bearer token from header
+	authorizationHeader := context.GetHeader("Authorization")
+	payload, _, err := middlewares.AuthGetPayloadFromAuthorization(authorizationHeader, config, adminConfig)
+
+	// If it failed and PlexAuth is enabled, respond with and error
+	// If it didn't fail, and PlexAuth is enabled, declare auth as passed
+	if err != nil && config.PlexAuth {
+		log.Println("Failed to authorize authorization header. Error: " + err.Error())
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to authorize request."})
+		context.Abort()
+		return
+	} else if payload.Admin && config.PlexAuth {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Admin login cannot retrieve statistics."})
+		context.Abort()
+		return
+	}
+
+	// If the user is not an admin, and PlexAuth is enabled, validate and retrieve details from Plex Token in payload
+	if config.PlexAuth {
+		plex_object, err := modules.PlexAuthValidateToken(payload.AuthToken, config.ClientKey, config.WrapperrVersion)
+		if err != nil {
+			log.Println("Could not validate Plex Auth login. Error: " + err.Error())
+			context.JSON(http.StatusUnauthorized, gin.H{"error": "Could not validate Plex Auth login."})
+			context.Abort()
+			return
+		}
+
+		// Set user details from Plex login
+		userName = plex_object.Username
+		userId = plex_object.ID
+		userEmail = plex_object.Email
+
+		// Check for friendly name using Tautulli
+		for i := 0; i < len(config.TautulliConfig); i++ {
+			_, new_username, new_friendlyname, _, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, userName)
+
+			if err == nil {
+				userName = new_username
+				userFriendlyName = new_friendlyname
+			}
+			break
+		}
+
+	}
+
+	// Read payload from Post input
+	var wrapperr_request models.SearchWrapperrRequest
+	if err := context.ShouldBindJSON(&wrapperr_request); err != nil {
+		log.Println("Failed to parse request. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
+		context.Abort()
+		return
+	}
+
+	// If auth is not passed, caching mode is false, and no PlexIdentity was received, mark it as a bad request
+	if wrapperr_request.PlexIdentity == "" && !config.PlexAuth {
+		log.Println("Cannot retrieve statistics because search parameter is invalid.")
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid search parameter."})
+		context.Abort()
+		return
+	}
+
+	// If no auth has been passed, caching mode is false, and user is not admin, search for the Plex details using Tautulli and PlexIdentity
+	if !config.PlexAuth {
+		UserNameFound := false
+
+		for i := 0; i < len(config.TautulliConfig); i++ {
+			new_id, new_username, user_friendlyname, new_email, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
+
+			if err == nil {
+				UserNameFound = true
+				userName = new_username
+				userId = new_id
+				userEmail = new_email
+				userFriendlyName = user_friendlyname
+			}
+		}
+
+		if !UserNameFound {
+			log.Println("Failed to find user in Tautulli. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Could not find a matching user."})
+			context.Abort()
+			return
+		}
+	}
+
+	// If no username and no user_id has been declared at this point, something is wrong. Return error.
+	if userName == "" || userEmail == "" || userId == 0 {
+		log.Println("At this point the user should have been verified, but username, email or ID is empty.")
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
+		context.Abort()
+		return
+	}
+
+	wrapperrReply, _, err := modules.GetWrapperStatistics(userName, userFriendlyName, userId, userEmail, config, adminConfig, false, 0)
+	if err != nil {
+		log.Println("Failed to get statistics. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get statistics."})
+		context.Abort()
+		return
+	}
+
+	userhistoryEntry := models.WrapperrHistoryEntry{
+		Date: time.Now(),
+		IP:   context.ClientIP(),
+	}
+	historyEntries := []models.WrapperrHistoryEntry{}
+	historyEntries = append(historyEntries, userhistoryEntry)
+
+	userEntry := models.WrapperrUser{
+		User:         userName,
+		UserID:       userId,
+		FriendlyName: userFriendlyName,
+		Email:        userEmail,
+		Wrappings:    historyEntries,
+	}
+
+	err = modules.UsersSaveUserEntry(userEntry)
+	if err != nil {
+		log.Println("Failed to save user history entry. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save user history entry."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusBadRequest, wrapperrReply)
+	return
+}

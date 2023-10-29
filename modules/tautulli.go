@@ -5,6 +5,7 @@ import (
 	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -44,7 +45,7 @@ func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps b
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		errString := strings.Replace(err.Error(), TautulliApiKey, "REDACTED", -1)
 		log.Println("Failed to read Tautulli server response. Error: " + errString)
@@ -84,12 +85,17 @@ func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps b
 	return tautulli_status, nil
 }
 
-func TautulliGetUserId(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, PlexUser string) (int, string, error) {
+func TautulliGetUserId(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, PlexUser string) (userID int, userName string, userFriendlyName string, userEmail string, err error) {
+	userID = 0
+	userName = ""
+	userEmail = ""
+	userFriendlyName = ""
+	err = nil
 
 	url_string, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
 	if err != nil {
 		log.Println(err)
-		return 0, "", errors.New("Failed to build Tautulli connection URL.")
+		return userID, userName, userFriendlyName, userEmail, errors.New("Failed to build Tautulli connection URL.")
 	}
 
 	url_string = url_string + "api/v2/" + "?apikey=" + TautulliApiKey + "&cmd=get_users"
@@ -100,7 +106,7 @@ func TautulliGetUserId(TautulliPort int, TautulliIP string, TautulliHttps bool, 
 	req, err := http.NewRequest("GET", url_string, payload)
 	if err != nil {
 		log.Println(err)
-		return 0, "", errors.New("Failed to reach Tautulli server.")
+		return userID, userName, userFriendlyName, userEmail, errors.New("Failed to reach Tautulli server.")
 	}
 
 	req.Header.Add("Accept", "application/json")
@@ -108,38 +114,27 @@ func TautulliGetUserId(TautulliPort int, TautulliIP string, TautulliHttps bool, 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Println(err)
-		return 0, "", errors.New("Failed to reach Tautulli server.")
+		return userID, userName, userFriendlyName, userEmail, errors.New("Failed to reach Tautulli server.")
 	}
 
 	defer res.Body.Close()
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 
 	var body_reply models.TautulliGetUsersReply
 	json.Unmarshal(body, &body_reply)
 	if err != nil {
 		log.Println(err)
-		return 0, "", errors.New("Failed to parse Tautulli response.")
+		return userID, userName, userFriendlyName, userEmail, errors.New("Failed to parse Tautulli response.")
 	}
 
 	for i := 0; i < len(body_reply.Response.Data); i++ {
 		if body_reply.Response.Data[i].UserID != 0 && (strings.ToLower(body_reply.Response.Data[i].Username) == strings.ToLower(PlexUser) || strings.ToLower(body_reply.Response.Data[i].Email) == strings.ToLower(PlexUser)) {
-
-			var username string
-
-			if body_reply.Response.Data[i].FriendlyName != "" {
-				username = body_reply.Response.Data[i].FriendlyName
-			} else if body_reply.Response.Data[i].Username != "" {
-				username = body_reply.Response.Data[i].Username
-			} else {
-				return 0, "", errors.New("Failed retrieve Plex username.")
-			}
-
-			return body_reply.Response.Data[i].UserID, username, nil
+			return body_reply.Response.Data[i].UserID, body_reply.Response.Data[i].Username, body_reply.Response.Data[i].FriendlyName, body_reply.Response.Data[i].Email, nil
 		}
 	}
 
 	log.Println("Could not find any user that matched the given Plex Identity: '" + PlexUser + "'.")
-	return 0, "", errors.New("Failed to find user.")
+	return userID, userName, userEmail, userFriendlyName, errors.New("Failed to find user.")
 }
 
 func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, TautulliLength int, Libraries string, Grouping string, StartDate string) ([]models.TautulliHistoryItem, error) {

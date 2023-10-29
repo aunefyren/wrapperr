@@ -326,3 +326,7 @@ function CachingPageRedirect() {
 function LogsPageRedirect() {
     window.location.href = root+"/admin/logs";
 }
+
+function UsersPageRedirect() {
+    window.location.href = root+"/admin/users";
+}

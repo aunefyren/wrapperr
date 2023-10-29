@@ -1206,9 +1206,19 @@ $(window).scroll(function() {
     }
 
     try {
-        string = string.replaceAll('{user}', results.user.name)
+        var username = results.user.name
+        if(results.user.friendlyname !== "") {
+            username = results.user.friendlyname
+        }
+        string = string.replaceAll('{user}', username)
     } catch (e) {
         console.log('{user} replace failed')
+    }
+
+    try {
+        string = string.replaceAll('{username}', results.user.name)
+    } catch (e) {
+        console.log('{username} replace failed')
     }
 
     try {

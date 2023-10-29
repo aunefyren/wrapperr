@@ -67,6 +67,9 @@ body {
 
 .sub_container {
     display: inline-block;
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
 }
 
 form {
@@ -309,4 +312,159 @@ a {
 
 .cacher-td, .log-td {
     text-align: right;
+}
+
+.users-module {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    margin: 1em;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid var(--yellow);
+    background-color: var(--charcoal);
+    color: var(--white);
+    border-radius: 0.25em;
+}
+
+.user-object {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    margin: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.user-userid, .user-username, .user-friendlyname, .user-email {
+    margin: 0.25em 0.5em;
+    text-align: center;
+    width: 15em;
+    overflow: hidden;
+}
+
+.btn_solo {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    height: 100%;
+    height: -webkit-fill-available;
+    height: -moz-available;
+    box-sizing: border-box;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+}
+
+.user-headers {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    margin: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+.user-header {
+    margin: 0.25em 0.5em;
+    text-align: center;
+    width: 15em;
+    overflow: hidden;
+    text-decoration: underline;
+}
+
+.user-logbutton {
+    width: 4em;
+}
+
+/* The Modal (background) */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: var(--charcoal);
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 0.1em solid var(--yellow);
+    width: 80%; /* Could be more or less, depending on screen size */
+    border-radius: 0.25em;
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+} 
+
+.user-history {
+    width: 100%;
+    width: -webkit-fill-available;
+    width: -moz-available;
+    margin: 1em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.user-history-date, .user-history-ip {
+    margin: 0.25em 0.5em;
+    text-align: center;
+    width: 15em;
+    overflow: hidden;
+}
+
+.admin-button-group {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
 }

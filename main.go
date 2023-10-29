@@ -168,6 +168,9 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			admin.POST("/update/admin", routes.ApiUpdateAdmin)
 			admin.POST("/get/log", routes.ApiGetLog)
 			admin.POST("/get/timezones", routes.ApiGetTimezones)
+			admin.POST("/get/cache-statistics", routes.ApiWrapperCacheStatistics)
+			admin.POST("/get/users", routes.ApiGetUsers)
+			admin.POST("/get/users/:userId", routes.ApiGetUser)
 		}
 	}
 
@@ -219,6 +222,11 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 	// Static endpoint for admin log functions
 	router.GET(root+"/admin/logs", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "logs.html", nil)
+	})
+
+	// Static endpoint for admin users functions
+	router.GET(root+"/admin/users", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "users.html", nil)
 	})
 
 	// Static endpoint for robots.txt

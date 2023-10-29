@@ -4,9 +4,11 @@ import (
 	"aunefyren/wrapperr/files"
 	"aunefyren/wrapperr/middlewares"
 	"aunefyren/wrapperr/models"
+	"aunefyren/wrapperr/modules"
 	"aunefyren/wrapperr/utilities"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -281,5 +283,151 @@ func ApiGetTimezones(context *gin.Context) {
 	}
 
 	context.JSON(http.StatusOK, gin.H{"message": "Timezones received.", "error": false, "data": timezones.Timezones})
+	return
+}
+
+func ApiWrapperCacheStatistics(context *gin.Context) {
+	log.Println("New caching request.")
+
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	config, err := files.GetConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr configuration."})
+		context.Abort()
+		return
+	}
+
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		context.Abort()
+		return
+	}
+
+	// Check connection to every Tautulli server
+	for i := 0; i < len(config.TautulliConfig); i++ {
+		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'.")
+		tautulli_state, err := modules.TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
+		if err != nil {
+			log.Println("Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
+			context.Abort()
+			return
+		} else if !tautulli_state {
+			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
+			context.Abort()
+			return
+		}
+	}
+
+	var userName string = "Caching mode"
+	var userId int = 0
+	var userEmail string = "N/A"
+	var userFriendlyName = "Caching mode"
+
+	// Read payload from Post input
+	var cachingRequest models.CacheWrapperrRequest
+	if err := context.ShouldBindJSON(&cachingRequest); err != nil {
+		log.Println("Failed to parse request. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
+		context.Abort()
+		return
+	}
+
+	if cachingRequest.CacheLimit < 1 {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Chache limit too low."})
+		context.Abort()
+		return
+	}
+
+	_, cachingComplete, err := modules.GetWrapperStatistics(userName, userFriendlyName, userId, userEmail, config, adminConfig, true, cachingRequest.CacheLimit)
+	if err != nil {
+		log.Println("Failed to get statistics. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get statistics."})
+		context.Abort()
+		return
+	}
+
+	booleanReply := models.BooleanReply{
+		Message: "Completed caching request.",
+		Error:   false,
+		Data:    *cachingComplete,
+	}
+
+	context.JSON(http.StatusBadRequest, booleanReply)
+	return
+}
+
+func ApiGetUsers(context *gin.Context) {
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	users, err := files.GetUsers()
+	if err != nil {
+		log.Println("Failed to get users. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Users recieved.", "data": users})
+	return
+}
+
+func ApiGetUser(context *gin.Context) {
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	var userId = context.Param("userId")
+
+	userIDInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Println("Failed to parse user ID. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse user ID."})
+		context.Abort()
+		return
+	}
+
+	user, err := modules.UsersGetUser(userIDInt)
+	if err != nil {
+		log.Println("Failed to get user. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Users recieved.", "data": user})
 	return
 }
