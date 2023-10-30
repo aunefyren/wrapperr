@@ -344,7 +344,30 @@ a {
     align-items: center;
 }
 
-.user-userid, .user-username, .user-friendlyname, .user-email {
+.user-userid, .user-active {
+    margin: 0.25em 0.5em;
+    text-align: center;
+    width: 5em;
+    overflow: hidden;
+}
+
+.user-active-true {
+    background-color: var(--green);
+    border-radius: 0.25em;
+    width: min-content;
+    padding: 0 0.5em;
+    margin: auto;
+}
+
+.user-active-false {
+    background-color: var(--red);
+    border-radius: 0.25em;
+    width: min-content;
+    padding: 0 0.5em;
+    margin: auto;
+}
+
+.user-username, .user-friendlyname, .user-email {
     margin: 0.25em 0.5em;
     text-align: center;
     width: 15em;
@@ -393,6 +416,14 @@ a {
     margin: 0.25em 0.5em;
     text-align: center;
     width: 15em;
+    overflow: hidden;
+    text-decoration: underline;
+}
+
+.user-header-short {
+    margin: 0.25em 0.5em;
+    text-align: center;
+    width: 5em;
     overflow: hidden;
     text-decoration: underline;
 }

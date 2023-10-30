@@ -431,3 +431,73 @@ func ApiGetUser(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "Users recieved.", "data": user})
 	return
 }
+
+func ApiSyncTautulliUsers(context *gin.Context) {
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	err = modules.TautulliTestEveryServer()
+	if err != nil {
+		log.Println("Failed to test Tautulli server. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to test Tautulli server."})
+		context.Abort()
+		return
+	}
+
+	users, err := modules.TautulliGetUsersFromEveryServer()
+	if err != nil {
+		log.Println("Failed to get users. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users."})
+		context.Abort()
+		return
+	}
+
+	for _, user := range users {
+		wrapperrUser, err := modules.UsersGetUser(user.UserID)
+		if err != nil {
+			wrapperrUser = models.WrapperrUser{
+				FriendlyName: user.FriendlyName,
+				User:         user.Username,
+				UserID:       user.UserID,
+				Email:        user.Email,
+				Wrappings:    []models.WrapperrHistoryEntry{},
+			}
+
+			err = modules.UsersSaveUserEntry(wrapperrUser)
+			if err != nil {
+				log.Println("Failed to save new user. Error: " + err.Error())
+				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new user."})
+				context.Abort()
+				return
+			}
+		} else {
+			err = modules.UsersUpdateUser(user.UserID, user.FriendlyName, user.Username, user.Email, user.IsActive)
+			if err != nil {
+				log.Println("Failed to update user. Error: " + err.Error())
+				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user."})
+				context.Abort()
+				return
+			}
+		}
+	}
+
+	newusers, err := files.GetUsers()
+	if err != nil {
+		log.Println("Failed to new users. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to new users."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "Users synced.", "data": newusers})
+	return
+}

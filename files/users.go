@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 )
 
 var usersPath, _ = filepath.Abs("./config/users.json")
@@ -69,6 +70,10 @@ func GetUsers() (users []models.WrapperrUser, err error) {
 	if err != nil {
 		return users, err
 	}
+
+	sort.Slice(users, func(i, j int) bool {
+		return users[i].UserID < users[j].UserID
+	})
 
 	// Return users object
 	return users, nil

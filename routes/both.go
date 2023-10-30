@@ -184,6 +184,7 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 	var userId int = 0
 	var userEmail string = ""
 	var userFriendlyName = ""
+	var userActive = false
 
 	// Try to authorize bearer token from header
 	authorizationHeader := context.GetHeader("Authorization")
@@ -219,11 +220,12 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 
 		// Check for friendly name using Tautulli
 		for i := 0; i < len(config.TautulliConfig); i++ {
-			_, new_username, new_friendlyname, _, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, userName)
+			_, new_username, new_friendlyname, _, new_active, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, userName)
 
 			if err == nil {
 				userName = new_username
 				userFriendlyName = new_friendlyname
+				userActive = new_active
 			}
 			break
 		}
@@ -252,7 +254,7 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		UserNameFound := false
 
 		for i := 0; i < len(config.TautulliConfig); i++ {
-			new_id, new_username, user_friendlyname, new_email, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
+			new_id, new_username, user_friendlyname, new_email, new_active, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
 
 			if err == nil {
 				UserNameFound = true
@@ -260,6 +262,7 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 				userId = new_id
 				userEmail = new_email
 				userFriendlyName = user_friendlyname
+				userActive = new_active
 			}
 		}
 
@@ -275,6 +278,12 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 	if userName == "" || userEmail == "" || userId == 0 {
 		log.Println("At this point the user should have been verified, but username, email or ID is empty.")
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
+		context.Abort()
+		return
+	}
+
+	if !userActive {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "User is not active."})
 		context.Abort()
 		return
 	}

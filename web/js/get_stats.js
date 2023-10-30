@@ -14,7 +14,7 @@ function get_stats() {
 
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && (this.status == 200 || this.status == 400 || this.status == 500)) {
+        if (this.readyState == 4) {
 			try {
 				var result= JSON.parse(this.responseText);
 			} catch(error) {

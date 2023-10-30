@@ -7,6 +7,7 @@ type WrapperrUser struct {
 	User         string                 `json:"user_name"`
 	UserID       int                    `json:"user_id"`
 	Email        string                 `json:"user_email"`
+	Active       bool                   `json:"user_active"`
 	Wrappings    []WrapperrHistoryEntry `json:"wrappings"`
 }
 

@@ -85,32 +85,34 @@ type TautulliEntry struct {
 
 type TautulliGetUsersReply struct {
 	Response struct {
-		Result  string      `json:"result"`
-		Message interface{} `json:"message"`
-		Data    []struct {
-			RowID           int         `json:"row_id"`
-			UserID          int         `json:"user_id"`
-			Username        string      `json:"username"`
-			FriendlyName    string      `json:"friendly_name"`
-			Thumb           interface{} `json:"thumb"`
-			Email           string      `json:"email"`
-			IsActive        int         `json:"is_active"`
-			IsAdmin         int         `json:"is_admin"`
-			IsHomeUser      interface{} `json:"is_home_user"`
-			IsAllowSync     interface{} `json:"is_allow_sync"`
-			IsRestricted    interface{} `json:"is_restricted"`
-			DoNotify        int         `json:"do_notify"`
-			KeepHistory     int         `json:"keep_history"`
-			AllowGuest      int         `json:"allow_guest"`
-			ServerToken     interface{} `json:"server_token"`
-			SharedLibraries interface{} `json:"shared_libraries"`
-			FilterAll       interface{} `json:"filter_all"`
-			FilterMovies    interface{} `json:"filter_movies"`
-			FilterTv        interface{} `json:"filter_tv"`
-			FilterMusic     interface{} `json:"filter_music"`
-			FilterPhotos    interface{} `json:"filter_photos"`
-		} `json:"data"`
+		Result  string         `json:"result"`
+		Message interface{}    `json:"message"`
+		Data    []TautulliUser `json:"data"`
 	} `json:"response"`
+}
+
+type TautulliUser struct {
+	RowID           int         `json:"row_id"`
+	UserID          int         `json:"user_id"`
+	Username        string      `json:"username"`
+	FriendlyName    string      `json:"friendly_name"`
+	Thumb           interface{} `json:"thumb"`
+	Email           string      `json:"email"`
+	IsActive        int         `json:"is_active"`
+	IsAdmin         int         `json:"is_admin"`
+	IsHomeUser      interface{} `json:"is_home_user"`
+	IsAllowSync     interface{} `json:"is_allow_sync"`
+	IsRestricted    interface{} `json:"is_restricted"`
+	DoNotify        int         `json:"do_notify"`
+	KeepHistory     int         `json:"keep_history"`
+	AllowGuest      int         `json:"allow_guest"`
+	ServerToken     interface{} `json:"server_token"`
+	SharedLibraries interface{} `json:"shared_libraries"`
+	FilterAll       interface{} `json:"filter_all"`
+	FilterMovies    interface{} `json:"filter_movies"`
+	FilterTv        interface{} `json:"filter_tv"`
+	FilterMusic     interface{} `json:"filter_music"`
+	FilterPhotos    interface{} `json:"filter_photos"`
 }
 
 type TautulliStatusReply struct {
