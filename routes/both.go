@@ -267,7 +267,7 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		}
 
 		if !UserNameFound {
-			log.Println("Failed to find user in Tautulli. Error: " + err.Error())
+			log.Println("Failed to find user in Tautulli.")
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Could not find a matching user."})
 			context.Abort()
 			return
