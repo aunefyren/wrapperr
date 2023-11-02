@@ -18,7 +18,7 @@ jobs:
             goos: windows
     steps:
     - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1.34
+    - uses: wangyoucao577/go-release-action@v1.40
       with:
         github_token: ${{ secrets.GIT_HUB_TOKEN }}
         goos: ${{ matrix.goos }}
@@ -26,6 +26,6 @@ jobs:
         goversion: "1.20.3"
         binary_name: "wrapperr"
         ldflags: "-s -w"
-        extra_files: README.md config web CODE_OF_CONDUCT.md config_default.json Dockerfile
+        extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile
         retry: 10
         overwrite: true
