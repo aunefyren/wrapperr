@@ -26,6 +26,7 @@ jobs:
         goversion: "1.20.3"
         binary_name: "wrapperr"
         ldflags: "-s -w"
-        extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile
+        extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile files
         retry: 10
         overwrite: true
+        release_name: ${{ github.ref_name }}
