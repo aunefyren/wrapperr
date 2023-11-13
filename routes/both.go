@@ -119,16 +119,10 @@ func ApiCreateShareLink(context *gin.Context) {
 		return
 	}
 
-	stringReply := models.StringReply{
-		Message: "Saved Wrapperr link.",
-		Error:   false,
-		Data:    strconv.Itoa(user_id) + "-" + hash_value,
-	}
-
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Saved new Wrapperr share link for " + user_name + " (" + strconv.Itoa(user_id) + ")." + ipString)
 
-	context.JSON(http.StatusCreated, stringReply)
+	context.JSON(http.StatusCreated, gin.H{"message": "Saved Wrapperr link.", "error": false, "data": strconv.Itoa(user_id) + "-" + hash_value})
 	return
 }
 
@@ -319,6 +313,6 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusBadRequest, wrapperrReply)
+	context.JSON(http.StatusOK, wrapperrReply)
 	return
 }

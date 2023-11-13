@@ -22,10 +22,6 @@ func ApiGetWrapperrVersion(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
 		context.Abort()
 		return
-	} else if !configBool {
-		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
-		context.Abort()
-		return
 	}
 
 	config, err := files.GetConfig()
@@ -68,16 +64,10 @@ func ApiGetAdminState(context *gin.Context) {
 		return
 	}
 
-	booleanReply := models.BooleanReply{
-		Message: "Retrieved Wrapperr version.",
-		Error:   false,
-		Data:    admin,
-	}
-
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Retrieved Wrapperr admin state." + ipString)
 
-	context.JSON(http.StatusOK, booleanReply)
+	context.JSON(http.StatusOK, gin.H{"message": "Retrieved Wrapperr version.", "error": false, "data": admin})
 	return
 }
 
@@ -101,7 +91,7 @@ func ApiGetFunctions(context *gin.Context) {
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Retrieved Wrapperr functions." + ipString)
 
-	context.JSON(http.StatusOK, functionReply)
+	context.JSON(http.StatusOK, gin.H{"message": "Functions retrieved.", "data": functionReply})
 	return
 }
 
@@ -179,16 +169,10 @@ func ApiWrapperrConfigured(context *gin.Context) {
 		context.Abort()
 		return
 	} else {
-		booleanReply := models.BooleanReply{
-			Message: "Retrieved Wrapperr configuration state.",
-			Error:   false,
-			Data:    configBool,
-		}
-
 		ipString := utilities.GetOriginIPString(context)
 		log.Println("Retrieved Wrapperr configuration state." + ipString)
 
-		context.JSON(http.StatusOK, booleanReply)
+		context.JSON(http.StatusOK, gin.H{"message": "Retrieved Wrapperr configuration state.", "error": false, "data": configBool})
 		return
 	}
 }
@@ -269,16 +253,10 @@ func ApiLogInAdmin(context *gin.Context) {
 			return
 		}
 
-		stringReply := models.StringReply{
-			Message: "Login cookie created",
-			Error:   false,
-			Data:    token,
-		}
-
 		ipString := utilities.GetOriginIPString(context)
 		log.Println("Created and retrieved admin login JWT Token." + ipString)
 
-		context.JSON(http.StatusOK, stringReply)
+		context.JSON(http.StatusOK, gin.H{"message": "Login cookie created.", "error": false, "data": token})
 		return
 	}
 }

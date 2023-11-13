@@ -15,12 +15,11 @@ function get_functions() {
                 document.getElementById("plex_signout_button").style.opacity = '1';
                 document.getElementById('results_error').innerHTML = result.error;
             } else {
-                functions = result.wrapperr_customize;
-                functions.plex_auth = result.plex_auth
-                functions.create_share_links = result.create_share_links
-                functions.wrapperr_version = result.wrapperr_version
+                functions = result.data.wrapperr_customize;
+                functions.plex_auth = result.data.plex_auth
+                functions.create_share_links = result.data.create_share_links
+                functions.wrapperr_version = result.data.wrapperr_version
                 get_stats();
-
             }
         }
     };

@@ -16,7 +16,10 @@ import (
 func GetWrapperStatistics(user_name string, user_friendlyname string, user_id int, user_email string, config models.WrapperrConfig, adminConfig models.AdminConfig, cachingMode bool, cacheLimit int) (wrapperrReply models.WrapperrStatisticsReply, cachingComplete *bool, err error) {
 	log.Println("Getting stats for: " + user_name + " " + user_friendlyname + " " + strconv.Itoa(user_id) + " " + user_email)
 
-	wrapperrReply = models.WrapperrStatisticsReply{}
+	wrapperrReply = models.WrapperrStatisticsReply{
+		Message: "Statistics retrieved.",
+		Error:   false,
+	}
 	err = nil
 	cachingComplete = nil
 

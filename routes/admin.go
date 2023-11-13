@@ -36,22 +36,15 @@ func ApiGetConfig(context *gin.Context) {
 	payload, httpStatus, err := middlewares.AuthGetPayloadFromAuthorization(authorizationHeader, config, adminConfig)
 	if err != nil {
 		log.Println("Failed to get payload from Authorization token. Error: " + err.Error())
-		context.JSON(httpStatus, gin.H{"error": err.Error()})
+		context.JSON(httpStatus, gin.H{"error": "Failed to get payload from Authorization token."})
 		context.Abort()
 		return
-	}
-
-	configReply := models.ConfigReply{
-		Data:     config,
-		Message:  "Retrieved Wrapperr config.",
-		Error:    false,
-		Username: payload.Username,
 	}
 
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Retrieved Wrapperr configuration." + ipString)
 
-	context.JSON(http.StatusOK, configReply)
+	context.JSON(http.StatusOK, gin.H{"data": config, "message": "Retrieved Wrapperr config.", "username": payload.Username})
 	return
 }
 
@@ -260,15 +253,8 @@ func ApiGetLog(context *gin.Context) {
 		return
 	}
 
-	logLinesReturn := models.WrapperrLogLineReply{
-		Message: "Log lines retrieved",
-		Error:   false,
-		Data:    logLines,
-		Limit:   files.GetMaxLogLinesReturned(),
-	}
-
 	log.Println("Log lines retrieved for admin.")
-	context.JSON(http.StatusOK, logLinesReturn)
+	context.JSON(http.StatusOK, gin.H{"message": "Log lines retrieved", "data": logLines, "limit": files.GetMaxLogLinesReturned()})
 	return
 }
 
@@ -362,13 +348,7 @@ func ApiWrapperCacheStatistics(context *gin.Context) {
 		return
 	}
 
-	booleanReply := models.BooleanReply{
-		Message: "Completed caching request.",
-		Error:   false,
-		Data:    *cachingComplete,
-	}
-
-	context.JSON(http.StatusBadRequest, booleanReply)
+	context.JSON(http.StatusBadRequest, gin.H{"message": "Completed caching request.", "error": false, "data": *cachingComplete})
 	return
 }
 
@@ -464,11 +444,24 @@ func ApiSyncTautulliUsers(context *gin.Context) {
 	for _, user := range users {
 		wrapperrUser, err := modules.UsersGetUser(user.UserID)
 		if err != nil {
+			var Active = false
+			if user.IsActive == 1 {
+				Active = true
+			} else if user.IsActive == 0 {
+				Active = false
+			} else {
+				log.Println("Failed to convert integer to bool. Error: " + err.Error())
+				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to convert integer to bool."})
+				context.Abort()
+				return
+			}
+
 			wrapperrUser = models.WrapperrUser{
 				FriendlyName: user.FriendlyName,
 				User:         user.Username,
 				UserID:       user.UserID,
 				Email:        user.Email,
+				Active:       Active,
 				Wrappings:    []models.WrapperrHistoryEntry{},
 			}
 
