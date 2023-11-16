@@ -73,6 +73,7 @@ function placeUsers(usersArray) {
             <div class="user-header">Friendly name</div>
             <div class="user-header">Email</div>
             <div class="user-header-short">Active</div>
+            <div class="user-header">Tautulli servers</div>
         </div>
     `;
 
@@ -93,6 +94,11 @@ function placeUsers(usersArray) {
             active_state_class = "user-active-false"
         }
 
+        var tautulliServersString = ""
+        user.user_tautulli_servers.forEach(server => {
+            tautulliServersString += `<div class="tautulli-server-badge" title="${server}">${server}</div>`
+        });
+
         var html = `
             <div class="user-object">
                 <div class="user-details">
@@ -105,6 +111,7 @@ function placeUsers(usersArray) {
                             ${user.user_active}
                         </div>
                     </div>
+                    <div class="user-tautulli-servers">${tautulliServersString}</div>
                 </div>
 
                 ${historyDiv}

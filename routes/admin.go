@@ -348,7 +348,7 @@ func ApiWrapperCacheStatistics(context *gin.Context) {
 		return
 	}
 
-	context.JSON(http.StatusBadRequest, gin.H{"message": "Completed caching request.", "error": false, "data": *cachingComplete})
+	context.JSON(http.StatusOK, gin.H{"message": "Completed caching request.", "error": false, "data": *cachingComplete})
 	return
 }
 
@@ -433,76 +433,12 @@ func ApiSyncTautulliUsers(context *gin.Context) {
 		return
 	}
 
-	users, err := modules.TautulliGetUsersFromEveryServer()
+	err = modules.TautulliSyncUsersToWrapperr()
 	if err != nil {
-		log.Println("Failed to get users. Error: " + err.Error())
-		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get users."})
+		log.Println("Failed to sync users from Tautulli. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync users from Tautulli."})
 		context.Abort()
 		return
-	}
-
-	newUserArray := []models.WrapperrUser{}
-	for _, userGroup := range users {
-		var userMatch bool = false
-		var userIndex int = 0
-		for index, wrapperrUser := range newUserArray {
-			if userGroup.TautulliUser.UserID == wrapperrUser.UserID {
-				userMatch = true
-				userIndex = index
-			}
-		}
-
-		if !userMatch {
-			var Active = false
-			if userGroup.TautulliUser.IsActive == 1 {
-				Active = true
-			} else if userGroup.TautulliUser.IsActive == 0 {
-				Active = false
-			} else {
-				log.Println("Failed to convert integer to bool. Error: " + err.Error())
-				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to convert integer to bool."})
-				context.Abort()
-				return
-			}
-
-			wrapperrUser := models.WrapperrUser{
-				FriendlyName:    userGroup.TautulliUser.FriendlyName,
-				User:            userGroup.TautulliUser.Username,
-				UserID:          userGroup.TautulliUser.UserID,
-				Email:           userGroup.TautulliUser.Email,
-				TautulliServers: []string{userGroup.TautulliServer},
-				Active:          Active,
-				Wrappings:       []models.WrapperrHistoryEntry{},
-			}
-
-			newUserArray = append(newUserArray, wrapperrUser)
-		} else {
-			if !newUserArray[userIndex].Active && userGroup.TautulliUser.IsActive == 1 {
-				newUserArray[userIndex].Active = true
-			}
-			newUserArray[userIndex].TautulliServers = append(newUserArray[userIndex].TautulliServers, userGroup.TautulliServer)
-		}
-	}
-
-	for _, user := range newUserArray {
-		_, err := modules.UsersGetUser(user.UserID)
-		if err != nil {
-			err = modules.UsersSaveUserEntry(user)
-			if err != nil {
-				log.Println("Failed to save new user. Error: " + err.Error())
-				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new user."})
-				context.Abort()
-				return
-			}
-		} else {
-			err = modules.UsersUpdateUser(user.UserID, user.FriendlyName, user.User, user.Email, user.Active, user.TautulliServers)
-			if err != nil {
-				log.Println("Failed to update user. Error: " + err.Error())
-				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user."})
-				context.Abort()
-				return
-			}
-		}
 	}
 
 	newusers, err := files.GetUsers()

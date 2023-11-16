@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -158,20 +159,21 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 	}
 
 	// Check connection to every Tautulli server
-	for i := 0; i < len(config.TautulliConfig); i++ {
-		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'.")
-		tautulli_state, err := modules.TautulliTestConnection(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey)
-		if err != nil {
-			log.Println("Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'. Error: " + err.Error())
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
-			context.Abort()
-			return
-		} else if !tautulli_state {
-			log.Println("Failed to ping Tautulli server '" + config.TautulliConfig[i].TautulliName + "' before retrieving statistics.")
-			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to reach Tautulli server '" + config.TautulliConfig[i].TautulliName + "'."})
-			context.Abort()
-			return
-		}
+	err = modules.TautulliTestEveryServer()
+	if err != nil {
+		log.Println("Failed to test Tautulli server. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to test Tautulli server."})
+		context.Abort()
+		return
+	}
+
+	// Sync users from Tautulli to Wrapperr
+	err = modules.TautulliSyncUsersToWrapperr()
+	if err != nil {
+		log.Println("Failed to sync users from Tautulli. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync users from Tautulli."})
+		context.Abort()
+		return
 	}
 
 	var userName string = ""
@@ -213,17 +215,17 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		userEmail = plex_object.Email
 
 		// Check for friendly name using Tautulli
-		for i := 0; i < len(config.TautulliConfig); i++ {
-			_, new_username, new_friendlyname, _, new_active, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, userName)
-
-			if err == nil {
-				userName = new_username
-				userFriendlyName = new_friendlyname
-				userActive = new_active
-			}
-			break
+		wrapperrUser, err := modules.UsersGetUser(userId)
+		if err != nil {
+			log.Println("Failed to find Wrapperr user. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find Wrapperr user."})
+			context.Abort()
+			return
 		}
 
+		userName = wrapperrUser.User
+		userFriendlyName = wrapperrUser.FriendlyName
+		userActive = wrapperrUser.Active
 	}
 
 	// Read payload from Post input
@@ -248,15 +250,12 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		UserNameFound := false
 
 		for i := 0; i < len(config.TautulliConfig); i++ {
-			new_id, new_username, user_friendlyname, new_email, new_active, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, wrapperr_request.PlexIdentity)
+			new_id, _, _, _, _, err := modules.TautulliGetUserId(config.TautulliConfig[i].TautulliPort, config.TautulliConfig[i].TautulliIP, config.TautulliConfig[i].TautulliHttps, config.TautulliConfig[i].TautulliRoot, config.TautulliConfig[i].TautulliApiKey, strings.TrimSpace(wrapperr_request.PlexIdentity))
 
 			if err == nil {
 				UserNameFound = true
-				userName = new_username
 				userId = new_id
-				userEmail = new_email
-				userFriendlyName = user_friendlyname
-				userActive = new_active
+				break
 			}
 		}
 
@@ -266,6 +265,20 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 			context.Abort()
 			return
 		}
+
+		// Check for friendly name using Tautulli
+		wrapperrUser, err := modules.UsersGetUser(userId)
+		if err != nil {
+			log.Println("Failed to find Wrapperr user. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to find Wrapperr user."})
+			context.Abort()
+			return
+		}
+
+		userName = wrapperrUser.User
+		userEmail = wrapperrUser.Email
+		userFriendlyName = wrapperrUser.FriendlyName
+		userActive = wrapperrUser.Active
 	}
 
 	// If no username and no user_id has been declared at this point, something is wrong. Return error.

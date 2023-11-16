@@ -355,7 +355,7 @@ a {
     background-color: var(--green);
     border-radius: 0.25em;
     width: min-content;
-    padding: 0 0.5em;
+    padding: 0.15em 0.5em;
     margin: auto;
 }
 
@@ -363,11 +363,23 @@ a {
     background-color: var(--red);
     border-radius: 0.25em;
     width: min-content;
-    padding: 0 0.5em;
+    padding: 0.15em 0.5em;
     margin: auto;
 }
 
-.user-username, .user-friendlyname, .user-email {
+.tautulli-server-badge {
+    background-color: var(--yellow);
+    border-radius: 0.25em;
+    width: min-content;
+    padding: 0.15em 0.5em;
+    margin: auto;
+    color: var(--black);
+    white-space: nowrap;
+    margin: 0.5em auto;
+    overflow: hidden;
+}
+
+.user-username, .user-friendlyname, .user-email, .user-tautulli-servers {
     margin: 0.25em 0.5em;
     text-align: center;
     width: 15em;

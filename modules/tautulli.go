@@ -253,3 +253,87 @@ func TautulliGetUsersFromEveryServer() (tautulliUsers []models.TautulliUserGroup
 
 	return
 }
+
+func TautulliSyncUsersToWrapperr() (err error) {
+	err = nil
+
+	// Get all users from Tautulli
+	users, err := TautulliGetUsersFromEveryServer()
+	if err != nil {
+		log.Println("Failed to get users. Error: " + err.Error())
+		return errors.New("Failed to get users.")
+	}
+
+	// Create Wrapperr user objects array to fill
+	newUserArray := []models.WrapperrUser{}
+
+	// Create new Wrapperr user objects from Tautulli reply
+	for _, userGroup := range users {
+		var userMatch bool = false
+		var userIndex int = 0
+		for index, wrapperrUser := range newUserArray {
+			if userGroup.TautulliUser.UserID == wrapperrUser.UserID {
+				userMatch = true
+				userIndex = index
+				break
+			}
+		}
+
+		// User object is not in array, create and push to array
+		// If user object is in array, append new server and weigh active status
+		if !userMatch {
+			// Create bool from small int
+			var Active = false
+			if userGroup.TautulliUser.IsActive == 1 {
+				Active = true
+			} else if userGroup.TautulliUser.IsActive == 0 {
+				Active = false
+			} else {
+				log.Println("Failed to convert integer to bool. Error: " + err.Error())
+				return errors.New("Failed to convert integer to bool.")
+			}
+
+			// Create new object
+			wrapperrUser := models.WrapperrUser{
+				FriendlyName:    userGroup.TautulliUser.FriendlyName,
+				User:            userGroup.TautulliUser.Username,
+				UserID:          userGroup.TautulliUser.UserID,
+				Email:           userGroup.TautulliUser.Email,
+				TautulliServers: []string{userGroup.TautulliServer},
+				Active:          Active,
+				Wrappings:       []models.WrapperrHistoryEntry{},
+			}
+
+			// Push to array
+			newUserArray = append(newUserArray, wrapperrUser)
+		} else {
+			// If any server is "active", the user is active
+			if newUserArray[userIndex].Active == false && userGroup.TautulliUser.IsActive == 1 {
+				newUserArray[userIndex].Active = true
+			}
+
+			// Add new server
+			newUserArray[userIndex].TautulliServers = append(newUserArray[userIndex].TautulliServers, userGroup.TautulliServer)
+		}
+	}
+
+	// Update every new Wrapperr user with new object
+	for _, user := range newUserArray {
+		_, err = UsersGetUser(user.UserID)
+		if err != nil {
+			err = UsersSaveUserEntry(user)
+			if err != nil {
+				log.Println("Failed to save new user. Error: " + err.Error())
+				return errors.New("Failed to save new user.")
+			}
+		} else {
+			err = UsersUpdateUser(user.UserID, user.FriendlyName, user.User, user.Email, user.Active, user.TautulliServers)
+			if err != nil {
+				log.Println("Failed to update user. Error: " + err.Error())
+				return errors.New("Failed to update user.")
+			}
+		}
+	}
+
+	return
+}
