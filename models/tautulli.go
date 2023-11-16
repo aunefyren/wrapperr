@@ -115,6 +115,11 @@ type TautulliUser struct {
 	FilterPhotos    interface{} `json:"filter_photos"`
 }
 
+type TautulliUserGroup struct {
+	TautulliUser   TautulliUser `json:"tautulli_user"`
+	TautulliServer string       `json:"tautulli_server"`
+}
+
 type TautulliStatusReply struct {
 	Response struct {
 		Result  string `json:"result"`

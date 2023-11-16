@@ -224,9 +224,9 @@ func TautulliTestEveryServer() (err error) {
 	return
 }
 
-func TautulliGetUsersFromEveryServer() (tautulliUsers []models.TautulliUser, err error) {
+func TautulliGetUsersFromEveryServer() (tautulliUsers []models.TautulliUserGroup, err error) {
 	err = nil
-	tautulliUsers = []models.TautulliUser{}
+	tautulliUsers = []models.TautulliUserGroup{}
 
 	config, err := files.GetConfig()
 	if err != nil {
@@ -243,7 +243,11 @@ func TautulliGetUsersFromEveryServer() (tautulliUsers []models.TautulliUser, err
 		}
 
 		for _, user := range tautulliReply.Response.Data {
-			tautulliUsers = append(tautulliUsers, user)
+			tautulliUserGroup := models.TautulliUserGroup{
+				TautulliUser:   user,
+				TautulliServer: config.TautulliConfig[i].TautulliName,
+			}
+			tautulliUsers = append(tautulliUsers, tautulliUserGroup)
 		}
 	}
 

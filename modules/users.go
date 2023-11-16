@@ -59,17 +59,8 @@ func UsersGetUser(userID int) (user models.WrapperrUser, err error) {
 	return user, errors.New("User not found.")
 }
 
-func UsersUpdateUser(userID int, FriendlyName string, userName string, Email string, ActiveInt int) (err error) {
+func UsersUpdateUser(userID int, FriendlyName string, userName string, Email string, Active bool, TautulliServers []string) (err error) {
 	err = nil
-	Active := false
-
-	if ActiveInt == 1 {
-		Active = true
-	} else if ActiveInt == 0 {
-		Active = false
-	} else {
-		return errors.New("Invalid active state found.")
-	}
 
 	users, err := files.GetUsers()
 	if err != nil {
@@ -94,6 +85,7 @@ func UsersUpdateUser(userID int, FriendlyName string, userName string, Email str
 	users[userIndex].Email = Email
 	users[userIndex].FriendlyName = FriendlyName
 	users[userIndex].User = userName
+	users[userIndex].TautulliServers = TautulliServers
 
 	err = files.SaveUsers(users)
 	if err != nil {
