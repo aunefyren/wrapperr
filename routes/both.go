@@ -281,9 +281,14 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		userActive = wrapperrUser.Active
 	}
 
-	// If no username and no user_id has been declared at this point, something is wrong. Return error.
-	if userName == "" || userEmail == "" || userId == 0 {
+	// If no username, email and no user_id has been declared at this point, and Plex Auth is active, something is wrong. Return error.
+	if (userName == "" || userEmail == "" || userId == 0) && config.PlexAuth {
 		log.Println("At this point the user should have been verified, but username, email or ID is empty.")
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
+		context.Abort()
+		return
+	} else if userName == "" || userEmail == "" {
+		log.Println("At this point the user should have been verified, but username or ID is empty.")
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
 		context.Abort()
 		return
