@@ -287,7 +287,7 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
 		context.Abort()
 		return
-	} else if userName == "" || userEmail == "" {
+	} else if userName == "" || userId == 0 {
 		log.Println("At this point the user should have been verified, but username or ID is empty.")
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "User validation error."})
 		context.Abort()
