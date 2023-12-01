@@ -267,6 +267,12 @@ func TautulliSyncUsersToWrapperr() (err error) {
 	// Create Wrapperr user objects array to fill
 	newUserArray := []models.WrapperrUser{}
 
+	ignoredUsersIDArray, err := UsersGetIgnoredUserIDs()
+	if err != nil {
+		log.Println("Failed to get ignored users. Error: " + err.Error())
+		return errors.New("Failed to get ignored users.")
+	}
+
 	// Create new Wrapperr user objects from Tautulli reply
 	for _, userGroup := range users {
 		var userMatch bool = false
@@ -293,6 +299,14 @@ func TautulliSyncUsersToWrapperr() (err error) {
 				return errors.New("Failed to convert integer to bool.")
 			}
 
+			var userAlreadyIgnored = false
+			for _, ignoredID := range ignoredUsersIDArray {
+				if ignoredID == userGroup.TautulliUser.UserID {
+					userAlreadyIgnored = true
+					break
+				}
+			}
+
 			// Create new object
 			wrapperrUser := models.WrapperrUser{
 				FriendlyName:    userGroup.TautulliUser.FriendlyName,
@@ -302,6 +316,7 @@ func TautulliSyncUsersToWrapperr() (err error) {
 				TautulliServers: []string{userGroup.TautulliServer},
 				Active:          Active,
 				Wrappings:       []models.WrapperrHistoryEntry{},
+				Ignore:          userAlreadyIgnored,
 			}
 
 			// Push to array
@@ -327,7 +342,7 @@ func TautulliSyncUsersToWrapperr() (err error) {
 				return errors.New("Failed to save new user.")
 			}
 		} else {
-			err = UsersUpdateUser(user.UserID, user.FriendlyName, user.User, user.Email, user.Active, user.TautulliServers)
+			err = UsersUpdateUser(user.UserID, user.FriendlyName, user.User, user.Email, user.Active, user.TautulliServers, user.Ignore)
 			if err != nil {
 				log.Println("Failed to update user. Error: " + err.Error())
 				return errors.New("Failed to update user.")

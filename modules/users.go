@@ -59,7 +59,7 @@ func UsersGetUser(userID int) (user models.WrapperrUser, err error) {
 	return user, errors.New("User not found.")
 }
 
-func UsersUpdateUser(userID int, FriendlyName string, userName string, Email string, Active bool, TautulliServers []string) (err error) {
+func UsersUpdateUser(userID int, FriendlyName string, userName string, Email string, Active bool, TautulliServers []string, Ignore bool) (err error) {
 	err = nil
 
 	users, err := files.GetUsers()
@@ -86,6 +86,7 @@ func UsersUpdateUser(userID int, FriendlyName string, userName string, Email str
 	users[userIndex].FriendlyName = FriendlyName
 	users[userIndex].User = userName
 	users[userIndex].TautulliServers = TautulliServers
+	users[userIndex].Ignore = Ignore
 
 	err = files.SaveUsers(users)
 	if err != nil {
@@ -94,4 +95,23 @@ func UsersUpdateUser(userID int, FriendlyName string, userName string, Email str
 	}
 
 	return
+}
+
+func UsersGetIgnoredUserIDs() (users []int, err error) {
+	err = nil
+	users = []int{}
+
+	foundUsers, err := files.GetUsers()
+	if err != nil {
+		log.Println("Failed to get users. Error: " + err.Error())
+		return users, errors.New("Failed to get users.")
+	}
+
+	for _, foundUser := range foundUsers {
+		if foundUser.Ignore {
+			users = append(users, foundUser.UserID)
+		}
+	}
+
+	return users, err
 }

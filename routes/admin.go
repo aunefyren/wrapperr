@@ -452,3 +452,65 @@ func ApiSyncTautulliUsers(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "Users synced.", "data": newusers})
 	return
 }
+
+func ApiIgnoreUser(context *gin.Context) {
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	var userId = context.Param("userId")
+
+	userIDInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Println("Failed to parse user ID. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse user ID."})
+		context.Abort()
+		return
+	}
+
+	// Read payload from Post input
+	var ignorePayload models.AdminIgnoreUser
+	if err := context.ShouldBindJSON(&ignorePayload); err != nil {
+		log.Println("Failed to parse request. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
+		context.Abort()
+		return
+	}
+
+	user, err := modules.UsersGetUser(userIDInt)
+	if err != nil {
+		log.Println("Failed to get user. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user."})
+		context.Abort()
+		return
+	}
+
+	user.Ignore = ignorePayload.Ignore
+
+	err = modules.UsersUpdateUser(user.UserID, user.FriendlyName, user.User, user.Email, user.Active, user.TautulliServers, user.Ignore)
+	if err != nil {
+		log.Println("Failed to update user. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update user."})
+		context.Abort()
+		return
+	}
+
+	err = files.ClearCache()
+	if err != nil {
+		log.Println("Failed to clear cache. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clear cache."})
+		context.Abort()
+		return
+	}
+
+	context.JSON(http.StatusOK, gin.H{"message": "User toggeled."})
+	return
+}

@@ -10,6 +10,7 @@ type WrapperrUser struct {
 	Active          bool                   `json:"user_active"`
 	TautulliServers []string               `json:"user_tautulli_servers"`
 	Wrappings       []WrapperrHistoryEntry `json:"wrappings"`
+	Ignore          bool                   `json:"user_ignore"`
 }
 
 type WrapperrHistoryEntry struct {

@@ -10,3 +10,7 @@ type AdminConfigUpdateRequest struct {
 	AdminPassword         string `json:"admin_password"`
 	AdminPasswordOriginal string `json:"admin_password_original"`
 }
+
+type AdminIgnoreUser struct {
+	Ignore bool `json:"user_ignore"`
+}

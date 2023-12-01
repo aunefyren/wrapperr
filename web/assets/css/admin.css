@@ -329,6 +329,7 @@ a {
     background-color: var(--charcoal);
     color: var(--white);
     border-radius: 0.25em;
+    overflow: scroll;
 }
 
 .user-object {
@@ -344,11 +345,22 @@ a {
     align-items: center;
 }
 
-.user-userid, .user-active {
+.user-userid, .user-active, .user-ignore, .user-logbutton {
     margin: 0.25em 0.5em;
     text-align: center;
     width: 5em;
     overflow: hidden;
+    height: 2em;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-content: center;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-logbutton {
+    height: 3em;
 }
 
 .user-active-true {
@@ -438,10 +450,6 @@ a {
     width: 5em;
     overflow: hidden;
     text-decoration: underline;
-}
-
-.user-logbutton {
-    width: 4em;
 }
 
 /* The Modal (background) */

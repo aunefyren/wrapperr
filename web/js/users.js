@@ -74,6 +74,8 @@ function placeUsers(usersArray) {
             <div class="user-header">Email</div>
             <div class="user-header-short">Active</div>
             <div class="user-header">Tautulli servers</div>
+            <div class="user-header-short">Ignore user</div>
+            <div class="user-header-short">History</div>
         </div>
     `;
 
@@ -83,6 +85,11 @@ function placeUsers(usersArray) {
             historyDiv = `
             <div class="user-logbutton">
                 <button class="form-control btn" name="historyButton" id="historyButton" onclick="getHistory(${user.user_id});" style="width: 2em; height: 2em; padding: 0.25em;"><img src="${root}/assets/document.svg" class="btn_solo"></img><p2 id="historyButtonImage"></p2></button>
+            </div>
+            `;
+        } else {
+            historyDiv = `
+            <div class="user-logbutton">
             </div>
             `;
         }
@@ -99,6 +106,11 @@ function placeUsers(usersArray) {
             tautulliServersString += `<div class="tautulli-server-badge" title="${server}">${server}</div>`
         });
 
+        var ignoredUserString = ""
+        if(user.user_ignore) {
+            ignoredUserString = "checked"
+        } 
+
         var html = `
             <div class="user-object">
                 <div class="user-details">
@@ -112,9 +124,11 @@ function placeUsers(usersArray) {
                         </div>
                     </div>
                     <div class="user-tautulli-servers">${tautulliServersString}</div>
+                    <div class="user-ignore">
+                        <input style="margin: auto;" class="clickable" type="checkbox" id="ignore_user_check_${user.user_id}" name="ignore_user_check_${user.user_id}" onclick="toggleUserIgnore('${user.user_id}', ${user.user_ignore})" value="" ${ignoredUserString}>
+                    </div>
+                    ${historyDiv}
                 </div>
-
-                ${historyDiv}
             </div>
         `;
 
@@ -202,5 +216,43 @@ function syncTautulli() {
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send();
+    return;
+}
+
+function toggleUserIgnore(userId, currentIgnoreValue) {
+    if(!confirm("Are you sure? The cache will be deleted for it to take effect.")) {
+        return;
+    }
+
+    var ignoreValue = !currentIgnoreValue
+    data_form = {
+        "user_ignore": ignoreValue
+    };
+
+    var data_obj = JSON.stringify(data_form);
+
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+			try {
+                var result= JSON.parse(this.responseText);
+            } catch(error) {
+                alert('Failed to parse API response.');
+                console.log('Failed to parse API response. Error: ' + this.responseText);
+                return;
+            }
+
+            if(result.error) {
+                document.getElementById("ignore_user_check_" + userId).checked = currentIgnoreValue;
+                alert(result.error);
+            }
+        }
+        
+    };
+    xhttp.withCredentials = true;
+    xhttp.open("post", api_url + "get/users/" + userId + "/ignore");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.setRequestHeader("Authorization", cookie);
+    xhttp.send(data_obj);
     return;
 }
