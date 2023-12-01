@@ -20,7 +20,7 @@ Like the project? Have too much money? Buy me a coffee or something! ☕️
 
 Many platforms have periodic recaps of user data and statistics, which can be fun and interesting to look at. Typically these statistics are released on a website in December, like Spotify Wrapped.
 
-Wrapperr is a website-based application for pulling Plex user statistics within a set timeframe (sourced from [Tautulli](https://github.com/Tautulli/Tautulli)). The statistics are gathered and processed into a statistics summary. Then the website displays this in a fun, interactive format. Yes, you need Tautulli to have been running beforehand and currently for this to work. That is where the data is stored.
+Wrapperr is a website-based application for pulling Plex user statistics within a set timeframe (sourced from [Tautulli](https://github.com/Tautulli/Tautulli)). The statistics are gathered and processed into a statistics summary. Then the website displays this in a fun, interactive format. Yes, you need Tautulli to have been running beforehand and currently for this to work. That is where the data is stored, Wrapperr just processes and displays it.
 
 <br>
 
@@ -61,11 +61,11 @@ Wrapperr is a website-based application for pulling Plex user statistics within 
 <br>
 
 ## Explanation - How does it work?
-This is a web-based platform. It gathers and displays statistics using an API (application programming interface) that interacts with the Tautulli API. Install Wrapperr, configure the essential options, and Wrapperr will do the rest. Based on your exact configuration, Wrapperr will gather unique statistics for each user interacting with the application.
+This is a web-based platform. It gathers and displays statistics gathered from the Tautulli API (application programming interface). Install Wrapperr, configure the essential options, and Wrapperr will do the rest. Based on your exact configuration, Wrapperr will gather unique statistics for each user interacting with the application and display it in a nice format.
 
-In Wrapperr you configure a timeframe, from date-time A to date-time B. This is the timeframe from which the statistics are created. One could for instance have a wrap-up of multiple years of Tautulli data or just a week. If enabled, Wrapperr will verify the user with Plex to ensure personal data is kept private.
+Within Wrapperr you configure a timeframe, from date-time `A` to date-time `B`. This is the timeframe from which the statistics are created. One could for instance have a wrap-up of multiple years of Tautulli data or just a week. If enabled, Wrapperr will also verify the user with their Plex login to ensure personal data is kept private.
 
-Most text is customizable through the Wrapperr admin interface which allows for regional translation. Certain statistics can be disabled and enabled based on relevance/interest. Users can if enabled, generate random URLs which can be shared between friends who want to see each other's statistics.
+Most text is customizable through the Wrapperr admin interface which allows for regional translation. Certain statistics can be disabled and enabled based on relevance/interest. Users can, if enabled, generate random URLs that can be shared between friends who want to see each other's statistics.
 
 <br>
 <br>
@@ -83,7 +83,7 @@ There are multiple ways to install Wrapperr. The easiest is just to download the
 <br>
 
 ### Build with Go
-If you want to build Wrapperr yourself, you can download whatever version/tag/branch you want, and place the files in a directory. With [Go](https://go.dev/dl/) installed, from the Wrapperr directory, run the following commands to build and execute Wrapperr:
+If you want to build Wrapperr yourself instead of downloading a release, you can download whatever version/tag/branch/release of the source code you want, and place the files in a directory. With [Go](https://go.dev/dl/) installed, from the Wrapperr directory, run the following commands to build and execute Wrapperr:
 
 ```
 $ go build
@@ -95,13 +95,13 @@ Note, if building on another operating system, the executable could have a diffe
 <br>
 
 ### Head to the website
-If successful, Wrapperr should be accessible on ```http://localhost:8282```. From there you can click on ```admin``` in the footer at the bottom, or go to ```/admin``` in the URL. From there you can configure everything about Wrapperr in the different sections of the menu. 
+If Wrapperr is successfully started, it should be accessible on ```http://localhost:8282```. From there you can click on ```admin``` in the footer at the bottom, or go to ```/admin``` in the URL. From there you can configure everything about Wrapperr in the different sections of the menu. 
 
 <br>
 <br>
 
 ### Essential configuration options
-A couple of configuration options are necessary for Wrapperr to function. First of all, Tautulli connection details. There is a test button available on the page to ensure you have entered the correct details. The second one is the time zone option on the ```Wrapperr Settings``` page.
+A couple of configuration options are necessary on the admin page for Wrapperr to function. First of all, Tautulli connection details. There is a test button available on the page to ensure you have entered the correct details. The second one is the time zone option on the ```Wrapperr Settings``` page.
 
 It is recommended to keep ```Cache results for later use``` enabled on the ```Wrapperr Settings``` page, and head to the ```Caching``` page after configuration. Click the ```Cache``` button and wait for the caching to finish. This ensures a good, quick user experience. 
 
