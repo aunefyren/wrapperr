@@ -18,7 +18,9 @@ Like the project? Have too much money? Buy me a coffee or something! ☕️
 
 ## Introduction - What is this?
 
-A website-based application and API for collecting user stats within a set timeframe using [Tautulli](https://github.com/Tautulli/Tautulli). The data is displayed as a statistics summary, sort of like Spotify Wrapped. Yes, you need Tautulli to have been running beforehand and currently for this to work.
+Many platforms have periodic recaps of user data and statistics, which can be fun and interesting to look at. Typically these statistics are released on a website in December, like Spotify Wrapped.
+
+Wrapperr is a website-based application for pulling Plex user statistics within a set timeframe (sourced from [Tautulli](https://github.com/Tautulli/Tautulli)). The statistics are gathered and processed into a statistics summary. Then the website displays this in a fun, interactive format. Yes, you need Tautulli to have been running beforehand and currently for this to work. That is where the data is stored.
 
 <br>
 
