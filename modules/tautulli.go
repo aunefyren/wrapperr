@@ -198,7 +198,7 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 	}
 
 	if res.StatusCode != http.StatusOK {
-		log.Println("Did not recieve valid HTTP status from Tautulli API. Body from response:\n" + string(body))
+		log.Println("Did not recieve valid HTTP status from Tautulli API. Got '" + res.Status + "'. Body from response:\n" + string(body))
 		return []models.TautulliHistoryItem{}, errors.New("Did not recieve valid HTTP status from Tautulli API.")
 	}
 
