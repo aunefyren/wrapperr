@@ -197,6 +197,11 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 		return []models.TautulliHistoryItem{}, errors.New("Failed to read Tautulli API response body.")
 	}
 
+	if res.StatusCode != http.StatusOK {
+		log.Println("Did not recieve valid HTTP status from Tautulli API. Body from response:\n" + string(body))
+		return []models.TautulliHistoryItem{}, errors.New("Did not recieve valid HTTP status from Tautulli API.")
+	}
+
 	var body_reply models.TautulliGetHistoryReply
 	err = json.Unmarshal(body, &body_reply)
 	if err != nil {
