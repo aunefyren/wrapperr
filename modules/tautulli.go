@@ -206,6 +206,7 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 	err = json.Unmarshal(body, &body_reply)
 	if err != nil {
 		log.Println("Failed to parse Tautulli response. Error: " + err.Error())
+		log.Print("Body from response:\n" + string(body))
 		return []models.TautulliHistoryItem{}, errors.New("Failed to parse Tautulli response.")
 	}
 
