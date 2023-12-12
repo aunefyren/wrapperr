@@ -4,6 +4,7 @@ import (
 	"aunefyren/wrapperr/files"
 	"aunefyren/wrapperr/models"
 	"errors"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -236,16 +237,37 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 						}
 
 						if tautulli_data[j].FullTitle == nil ||
-							tautulli_data[j].GrandparentRatingKey == nil ||
 							tautulli_data[j].GrandparentTitle == nil ||
 							tautulli_data[j].OriginalTitle == nil ||
-							tautulli_data[j].ParentRatingKey == nil ||
 							tautulli_data[j].ParentTitle == nil ||
-							tautulli_data[j].RatingKey == nil ||
 							tautulli_data[j].Title == nil ||
 							tautulli_data[j].OriginallyAvailableAt == nil {
 							log.Println("Tautulli item has missing data point(s). Unable to process statistics. Skipping data.")
 							continue
+						}
+
+						var year int = 0
+						yearInt, err := strconv.Atoi(fmt.Sprintf("%v", tautulli_data[j].Year))
+						if err == nil {
+							year = yearInt
+						}
+
+						var grandparentRatingKey int = 0
+						grandparentRatingKeyInt, err := strconv.Atoi(fmt.Sprintf("%v", tautulli_data[j].GrandparentRatingKey))
+						if err == nil {
+							grandparentRatingKey = grandparentRatingKeyInt
+						}
+
+						var parentRatingKey int = 0
+						parentRatingKeyInt, err := strconv.Atoi(fmt.Sprintf("%v", tautulli_data[j].ParentRatingKey))
+						if err == nil {
+							grandparentRatingKey = parentRatingKeyInt
+						}
+
+						var ratingKey int = 0
+						ratingKeyInt, err := strconv.Atoi(fmt.Sprintf("%v", tautulli_data[j].RatingKey))
+						if err == nil {
+							ratingKey = ratingKeyInt
 						}
 
 						// Translate data to own struct
@@ -255,19 +277,19 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							Duration:              tautulli_data[j].Duration,
 							FriendlyName:          tautulli_data[j].FriendlyName,
 							FullTitle:             *tautulli_data[j].FullTitle,
-							GrandparentRatingKey:  *tautulli_data[j].GrandparentRatingKey,
+							GrandparentRatingKey:  grandparentRatingKey,
 							GrandparentTitle:      *tautulli_data[j].GrandparentTitle,
 							OriginalTitle:         *tautulli_data[j].OriginalTitle,
 							MediaType:             tautulli_data[j].MediaType,
-							ParentRatingKey:       *tautulli_data[j].ParentRatingKey,
+							ParentRatingKey:       parentRatingKey,
 							ParentTitle:           *tautulli_data[j].ParentTitle,
 							PausedCounter:         tautulli_data[j].PausedCounter,
 							PercentComplete:       tautulli_data[j].PercentComplete,
-							RatingKey:             *tautulli_data[j].RatingKey,
+							RatingKey:             ratingKey,
 							Title:                 *tautulli_data[j].Title,
 							User:                  tautulli_data[j].User,
 							UserID:                tautulli_data[j].UserID,
-							Year:                  tautulli_data[j].Year,
+							Year:                  year,
 							OriginallyAvailableAt: *tautulli_data[j].OriginallyAvailableAt,
 						}
 
