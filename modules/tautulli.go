@@ -149,10 +149,14 @@ func TautulliGetUsers(TautulliPort int, TautulliIP string, TautulliHttps bool, T
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
-
-	json.Unmarshal(body, &usersReply)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to read Tautulli API response body. Error: " + err.Error())
+		return usersReply, errors.New("Failed to read Tautulli API response body.")
+	}
+
+	err = json.Unmarshal(body, &usersReply)
+	if err != nil {
+		log.Println("Failed to parse Tautulli response. Error: " + err.Error())
 		return usersReply, errors.New("Failed to parse Tautulli response.")
 	}
 
@@ -163,7 +167,7 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 
 	url_string, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to build Tautulli connection URL. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to build Tautulli connection URL.")
 	}
 
@@ -174,7 +178,7 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 
 	req, err := http.NewRequest("GET", url_string, payload)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to reach Tautulli server.")
 	}
 
@@ -182,17 +186,21 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to reach Tautulli server.")
 	}
 
 	defer res.Body.Close()
 	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		log.Println("Failed to read Tautulli API response body. Error: " + err.Error())
+		return []models.TautulliHistoryItem{}, errors.New("Failed to read Tautulli API response body.")
+	}
 
 	var body_reply models.TautulliGetHistoryReply
-	json.Unmarshal(body, &body_reply)
+	err = json.Unmarshal(body, &body_reply)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to parse Tautulli response. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to parse Tautulli response.")
 	}
 
