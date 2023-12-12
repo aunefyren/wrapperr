@@ -37,19 +37,19 @@ type TautulliHistoryItem struct {
 	Secure                interface{} `json:"secure"`
 	Relayed               interface{} `json:"relayed"`
 	MediaType             string      `json:"media_type"`
-	RatingKey             int         `json:"rating_key"`
-	ParentRatingKey       int         `json:"parent_rating_key"`
-	GrandparentRatingKey  int         `json:"grandparent_rating_key"`
-	FullTitle             string      `json:"full_title"`
-	Title                 string      `json:"title"`
-	ParentTitle           string      `json:"parent_title"`
-	GrandparentTitle      string      `json:"grandparent_title"`
-	OriginalTitle         string      `json:"original_title"`
-	Year                  int         `json:"year"`
-	MediaIndex            string      `json:"media_index"`
-	ParentMediaIndex      string      `json:"parent_media_index"`
-	Thumb                 string      `json:"thumb"`
-	OriginallyAvailableAt string      `json:"originally_available_at"`
+	RatingKey             *int        `json:"rating_key,omitempty"`
+	ParentRatingKey       *int        `json:"parent_rating_key,omitempty"`
+	GrandparentRatingKey  *int        `json:"grandparent_rating_key,omitempty"`
+	FullTitle             *string     `json:"full_title,omitempty"`
+	Title                 *string     `json:"title,omitempty"`
+	ParentTitle           *string     `json:"parent_title,omitempty"`
+	GrandparentTitle      *string     `json:"grandparent_title,omitempty"`
+	OriginalTitle         *string     `json:"original_title,omitempty"`
+	Year                  int         `json:"year,omitempty"`
+	MediaIndex            *string     `json:"media_index,omitempty"`
+	ParentMediaIndex      *string     `json:"parent_media_index,omitempty"`
+	Thumb                 *string     `json:"thumb,omitempty"`
+	OriginallyAvailableAt *string     `json:"originally_available_at,omitempty"`
 	GUID                  string      `json:"guid"`
 	TranscodeDecision     string      `json:"transcode_decision"`
 	PercentComplete       int         `json:"percent_complete"`

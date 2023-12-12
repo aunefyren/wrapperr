@@ -235,27 +235,40 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							continue
 						}
 
+						if tautulli_data[j].FullTitle == nil ||
+							tautulli_data[j].GrandparentRatingKey == nil ||
+							tautulli_data[j].GrandparentTitle == nil ||
+							tautulli_data[j].OriginalTitle == nil ||
+							tautulli_data[j].ParentRatingKey == nil ||
+							tautulli_data[j].ParentTitle == nil ||
+							tautulli_data[j].RatingKey == nil ||
+							tautulli_data[j].Title == nil ||
+							tautulli_data[j].OriginallyAvailableAt == nil {
+							log.Println("Tautulli item has missing data point(s). Unable to process statistics. Skipping data.")
+							continue
+						}
+
 						// Translate data to own struct
 						tautulli_entry := models.TautulliEntry{
 							Date:                  tautulli_data[j].Date,
 							RowID:                 tautulli_data[j].RowID,
 							Duration:              tautulli_data[j].Duration,
 							FriendlyName:          tautulli_data[j].FriendlyName,
-							FullTitle:             tautulli_data[j].FullTitle,
-							GrandparentRatingKey:  tautulli_data[j].GrandparentRatingKey,
-							GrandparentTitle:      tautulli_data[j].GrandparentTitle,
-							OriginalTitle:         tautulli_data[j].OriginalTitle,
+							FullTitle:             *tautulli_data[j].FullTitle,
+							GrandparentRatingKey:  *tautulli_data[j].GrandparentRatingKey,
+							GrandparentTitle:      *tautulli_data[j].GrandparentTitle,
+							OriginalTitle:         *tautulli_data[j].OriginalTitle,
 							MediaType:             tautulli_data[j].MediaType,
-							ParentRatingKey:       tautulli_data[j].ParentRatingKey,
-							ParentTitle:           tautulli_data[j].ParentTitle,
+							ParentRatingKey:       *tautulli_data[j].ParentRatingKey,
+							ParentTitle:           *tautulli_data[j].ParentTitle,
 							PausedCounter:         tautulli_data[j].PausedCounter,
 							PercentComplete:       tautulli_data[j].PercentComplete,
-							RatingKey:             tautulli_data[j].RatingKey,
-							Title:                 tautulli_data[j].Title,
+							RatingKey:             *tautulli_data[j].RatingKey,
+							Title:                 *tautulli_data[j].Title,
 							User:                  tautulli_data[j].User,
 							UserID:                tautulli_data[j].UserID,
 							Year:                  tautulli_data[j].Year,
-							OriginallyAvailableAt: tautulli_data[j].OriginallyAvailableAt,
+							OriginallyAvailableAt: *tautulli_data[j].OriginallyAvailableAt,
 						}
 
 						// Append to day data
