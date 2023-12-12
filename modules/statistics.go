@@ -215,7 +215,9 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				// Get data from Tautulli for server, day, and library
 				tautulli_data, err := TautulliDownloadStatistics(config.TautulliConfig[q].TautulliPort, config.TautulliConfig[q].TautulliIP, config.TautulliConfig[q].TautulliHttps, config.TautulliConfig[q].TautulliRoot, config.TautulliConfig[q].TautulliApiKey, config.TautulliConfig[q].TautulliLength, library_str, grouping, current_loop_date)
 				if err != nil {
-					log.Println(err)
+					log.Println("Failed to download data for date from Tautulli API. Error: " + err.Error())
+					log.Println("Skipping day on current server.")
+					continue
 				}
 
 				// Loop through retrieved data from Tautulli
