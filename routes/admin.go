@@ -305,6 +305,12 @@ func ApiWrapperCacheStatistics(context *gin.Context) {
 		return
 	}
 
+	if !config.UseCache {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Caching is not enabled, so a cache request is useless."})
+		context.Abort()
+		return
+	}
+
 	// Check connection to every Tautulli server
 	for i := 0; i < len(config.TautulliConfig); i++ {
 		log.Println("Checking Tautulli server '" + config.TautulliConfig[i].TautulliName + "'.")
