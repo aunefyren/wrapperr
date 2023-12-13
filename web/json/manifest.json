@@ -1,0 +1,64 @@
+{
+    "lang": "en",
+    "dir": "ltr",
+    "name": "Wrapperr",
+    "short_name": "Wrapperr",
+    "description": "nicely wrapped Plex statistics.",
+    "theme_color": "#F9C74F",
+    "background_color": "#F9844A",
+    "display": "standalone",
+    "orientation": "portrait",
+    "scope": "/",
+    "start_url": "/",
+    "prefer_related_applications": false,
+    "icons": [
+      {
+        "src": "/assets/logos/logo.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any"
+      },
+      {
+        "src": "/assets/logos/logo-72x72.png",
+        "sizes": "72x72",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "/assets/logos/logo-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "/assets/logos/logo-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "/assets/logos/logo-1024x1024.png",
+        "sizes": "1024x1024",
+        "type": "image/png",
+        "purpose": "maskable any"
+      },
+      {
+        "src": "/assets/logos/logo-mono-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png",
+        "purpose": "any monochrome"
+      },
+      {
+        "src": "/assets/logos/logo-mono.svg",
+        "sizes": "any",
+        "type": "image/svg+xml",
+        "purpose": "any monochrome"
+      }
+    ],
+    "splash_pages": null,
+    "id": "7b46f4ad-dd2a-4446-80e7-a2c2765eedbc",
+    "categories": [
+      "games",
+      "lifestyle"
+    ]
+  }

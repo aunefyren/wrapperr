@@ -240,5 +240,23 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 		c.Data(http.StatusOK, "text/plain", TXTfile)
 	})
 
+	// Static endpoint for service-worker
+	router.GET("/service-worker.js", func(c *gin.Context) {
+		JSfile, err := os.ReadFile("./web/js/service-worker.js")
+		if err != nil {
+			fmt.Println("Reading service-worker threw error trying to open the file. Error: " + err.Error())
+		}
+		c.Data(http.StatusOK, "text/javascript", JSfile)
+	})
+
+	// Static endpoint for manifest
+	router.GET("/manifest.json", func(c *gin.Context) {
+		JSONfile, err := os.ReadFile("./web/json/manifest.json")
+		if err != nil {
+			fmt.Println("Reading manifest threw error trying to open the file. Error: " + err.Error())
+		}
+		c.Data(http.StatusOK, "text/json", JSONfile)
+	})
+
 	return router
 }
