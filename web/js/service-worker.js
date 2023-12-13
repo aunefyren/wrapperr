@@ -8,7 +8,7 @@ const CACHE_NAME = 'wrapperr-cache';
 const urlsToCache = [
     '/',
     './manifest.json',
-    './assets/favicons/favicon.ico'
+    './assets/img/favicons/favicon.ico'
 ];
 
 self.addEventListener('install', (event) => {
