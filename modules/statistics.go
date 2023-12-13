@@ -455,7 +455,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// Look for track within pre-defined array
 				for d := 0; d < len(wrapperr_user_track); d++ {
-					if ((wrapperr_user_track[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_track[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_track[d].Title == wrapperr_data[i].Data[j].Title {
+					if ((wrapperr_user_track[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_track[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_track[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_track[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
 						wrapperr_user_track[d].Plays += 1
 						wrapperr_user_track[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_track[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -477,7 +477,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// Look for album within pre-defined array
 				for d := 0; d < len(wrapperr_user_album); d++ {
-					if ((wrapperr_user_album[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_album[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_album[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle {
+					if ((wrapperr_user_album[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_album[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_album[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_album[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
 						wrapperr_user_album[d].Plays += 1
 						wrapperr_user_album[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_album[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
