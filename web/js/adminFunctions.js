@@ -164,6 +164,9 @@ function get_config(cookie) {
                 wrapped_end = new Date(0);
                 wrapped_end.setUTCSeconds(result.data.wrapped_end);
 
+                wrapped_dynamic = result.data.wrapped_dynamic
+                wrapped_dynamic_days = result.data.wrapped_dynamic_days
+
                 stats_order_by_plays = result.data.wrapperr_customize.stats_order_by_plays;
                 stats_order_by_duration = result.data.wrapperr_customize.stats_order_by_duration;
 

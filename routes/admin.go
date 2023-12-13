@@ -117,6 +117,8 @@ func ApiSetConfig(context *gin.Context) {
 		config.ApplicationURL = config_payload.WrapperrData.ApplicationURL
 		config.WrappedEnd = config_payload.WrapperrData.WrappedEnd
 		config.WrappedStart = config_payload.WrapperrData.WrappedStart
+		config.WrappedDynamic = config_payload.WrapperrData.WrappedDynamic
+		config.WrappedDynamicDays = config_payload.WrapperrData.WrappedDynamicDays
 		config.WinterTheme = config_payload.WrapperrData.WinterTheme
 
 		err = files.SaveConfig(config)

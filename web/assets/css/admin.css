@@ -519,3 +519,11 @@ a {
     justify-content: center;
     align-items: center;
 }
+
+.dynamic-enabled, .static-enabled {
+    display: flex;
+}
+
+.dynamic-disabled, .static-disabled {
+    display: none;
+}

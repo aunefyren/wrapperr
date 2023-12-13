@@ -26,6 +26,20 @@ function loadAdminPage() {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<label for="wrapped_dynamic" title="Whether the time frame is static or dynamic.">Dynamic time frame:<br>';
+    html += '<input type="checkbox" class="form-control" id="wrapped_dynamic" onclick="toggleWrappedPeriod();" ';
+    if(wrapped_dynamic) {
+        html += 'checked="' + wrapped_dynamic + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
+    html += '</div>';
+
+    html += '<div id="wrapped-static" class="wrapped-static static-enabled">';
+
+    html += '<div class="form-group">';
     html += '<label for="wrapped_start" title="The start of the period you want wrapped.">Start of wrapped period:<br>';
     html += '<input type="datetime-local" class="form-control" id="wrapped_start" value="' + temp_date + '" required /><br>';
     html += '</div>';
@@ -43,6 +57,17 @@ function loadAdminPage() {
     html += '<div class="form-group">';
     html += '<label for="wrapped_end" title="The end of your wrapped period. All data until this point is viable.">End of wrapped period:<br>';
     html += '<input type="datetime-local" class="form-control" id="wrapped_end" value="' + temp_date + '" required /></label>';
+    html += '</div>';
+
+    html += '</div>';
+
+    html += '<div id="wrapped-dynamic" class="wrapped-dynamic dynamic-disabled">';
+
+    html += '<div class="form-group">';
+    html += '<label for="wrapped_dynamic_days" title="How many days into the past should be included in the time period?">Days in the past to include:<br>';
+    html += '<input type="number" class="form-control" id="wrapped_dynamic_days" value="' + wrapped_dynamic_days + '" required /></label>';
+    html += '</div>';
+
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -153,6 +178,10 @@ function loadAdminPage() {
     document.getElementById("setup").innerHTML = html;
 
     getTimezones();
+
+    if(wrapped_dynamic) {
+        toggleWrappedPeriod();
+    }
 }
 
 function set_wrapperr_settings_call() {
@@ -175,6 +204,8 @@ function set_wrapperr_settings_call() {
     timezone = document.getElementById('timezone').value;
     clear_cache = document.getElementById('clear_cache').checked;
     winter_theme = document.getElementById('winter_theme').checked;
+    wrapped_dynamic = document.getElementById('wrapped_dynamic').checked;
+    wrapped_dynamic_days = document.getElementById('wrapped_dynamic_days').value;
 
     if(wrapperr_root_original !== wrapperr_root) {
         if(!confirm("You have changed the Wrapperr root/base URL. Wrapperr will attempt to restart and the interface to access this webpage will change. If you are using an URL base you must use a trailing '/' at the end of your new URL.")){
@@ -228,25 +259,27 @@ function set_wrapperr_settings_call() {
     }
     
     wrapperr_settings_form = {
-                                "clear_cache" : clear_cache,
-                                "data_type" : "wrapperr_data",
-                                "tautulli_config" : [],
-                                "wrapperr_customize" : {},
-                                "wrapperr_data" : {
-                                    "use_cache" : use_cache,
-                                    "use_logs" : use_logs,
-                                    "plex_auth" : plex_auth,
-                                    "basic_auth" : basic_auth,
-                                    "wrapperr_root" : wrapperr_root,
-                                    "create_share_links" : create_share_links,
-                                    "timezone" : timezone,
-                                    "application_name" : application_name_str,
-                                    "application_url" : application_url_str,
-                                    "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
-                                    "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
-                                    "winter_theme" : winter_theme
-                                }
-                            };
+        "clear_cache" : clear_cache,
+        "data_type" : "wrapperr_data",
+        "tautulli_config" : [],
+        "wrapperr_customize" : {},
+        "wrapperr_data" : {
+            "use_cache" : use_cache,
+            "use_logs" : use_logs,
+            "plex_auth" : plex_auth,
+            "basic_auth" : basic_auth,
+            "wrapperr_root" : wrapperr_root,
+            "create_share_links" : create_share_links,
+            "timezone" : timezone,
+            "application_name" : application_name_str,
+            "application_url" : application_url_str,
+            "wrapped_start" : Math.round(wrapped_start.getTime() / 1000),
+            "wrapped_end" : Math.round(wrapped_end.getTime() / 1000),
+            "wrapped_dynamic" : wrapped_dynamic,
+            "wrapped_dynamic_days" : parseInt(wrapped_dynamic_days),
+            "winter_theme" : winter_theme
+        }
+    };
 
     var wrapperr_settings_data = JSON.stringify(wrapperr_settings_form);
     
@@ -320,4 +353,29 @@ function placeTimezones(timezoneArray) {
         option.name = item;
         dataList.appendChild(option);
     });
+}
+
+function toggleWrappedPeriod() {
+    wrapped_dynamic = document.getElementById("wrapped-dynamic")
+    wrapped_static = document.getElementById("wrapped-static")
+
+    if(wrapped_dynamic.classList.contains("dynamic-enabled")) {
+        wrapped_dynamic.classList.remove("dynamic-enabled")
+        wrapped_dynamic.classList.add("dynamic-disabled")
+    } else if(wrapped_dynamic.classList.contains("dynamic-disabled")) {
+        wrapped_dynamic.classList.add("dynamic-enabled")
+        wrapped_dynamic.classList.remove("dynamic-disabled")
+    } else {
+        wrapped_dynamic.classList.add("dynamic-disabled")
+    }
+
+    if(wrapped_static.classList.contains("static-enabled")) {
+        wrapped_static.classList.remove("static-enabled")
+        wrapped_static.classList.add("static-disabled")
+    } else if(wrapped_static.classList.contains("static-disabled")) {
+        wrapped_static.classList.add("static-enabled")
+        wrapped_static.classList.remove("static-disabled")
+    } else {
+        wrapped_static.classList.add("static-enabled")
+    }
 }
