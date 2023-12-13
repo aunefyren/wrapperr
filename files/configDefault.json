@@ -3,7 +3,7 @@
         "wrapperr_front_page_title":"Did you get that thing from Spotify and wondered what your Plex statistics looked like?",
         "wrapperr_front_page_subtitle":"Well, have a look...",
         "stats_intro_title":"Hey there, {user}!",
-        "stats_intro_subtitle":"New year, new page of statistics. 2022 let's go...",
+        "stats_intro_subtitle":"New year, new page of statistics. {current_year} let's go...",
         "stats_outro_title":"Hope you are staying safe!",
         "stats_outro_subtitle":"Goodbye.",
         "stats_order_by_plays":true,
