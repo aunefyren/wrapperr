@@ -23,7 +23,7 @@ function loadAdminPage() {
 
         html += '<div class="form-group">';
         html += '<label for="tautulli_name_' + i + '" title="Just what we shall name your server.">Tautulli Server name:</label>';
-        html += '<input type="text" class="form-control" id="tautulli_name_' + i + '" value="' + tautulli[i].tautulli_name + '" autocomplete="off" required placeholder="" /><br>';
+        html += '<input type="text" class="form-control" id="tautulli_name_' + i + '" value="' + tautulli[i].tautulli_name + '" autocomplete="off" required placeholder="" required /><br>';
         html += '</div>';
 
         html += '<div class="form-group">';
@@ -117,6 +117,9 @@ function loadAdminPage() {
 
 function additional_tautulli_server() {
 
+    console.log("Saving current settings.")
+    tautulli = set_tautulli_settings_call(true);
+
     tautulli_apikey = ""
     tautulli_ip = ""
     tautulli_port = ""
@@ -165,7 +168,7 @@ function remove_tautulli_server(index) {
 
 }
 
-function set_tautulli_settings_call() {
+function set_tautulli_settings_call(dont_call_api) {
 
     document.getElementById("set_tautulli_form_button").disabled = true;
     document.getElementById("set_tautulli_form_button").style.opacity = '0.5';
@@ -198,19 +201,19 @@ function set_tautulli_settings_call() {
             return;
         }
 
-        if(tautulli_apikey === '') {
-            document.getElementById("set_tautulli_form_button").disabled = false;
-            document.getElementById("set_tautulli_form_button").style.opacity = '1';
-            alert('Server name is required for Tautulli to function.');
-            document.getElementById('tautulli_name_' + i).focus();
-            return;
-        }
-
         if(tautulli_ip === '') {
             document.getElementById("set_tautulli_form_button").disabled = false;
             document.getElementById("set_tautulli_form_button").style.opacity = '1';
             alert('Tautulli IP is required for Tautulli to function.');
             document.getElementById('tautulli_ip_' + i).focus();
+            return;
+        }
+
+        if(tautulli_name === '') {
+            document.getElementById("set_tautulli_form_button").disabled = false;
+            document.getElementById("set_tautulli_form_button").style.opacity = '1';
+            alert('Tautulli server name is required for Tautulli to function.');
+            document.getElementById('tautulli_name_' + i).focus();
             return;
         }
 
@@ -273,13 +276,21 @@ function set_tautulli_settings_call() {
 
     clear_cache = document.getElementById('clear_cache').checked;
 
+    if(!dont_call_api) {
+        set_tautulli_settings_call_two(clear_cache, tautulli_settings_array)
+    } else {
+        return tautulli_settings_array
+    }
+}
+
+function set_tautulli_settings_call_two(clear_cache, tautulli_settings_array) {
     tautulli_settings_form = {
-                                "clear_cache" : clear_cache,
-                                "data_type" : "tautulli_config",
-                                "tautulli_config" : tautulli_settings_array,
-                                "wrapperr_data" : {},
-                                "wrapperr_customize" : {}
-                            };
+        "clear_cache" : clear_cache,
+        "data_type" : "tautulli_config",
+        "tautulli_config" : tautulli_settings_array,
+        "wrapperr_data" : {},
+        "wrapperr_customize" : {}
+    };
 
     var tautulli_settings_data = JSON.stringify(tautulli_settings_form);
 
