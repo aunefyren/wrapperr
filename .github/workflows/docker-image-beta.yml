@@ -3,6 +3,8 @@ name: Docker Image for Pushes
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
