@@ -2,9 +2,10 @@ FROM golang:1.20.3-bullseye
 
 ARG TARGETARCH 
 ARG TARGETOS 
-ENV port=8282
 
 LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
+
+ENV port=8282
 
 WORKDIR /app
 
