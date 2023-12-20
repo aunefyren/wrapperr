@@ -1,4 +1,4 @@
-FROM golang:1.20.3-bullseye
+FROM golang:1.20.4-bullseye as builder
 
 ARG TARGETARCH 
 ARG TARGETOS 
@@ -11,7 +11,15 @@ WORKDIR /app
 
 COPY . .
 
-RUN GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build 
+RUN GO111MODULE=on CGO_ENABLED=0 GOOS=${TARGETOS} GOARCH=${TARGETARCH} go build
+
+FROM debian:bullseye-slim as runtime
+
+LABEL org.opencontainers.image.source=https://github.com/aunefyren/wrapperr
+
+WORKDIR /app
+
+COPY --from=builder /app .
 
 EXPOSE ${port}
 
