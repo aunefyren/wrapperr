@@ -23,11 +23,11 @@ jobs:
         github_token: ${{ secrets.GIT_HUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: "1.20.3"
+        goversion: "1.21.5"
         binary_name: "wrapperr"
         ldflags: "-s -w"
         extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile files
         retry: 10
         overwrite: true
         release_name: ${{ github.ref_name }}
-        pre_command: sed -i 's/{{RELEASE_TAG}}/${{github.event.release.tag_name}}/g' files/config.go # Replace release variable with the name of this release
+        pre_command: sed -i 's/{{RELEASE_TAG}}/${{ github.event.release.tag_name }}/g' files/config.go # Replace release variable with the name of this release
