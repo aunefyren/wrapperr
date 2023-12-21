@@ -43,7 +43,7 @@ jobs:
     - name: Hash commit ID
       run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
     - name: test
-      run: echo $GITHUB_ENV
+      run: echo ${{ env.GITHUB_SHA_SHORT }}
     - name: Replace version variable
       run:  sed -i 's/{{RELEASE_TAG}}/beta-$GITHUB_ENV/g' files/config.go # Replace release variable with the name of this release
     - name: Build and push
