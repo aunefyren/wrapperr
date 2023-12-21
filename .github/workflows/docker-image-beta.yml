@@ -42,6 +42,8 @@ jobs:
         password: ${{ secrets.GIT_HUB_TOKEN }}
     - name: Hash commit ID
       run: GIT_HASH=$(git rev-parse --short "$GITHUB_SHA")
+    - name: test
+      run: echo $GIT_HASH
     - name: Replace version variable
       run:  sed -i 's/{{RELEASE_TAG}}/beta-$GIT_HASH/g' files/config.go # Replace release variable with the name of this release
     - name: Build and push
