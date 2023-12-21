@@ -11,7 +11,7 @@ import (
 	"github.com/google/uuid"
 )
 
-const wrapperr_version_parameter = "v3.2.3"
+const wrapperr_version_parameter = "{{RELEASE_TAG}}"
 const minSecretKeySize = 32
 
 var config_path, _ = filepath.Abs("./config/config.json")
