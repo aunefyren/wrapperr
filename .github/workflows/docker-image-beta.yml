@@ -41,7 +41,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GIT_HUB_TOKEN }}
     - name: Hash commit ID
-      run: echo "GIT_HASH=$(git rev-parse --short '$GITHUB_SHA')" >> $GITHUB_ENV
+      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-6)" >> $GITHUB_ENV
     - name: test
       run: echo $GITHUB_ENV
     - name: Replace version variable
