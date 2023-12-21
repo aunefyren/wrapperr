@@ -2,7 +2,7 @@ name: Release GO binaries
 
 on:
   release:
-    types: [edited,created,published]
+    types: [edited,published]
 
 jobs:
   releases-matrix:
@@ -30,3 +30,4 @@ jobs:
         retry: 10
         overwrite: true
         release_name: ${{ github.ref_name }}
+        pre_command: sed -i 's/{{RELEASE_TAG}}/${{github.event.release.tag_name}}/g' files/config.go # Replace release variable with the name of this release

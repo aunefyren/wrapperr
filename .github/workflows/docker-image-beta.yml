@@ -40,6 +40,10 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GIT_HUB_TOKEN }}
+    - name: Hash commit ID
+      run: echo "GITHUB_SHA_SHORT=$(echo $GITHUB_SHA | cut -c 1-7)" >> $GITHUB_ENV
+    - name: Replace version variable
+      run:  sed -i 's/{{RELEASE_TAG}}/beta-${{ env.GITHUB_SHA_SHORT }}/g' files/config.go # Replace release variable with the name of this release
     - name: Build and push
       uses: docker/build-push-action@v3
       with:

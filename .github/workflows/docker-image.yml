@@ -40,6 +40,8 @@ jobs:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GIT_HUB_TOKEN }}
+    - name: Replace version variable
+      run:  sed -i 's/{{RELEASE_TAG}}/${{github.event.release.tag_name}}/g' files/config.go # Replace release variable with the name of this release
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
