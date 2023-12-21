@@ -41,7 +41,7 @@ jobs:
         username: ${{ github.repository_owner }}
         password: ${{ secrets.GIT_HUB_TOKEN }}
     - name: Replace version variable
-      run:  sed -i 's/{{RELEASE_TAG}}/beta-${{github.event.push.head_commit.id}}/g' files/config.go # Replace release variable with the name of this release
+      run:  sed -i 's/{{RELEASE_TAG}}/beta-${{github.event.head_commit.id}}/g' files/config.go # Replace release variable with the name of this release
     - name: Build and push
       uses: docker/build-push-action@v3
       with:
