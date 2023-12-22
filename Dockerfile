@@ -19,6 +19,9 @@ WORKDIR /app
 
 COPY --from=builder /app .
 
+RUN apt update
+RUN apt install -y curl
+
 EXPOSE ${port}
 
 ENTRYPOINT /app/wrapperr -port=${port}
