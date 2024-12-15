@@ -23,7 +23,7 @@ jobs:
         github_token: ${{ secrets.GIT_HUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: "1.21.5"
+        goversion: "1.23.4"
         binary_name: "wrapperr"
         ldflags: "-s -w"
         extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile files
