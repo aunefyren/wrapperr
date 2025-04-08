@@ -183,8 +183,9 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 				// The date is found, the data is not complete
 				log.Println("Date " + current_loop_date + " from server '" + config.TautulliConfig[q].TautulliName + "' marked as incomplete in cache. Refreshing.")
 
-				// Remove processed server to ensure re-processing by all servers
+				// Remove processed servers and data to ensure re-processing by all servers
 				wrapperr_day.TautulliServers = []string{}
+				wrapperr_day.Data = []models.TautulliEntry{}
 
 			} else if !found_date || !tautulli_server_processed {
 
@@ -199,7 +200,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 
 			}
 
-			// Loop through selected libraries for Tautullli API calls
+			// Loop through selected libraries for Tautulli API calls
 			for library_loop := 0; library_loop < len(libraries); library_loop++ {
 
 				var library_str string = ""
