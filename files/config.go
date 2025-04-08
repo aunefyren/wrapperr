@@ -283,6 +283,11 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 		config.ApplicationName = config_default.ApplicationName
 	}
 
+	// If there is no time zone, set it to Europe/Paris (defined in the default template)
+	if config.Timezone == "" {
+		config.Timezone = config_default.Timezone
+	}
+
 	// If there is no application name, set it to Wrapperr (defined in the default template)
 	if config.WrapperrPort == 0 {
 		config.WrapperrPort = config_default.WrapperrPort

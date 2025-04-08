@@ -112,6 +112,7 @@
     "wrapped_end": 1704063540,
     "wrapperr_port" : 8282,
     "application_name" : "Wrapperr",
+    "timezone": "Europe/Paris",
 	"use_cache": true,
 	"use_logs": true,
 	"create_share_links": true,

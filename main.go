@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-contrib/cors"
@@ -87,15 +88,16 @@ func main() {
 	// Print current version
 	log.Println("Running version " + config.WrapperrVersion + ".")
 
-	// Define port variable with the port from the config file as default
-	var port int
-	flag.IntVar(&port, "port", config.WrapperrPort, "The port Wrapperr is listening on.")
-
-	// Parse the flags from input
-	flag.Parse()
+	// Change the config to respect flags
+	config, err = parseFlags(config)
+	if err != nil {
+		log.Println("Failed to parse input flags. Error: " + err.Error())
+		os.Exit(1)
+	}
+	log.Println("Flags parsed.")
 
 	// Alert what port is in use
-	log.Println("Starting Wrapperr on port " + strconv.Itoa(port) + ".")
+	log.Println("Starting Wrapperr on port " + strconv.Itoa(config.WrapperrPort) + ".")
 
 	// Initialize Router
 	router := initRouter(config)
@@ -107,10 +109,10 @@ func main() {
 	if certFound {
 		log.Println("Starting using HTTPS.")
 		certPath, certKeyPath := files.GetCertPaths()
-		log.Fatal(router.RunTLS(":"+strconv.Itoa(port), certPath, certKeyPath))
+		log.Fatal(router.RunTLS(":"+strconv.Itoa(config.WrapperrPort), certPath, certKeyPath))
 	} else {
 		log.Println("Starting using HTTP.")
-		log.Fatal(router.Run(":" + strconv.Itoa(port)))
+		log.Fatal(router.Run(":" + strconv.Itoa(config.WrapperrPort)))
 	}
 }
 
@@ -259,4 +261,62 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 	})
 
 	return router
+}
+
+func parseFlags(configFile models.WrapperrConfig) (models.WrapperrConfig, error) {
+	// Define flag variables with the configuration file as default values
+	var port = flag.Int("port", configFile.WrapperrPort, "The port Wrapperr is listening on.")
+	var timezone = flag.String("timezone", configFile.Timezone, "The timezone Wrapperr is running in.")
+	var applicationName = flag.String("applicationname", configFile.ApplicationName, "The timezone Wrapperr is running in.")
+	var createShareLinkString = flag.String("createsharelink", "true", "If users can generate shareable links.")
+	var plexAuth = flag.String("plexauth", "true", "If users must log in with Plex Auth.")
+
+	// Parse flags
+	flag.Parse()
+
+	// Respect the flag if provided
+	if port != nil {
+		configFile.WrapperrPort = *port
+	}
+
+	// Respect the flag if provided
+	if timezone != nil {
+		configFile.Timezone = *timezone
+	}
+
+	// Respect the flag if provided
+	if applicationName != nil {
+		configFile.ApplicationName = *applicationName
+	}
+
+	// Respect the flag if string is true
+	if createShareLinkString != nil {
+		if strings.ToLower(*createShareLinkString) == "true" {
+			configFile.CreateShareLinks = true
+		} else {
+			configFile.CreateShareLinks = false
+		}
+	}
+
+	// Respect the flag if string is true
+	if plexAuth != nil {
+		if strings.ToLower(*plexAuth) == "true" {
+			configFile.PlexAuth = true
+		} else {
+			configFile.PlexAuth = false
+		}
+	}
+
+	// Failsafe, if port is 0, set to default 8282
+	if configFile.WrapperrPort == 0 {
+		configFile.WrapperrPort = 8282
+	}
+
+	// Save the new configFile
+	err := files.SaveConfig(configFile)
+	if err != nil {
+		return configFile, err
+	}
+
+	return configFile, nil
 }
