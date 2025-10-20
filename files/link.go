@@ -1,7 +1,6 @@
 package files
 
 import (
-	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -11,6 +10,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aunefyren/wrapperr/models"
 )
 
 var link_path, _ = filepath.Abs("./config/links")

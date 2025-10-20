@@ -1,12 +1,13 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/utilities"
 	"errors"
 	"log"
 	"time"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/utilities"
 
 	"github.com/golang-jwt/jwt/v5"
 )

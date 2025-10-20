@@ -1,15 +1,16 @@
 package routes
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/modules"
-	"aunefyren/wrapperr/utilities"
 	"errors"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/modules"
+	"github.com/aunefyren/wrapperr/utilities"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,13 +1,14 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/aunefyren/wrapperr/models"
 )
 
 var content_type string = "application/json"

@@ -1,10 +1,11 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
 	"errors"
 	"log"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
 )
 
 func UsersSaveUserEntry(newUser models.WrapperrUser) (err error) {

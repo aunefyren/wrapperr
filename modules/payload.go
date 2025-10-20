@@ -1,8 +1,9 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/models"
 	"time"
+
+	"github.com/aunefyren/wrapperr/models"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"

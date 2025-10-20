@@ -1,15 +1,16 @@
 package middlewares
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/modules"
 	"encoding/base64"
 	"errors"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/modules"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"

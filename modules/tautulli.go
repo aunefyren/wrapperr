@@ -1,9 +1,6 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
 	"io"
@@ -12,6 +9,10 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/utilities"
 )
 
 func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string) (bool, error) {
