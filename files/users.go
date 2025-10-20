@@ -1,13 +1,14 @@
 package files
 
 import (
-	"aunefyren/wrapperr/models"
 	"encoding/json"
 	"errors"
 	"log"
 	"os"
 	"path/filepath"
 	"sort"
+
+	"github.com/aunefyren/wrapperr/models"
 )
 
 var usersPath, _ = filepath.Abs("./config/users.json")

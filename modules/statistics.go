@@ -1,14 +1,15 @@
 package modules
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/models"
 	"errors"
 	"fmt"
 	"log"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/models"
 
 	"github.com/goombaio/namegenerator"
 	"github.com/patrickmn/sortutil"

@@ -1,14 +1,15 @@
 package files
 
 import (
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/utilities"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
+
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/utilities"
 )
 
 var cache_path, _ = filepath.Abs("./config/cache.json")

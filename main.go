@@ -1,11 +1,6 @@
 package main
 
 import (
-	"aunefyren/wrapperr/files"
-	"aunefyren/wrapperr/middlewares"
-	"aunefyren/wrapperr/models"
-	"aunefyren/wrapperr/routes"
-	"aunefyren/wrapperr/utilities"
 	"flag"
 	"fmt"
 	"io"
@@ -15,6 +10,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/middlewares"
+	"github.com/aunefyren/wrapperr/models"
+	"github.com/aunefyren/wrapperr/routes"
+	"github.com/aunefyren/wrapperr/utilities"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"

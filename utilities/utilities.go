@@ -1,7 +1,6 @@
 package utilities
 
 import (
-	"aunefyren/wrapperr/models"
 	"encoding/base64"
 	"errors"
 	"fmt"
@@ -14,6 +13,8 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/aunefyren/wrapperr/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/kardianos/osext"

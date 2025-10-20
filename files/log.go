@@ -1,12 +1,13 @@
 package files
 
 import (
-	"aunefyren/wrapperr/models"
 	"bufio"
 	"log"
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/aunefyren/wrapperr/models"
 )
 
 var log_path, _ = filepath.Abs("./config/wrapperr.log")
