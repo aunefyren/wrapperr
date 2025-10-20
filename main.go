@@ -265,12 +265,22 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 }
 
 func parseFlags(configFile models.WrapperrConfig) (models.WrapperrConfig, error) {
+	plexAuthString := "true"
+	if !configFile.PlexAuth {
+		plexAuthString = "false"
+	}
+
+	createSharelinkString := "true"
+	if !configFile.CreateShareLinks {
+		createSharelinkString = "false"
+	}
+
 	// Define flag variables with the configuration file as default values
 	var port = flag.Int("port", configFile.WrapperrPort, "The port Wrapperr is listening on.")
 	var timezone = flag.String("timezone", configFile.Timezone, "The timezone Wrapperr is running in.")
 	var applicationName = flag.String("applicationname", configFile.ApplicationName, "The timezone Wrapperr is running in.")
-	var createShareLinkString = flag.String("createsharelink", "true", "If users can generate shareable links.")
-	var plexAuth = flag.String("plexauth", "true", "If users must log in with Plex Auth.")
+	var createShareLinkString = flag.String("createsharelink", createSharelinkString, "If users can generate shareable links.")
+	var plexAuth = flag.String("plexauth", plexAuthString, "If users must log in with Plex Auth.")
 
 	// Parse flags
 	flag.Parse()

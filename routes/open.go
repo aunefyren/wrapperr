@@ -34,18 +34,19 @@ func ApiGetWrapperrVersion(context *gin.Context) {
 	}
 
 	versionReply := models.WrapperrVersion{
-		WrapperrVersion:           config.WrapperrVersion,
-		ApplicationName:           config.ApplicationName,
-		PlexAuth:                  config.PlexAuth,
-		WrapperrFrontPageTitle:    config.WrapperrCustomize.WrapperrFrontPageTitle,
-		WrapperrFrontPageSubtitle: config.WrapperrCustomize.WrapperrFrontPageSubtitle,
-		ClientKey:                 config.ClientKey,
-		WrapperrConfigured:        configBool,
-		WinterTheme:               config.WinterTheme,
-		Message:                   "Retrieved Wrapperr version.",
-		Error:                     false,
-		WrapperrRoot:              config.WrapperrRoot,
-		BasicAuth:                 config.BasicAuth,
+		WrapperrVersion:              config.WrapperrVersion,
+		ApplicationName:              config.ApplicationName,
+		PlexAuth:                     config.PlexAuth,
+		WrapperrFrontPageTitle:       config.WrapperrCustomize.WrapperrFrontPageTitle,
+		WrapperrFrontPageSubtitle:    config.WrapperrCustomize.WrapperrFrontPageSubtitle,
+		WrapperrFrontPageSearchTitle: config.WrapperrCustomize.WrapperrFrontPageSearchTitle,
+		ClientKey:                    config.ClientKey,
+		WrapperrConfigured:           configBool,
+		WinterTheme:                  config.WinterTheme,
+		Message:                      "Retrieved Wrapperr version.",
+		Error:                        false,
+		WrapperrRoot:                 config.WrapperrRoot,
+		BasicAuth:                    config.BasicAuth,
 	}
 
 	ipString := utilities.GetOriginIPString(context)

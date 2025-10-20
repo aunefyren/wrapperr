@@ -3,6 +3,7 @@ package models
 type WrapperrCustomize struct {
 	WrapperrFrontPageTitle                      string `json:"wrapperr_front_page_title"`
 	WrapperrFrontPageSubtitle                   string `json:"wrapperr_front_page_subtitle"`
+	WrapperrFrontPageSearchTitle                string `json:"wrapperr_front_page_search_title"`
 	StatsIntroTitle                             string `json:"stats_intro_title"`
 	StatsIntroSubtitle                          string `json:"stats_intro_subtitle"`
 	StatsOutroTitle                             string `json:"stats_outro_title"`
@@ -102,18 +103,19 @@ type WrapperrCustomize struct {
 }
 
 type WrapperrVersion struct {
-	WrapperrVersion           string `json:"wrapperr_version"`
-	ApplicationName           string `json:"application_name"`
-	PlexAuth                  bool   `json:"plex_auth"`
-	WrapperrFrontPageTitle    string `json:"wrapperr_front_page_title"`
-	WrapperrFrontPageSubtitle string `json:"wrapperr_front_page_subtitle"`
-	WrapperrRoot              string `json:"wrapperr_root"`
-	ClientKey                 string `json:"client_key"`
-	WrapperrConfigured        bool   `json:"wrapperr_configured"`
-	WinterTheme               bool   `json:"winter_theme"`
-	BasicAuth                 bool   `json:"basic_auth"`
-	Message                   string `json:"message"`
-	Error                     bool   `json:"error"`
+	WrapperrVersion              string `json:"wrapperr_version"`
+	ApplicationName              string `json:"application_name"`
+	PlexAuth                     bool   `json:"plex_auth"`
+	WrapperrFrontPageTitle       string `json:"wrapperr_front_page_title"`
+	WrapperrFrontPageSubtitle    string `json:"wrapperr_front_page_subtitle"`
+	WrapperrFrontPageSearchTitle string `json:"wrapperr_front_page_search_title"`
+	WrapperrRoot                 string `json:"wrapperr_root"`
+	ClientKey                    string `json:"client_key"`
+	WrapperrConfigured           bool   `json:"wrapperr_configured"`
+	WinterTheme                  bool   `json:"winter_theme"`
+	BasicAuth                    bool   `json:"basic_auth"`
+	Message                      string `json:"message"`
+	Error                        bool   `json:"error"`
 }
 
 type WrapperrFunctions struct {

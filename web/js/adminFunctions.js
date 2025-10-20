@@ -172,6 +172,7 @@ function get_config(cookie) {
 
                 wrapperr_front_page_title = result.data.wrapperr_customize.wrapperr_front_page_title;
                 wrapperr_front_page_subtitle = result.data.wrapperr_customize.wrapperr_front_page_subtitle;
+                wrapperr_front_page_search_title = result.data.wrapperr_customize.wrapperr_front_page_search_title;
                 stats_intro_title = result.data.wrapperr_customize.stats_intro_title;
                 stats_intro_subtitle = result.data.wrapperr_customize.stats_intro_subtitle;
                 stats_outro_title = result.data.wrapperr_customize.stats_outro_title;

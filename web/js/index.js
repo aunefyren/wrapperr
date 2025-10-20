@@ -353,7 +353,7 @@ function get_wrapper_version(link_mode, hash) {
         
                 // Change search function to use Plex search instead
                 if(!result.plex_auth) {
-                    wrapperr_search_function();
+                    wrapperr_search_function(result.wrapperr_front_page_search_title);
                 }
                 
                 // If configured and using Plex Auth, call function
@@ -470,12 +470,12 @@ function delete_link_user() {
     return;
 }
 
-function wrapperr_search_function() {
+function wrapperr_search_function(searchTitle) {
 
     var html = '';
     
     html += '<div class="form-group">';
-        html += '<label for="plex_identity" title="Your Plex username or email.">Plex username or email:</label>';
+        html += `<label for="plex_identity" title="${searchTitle}">${searchTitle}</label>`;
         html += '<input type="text" class="form-control" id="plex_identity" value="" autocomplete="on" required />';
     html += '</div>';
 

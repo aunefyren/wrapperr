@@ -408,6 +408,10 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 		config.WrapperrCustomize.WrapperrFrontPageSubtitle = config_default.WrapperrCustomize.WrapperrFrontPageSubtitle
 	}
 
+	if config.WrapperrCustomize.WrapperrFrontPageSearchTitle == "" {
+		config.WrapperrCustomize.WrapperrFrontPageSearchTitle = config_default.WrapperrCustomize.WrapperrFrontPageSearchTitle
+	}
+
 	if config.WrapperrCustomize.StatsIntroTitle == "" {
 		config.WrapperrCustomize.StatsIntroTitle = config_default.WrapperrCustomize.StatsIntroTitle // If no intro title string, set to default intro title
 	}
