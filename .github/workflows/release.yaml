@@ -2,7 +2,7 @@ name: Release GO binaries
 
 on:
   release:
-    types: [edited,published]
+    types: [published]
 
 jobs:
   releases-matrix:
