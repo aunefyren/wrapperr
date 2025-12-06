@@ -433,6 +433,113 @@ function open_link_user() {
     window.open(document.getElementById('share_wrapped_url').innerHTML, '_blank').focus();
 }
 
+function get_wrapper_version_for_admin(wrappedData) {
+    // Get wrapper version and functions, then load the wrapped page
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            try {
+                var result = JSON.parse(this.responseText);
+            } catch(error) {
+                console.log('Failed to parse Wrapperr version. Response: ' + this.responseText);
+                document.getElementById("results_error").innerHTML = 'The API did not respond correctly.';
+                return;
+            }
+            
+            if(!result.error) {
+                // Set API URL if root is configured
+                if(result.wrapperr_root != "") {
+                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
+                }
+
+                // Set the current version in the footer
+                wrapperr_version = result.wrapperr_version;
+
+                // Change the application name based on Wrapperr configuration
+                if(result.application_name && result.application_name !== '') {
+                    document.title = result.application_name;
+                    application_name = result.application_name;
+                }
+
+                // Set the theme option
+                winter_theme = result.winter_theme;
+                if(winter_theme) {
+                    document.getElementById('snowflakes').style.display = "block";
+                    document.getElementById('snowflakes2').style.display = "block";
+                    document.getElementById('background_image').style.backgroundImage = "url('assets/winter.webp')";
+                }
+
+                // Get functions configuration
+                get_functions_for_admin(wrappedData, result);
+            } else {
+                document.getElementById("results_error").innerHTML = result.error;
+            }
+        }
+    };
+    xhttp.withCredentials = true;
+    
+    // Try to guess API URL from current URL
+    try {
+        var window_location_str = window.location.toString();
+        if(window_location_str.includes("?")) {
+            url_array = window_location_str.split("?")
+            var init_url = url_array[0]
+        } else {
+            var init_url = window_location_str
+        }
+
+        var last_char = init_url.charAt(init_url.length-1);
+        if(last_char == "/") {
+            var final_url = init_url
+        } else {
+            var final_url = init_url + "/"
+        }
+    } catch(e) {
+        console.log("Error occured while guessing API URL. Error: " + e);
+        var final_url = window.location.toString() + "/"
+    }
+
+    xhttp.open("post", final_url + "api/get/wrapperr-version");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send();
+    return;
+}
+
+function get_functions_for_admin(wrappedData, versionResult) {
+    // Get functions configuration
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            try {
+                var result = JSON.parse(this.responseText);
+            } catch(error) {
+                console.log('Failed to parse functions. Response: ' + this.responseText);
+                document.getElementById("results_error").innerHTML = 'Failed to load functions configuration.';
+                return;
+            }
+            
+            if(!result.error) {
+                // Set functions from the response data (same structure as get_functions())
+                functions = result.data.wrapperr_customize;
+                functions.plex_auth = result.data.plex_auth;
+                functions.create_share_links = result.data.create_share_links;
+                functions.wrapperr_version = result.data.wrapperr_version;
+                
+                // Set results and load the page
+                results = wrappedData;
+                load_page(results);
+            } else {
+                document.getElementById("results_error").innerHTML = result.error;
+            }
+        }
+    };
+    xhttp.withCredentials = true;
+    xhttp.open("post", api_url + "get/functions");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.send();
+    return;
+}
+
 function delete_link_user() {
 
     if(!confirm('Are you sure you want to delete this link?')) {
