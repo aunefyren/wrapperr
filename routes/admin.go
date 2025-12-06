@@ -421,6 +421,94 @@ func ApiGetUser(context *gin.Context) {
 	return
 }
 
+func ApiGetUserStatistics(context *gin.Context) {
+	log.Println("Admin requesting user statistics.")
+
+	configBool, err := files.GetConfigState()
+	if err != nil {
+		log.Println("Failed to retrieve configuration state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to retrieve configuration state."})
+		context.Abort()
+		return
+	} else if !configBool {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Wrapperr is not configured."})
+		context.Abort()
+		return
+	}
+
+	config, err := files.GetConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr configuration."})
+		context.Abort()
+		return
+	}
+
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		context.Abort()
+		return
+	}
+
+	// Check connection to every Tautulli server
+	err = modules.TautulliTestEveryServer()
+	if err != nil {
+		log.Println("Failed to test Tautulli server. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to test Tautulli server."})
+		context.Abort()
+		return
+	}
+
+	// Sync users from Tautulli to Wrapperr
+	err = modules.TautulliSyncUsersToWrapperr()
+	if err != nil {
+		log.Println("Failed to sync users from Tautulli. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to sync users from Tautulli."})
+		context.Abort()
+		return
+	}
+
+	var userId = context.Param("userId")
+
+	userIDInt, err := strconv.Atoi(userId)
+	if err != nil {
+		log.Println("Failed to parse user ID. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse user ID."})
+		context.Abort()
+		return
+	}
+
+	user, err := modules.UsersGetUser(userIDInt)
+	if err != nil {
+		log.Println("Failed to get user. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get user."})
+		context.Abort()
+		return
+	}
+
+	if !user.Active {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "User is not active."})
+		context.Abort()
+		return
+	}
+
+	wrapperrReply, _, err := modules.GetWrapperStatistics(user.User, user.FriendlyName, user.UserID, user.Email, config, adminConfig, false, 0)
+	if err != nil {
+		log.Println("Failed to get statistics. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get statistics."})
+		context.Abort()
+		return
+	}
+
+	ipString := utilities.GetOriginIPString(context)
+	log.Println("Admin retrieved statistics for user: " + user.User + " (" + strconv.Itoa(user.UserID) + ")." + ipString)
+
+	context.JSON(http.StatusOK, wrapperrReply)
+	return
+}
+
 func ApiSyncTautulliUsers(context *gin.Context) {
 	configBool, err := files.GetConfigState()
 	if err != nil {
