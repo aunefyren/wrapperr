@@ -289,67 +289,104 @@ function get_user_links(cookie) {
     return;
 }
 
+// Helper function to get the API base URL
+function get_api_base_url() {
+    try {
+        var window_location_str = window.location.toString();
+        if(window_location_str.includes("?")) {
+            url_array = window_location_str.split("?")
+            var init_url = url_array[0]
+        } else {
+            var init_url = window_location_str
+        }
+
+        var last_char = init_url.charAt(init_url.length-1);
+        if(last_char == "/") {
+            return init_url
+        } else {
+            return init_url + "/"
+        }
+    } catch(e) {
+        console.log("Error occured while guessing API URL. Error: " + e);
+        return window.location.toString() + "/"
+    }
+}
+
+// Helper function to apply common version result settings
+function apply_version_result_settings(result, options) {
+    options = options || {};
+    
+    // Set API URL if root is configured
+    if(result.wrapperr_root != "") {
+        api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
+        if(options.logUrl) {
+            console.log("URL: " + api_url)
+        }
+    }
+
+    // Set the current version
+    wrapperr_version = result.wrapperr_version;
+
+    // Change the application name based on Wrapperr configuration
+    if(result.application_name && result.application_name !== '') {
+        if(options.setApplicationNameElement) {
+            document.getElementById('application_name').innerHTML = result.application_name;
+        }
+        document.title = result.application_name;
+        application_name = result.application_name;
+    }
+
+    // Set the theme option
+    winter_theme = result.winter_theme;
+    if(winter_theme) {
+        document.getElementById('snowflakes').style.display = "block";
+        document.getElementById('snowflakes2').style.display = "block";
+        document.getElementById('background_image').style.backgroundImage = "url('assets/winter.webp')";
+    }
+}
+
 // Contact the Wrapperr API and get configuration details. Start processes based on the result
 function get_wrapper_version(link_mode, hash) {
-
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (this.readyState == 4) {
-
             // Attempt to parse the JSON response
             try {
                 var result= JSON.parse(this.responseText);
             } catch(error) {
                 console.log('Failed to parse Wrapperr version. Response: ' + this.responseText)
-                // Place error on the loading screen
                 document.getElementById("results_error_loading_screen").innerHTML = 'The API did not respond correctly.';
                 return;
             }
             
-            // If there was no error in the API request and link mode is not enabled
-            if(!result.error && !link_mode) {
+            if(result.error) {
+                document.getElementById('results_error_loading_screen').innerHTML = result.error;
+                return;
+            }
 
+            // Apply common settings
+            apply_version_result_settings(result, { logUrl: true, setApplicationNameElement: !link_mode });
+
+            // If there was no error in the API request and link mode is not enabled
+            if(!link_mode) {
                 // Set the current version in the footer
                 document.getElementById('github_link').innerHTML = 'GitHub (' + result.wrapperr_version + ')';
-                wrapperr_version = result.wrapperr_version;
-
-                // Change the application name based on Wrapperr configuration
-                if(result.application_name && result.application_name !== '') {
-                    document.getElementById('application_name').innerHTML = result.application_name;
-                    document.title = result.application_name;
-                    application_name = result.application_name;
-                }
 
                 // Set the client key in the JS variable
                 client_key = result.client_key;
 
-                 // Set the theme option in the JS variable
-                winter_theme = result.winter_theme;
-
-                // Enable snow and background image based on variable
-                if(winter_theme) {
-                    document.getElementById('snowflakes').style.display = "block";
-                    document.getElementById('snowflakes2').style.display = "block";
-                    document.getElementById('background_image').style.backgroundImage = "url('assets/winter.webp')";
-                }
-
-                // Change the title based based on Wrapperr configuration
+                // Change the title based on Wrapperr configuration
                 if(result.wrapperr_front_page_title !== '') {
                     document.getElementById('wrapperr_front_page_title').innerHTML = ReplaceStandardStrings(result.wrapperr_front_page_title);
                 }
 
-                // Change the subtitle based based on Wrapperr configuration
+                // Change the subtitle based on Wrapperr configuration
                 if(result.wrapperr_front_page_subtitle !== '') {
                     document.getElementById('wrapperr_front_page_subtitle').innerHTML = ReplaceStandardStrings(result.wrapperr_front_page_subtitle);
                 }
 
                 // Set the 'configured' option in the JS variable
                 wrapperr_configured = result.wrapperr_configured;
-            
-                if(result.wrapperr_root != "") {
-                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
-                    console.log("URL: " + api_url)
-                }
         
                 // Change search function to use Plex search instead
                 if(!result.plex_auth) {
@@ -369,61 +406,16 @@ function get_wrapper_version(link_mode, hash) {
                 setTimeout(function(){
                     document.getElementById('loading').style.display = "none";
                 },1000);
-                
-            } else if(!result.error && link_mode) {
-                
-                if(result.wrapperr_root != "") {
-                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
-                    console.log("URL: " + api_url)
-                }
-
-                // Set the current version in the footer
-                wrapperr_version = result.wrapperr_version;
-
-                // Change the application name based on Wrapperr configuration
-                if(result.application_name && result.application_name !== '') {
-                    document.title = result.application_name;
-                    application_name = result.application_name;
-                }
-                
+            } else {
+                // Link mode
                 console.log("Getting link page...");
                 wrapped_link_actions(hash);
-                
-            } else if(result.error) {
-                document.getElementById('results_error_loading_screen').innerHTML = result.error;
             }
-
         }
     };
     xhttp.withCredentials = true;
-    
-    // Try to guess API URL from current URL
-    try {
-
-        var window_location_str = window.location.toString();
-
-        if(window_location_str.includes("?")) {
-            url_array = window_location_str.split("?")
-            var init_url = url_array[0]
-        } else {
-            var init_url = window_location_str
-        }
-
-        var last_char = init_url.charAt(init_url.length-1);
-
-        if(last_char == "/") {
-            var final_url = init_url
-        } else {
-            var final_url = init_url + "/"
-        }
-        
-    } catch(e) {
-        console.log("Error occured while guessing API URL. Error: " + e);
-        var final_url = window.location.toString() + "/"
-    }
-
+    var final_url = get_api_base_url();
     xhttp.open("post", final_url + "api/get/wrapperr-version");
-
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send();
     return;
@@ -446,59 +438,20 @@ function get_wrapper_version_for_admin(wrappedData) {
                 return;
             }
             
-            if(!result.error) {
-                // Set API URL if root is configured
-                if(result.wrapperr_root != "") {
-                    api_url = window.location.origin + "/" + result.wrapperr_root + "/api/";
-                }
-
-                // Set the current version in the footer
-                wrapperr_version = result.wrapperr_version;
-
-                // Change the application name based on Wrapperr configuration
-                if(result.application_name && result.application_name !== '') {
-                    document.title = result.application_name;
-                    application_name = result.application_name;
-                }
-
-                // Set the theme option
-                winter_theme = result.winter_theme;
-                if(winter_theme) {
-                    document.getElementById('snowflakes').style.display = "block";
-                    document.getElementById('snowflakes2').style.display = "block";
-                    document.getElementById('background_image').style.backgroundImage = "url('assets/winter.webp')";
-                }
-
-                // Get functions configuration
-                get_functions_for_admin(wrappedData, result);
-            } else {
+            if(result.error) {
                 document.getElementById("results_error").innerHTML = result.error;
+                return;
             }
+
+            // Apply common settings
+            apply_version_result_settings(result);
+
+            // Get functions configuration
+            get_functions_for_admin(wrappedData, result);
         }
     };
     xhttp.withCredentials = true;
-    
-    // Try to guess API URL from current URL
-    try {
-        var window_location_str = window.location.toString();
-        if(window_location_str.includes("?")) {
-            url_array = window_location_str.split("?")
-            var init_url = url_array[0]
-        } else {
-            var init_url = window_location_str
-        }
-
-        var last_char = init_url.charAt(init_url.length-1);
-        if(last_char == "/") {
-            var final_url = init_url
-        } else {
-            var final_url = init_url + "/"
-        }
-    } catch(e) {
-        console.log("Error occured while guessing API URL. Error: " + e);
-        var final_url = window.location.toString() + "/"
-    }
-
+    var final_url = get_api_base_url();
     xhttp.open("post", final_url + "api/get/wrapperr-version");
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.send();
