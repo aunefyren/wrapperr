@@ -39,12 +39,12 @@ function loadAdminPage() {
     html += '</div>';
 
     html += '<div class="form-group">';
-    html += '<label for="obfuscate_other_users" title="Replace other\'s username with randomly generated names.">Obfuscate other usernames:<br>';
-    html += '<input type="checkbox" class="form-control" id="obfuscate_other_users" ';
-    if(obfuscate_other_users) {
-        html += 'checked="' + obfuscate_other_users + '" ';
-    }
-    html += '/><br>';
+    html += '<label for="obfuscate_other_users" title="How to display other users\' names in top lists.">Display other usernames as:<br>';
+    html += '<select class="form-control" id="obfuscate_other_users">';
+    html += '<option value="plex_username"' + (obfuscate_other_users === 'plex_username' ? ' selected' : '') + '>Plex username</option>';
+    html += '<option value="friendly_name"' + (obfuscate_other_users === 'friendly_name' ? ' selected' : '') + '>Tautulli friendly name</option>';
+    html += '<option value="obfuscate"' + (obfuscate_other_users === 'obfuscate' ? ' selected' : '') + '>Obfuscated (random names)</option>';
+    html += '</select><br>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -891,7 +891,7 @@ function set_wrapperr_customization_call() {
     stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
     stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
     stats_top_list_length = parseInt(document.getElementById("stats_top_list_length").value);
-    obfuscate_other_users = document.getElementById('obfuscate_other_users').checked;
+    obfuscate_other_users = document.getElementById('obfuscate_other_users').value;
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
     get_user_movie_stats_title = document.getElementById('get_user_movie_stats_title').value;

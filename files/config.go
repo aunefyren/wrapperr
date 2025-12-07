@@ -140,7 +140,7 @@ func CreateConfigFile() error {
 	config.WrappedDynamic = false
 	config.WrappedDynamicDays = 0
 	config.WrapperrCustomize.StatsTopListLength = 10
-	config.WrapperrCustomize.ObfuscateOtherUsers = true
+	config.WrapperrCustomize.ObfuscateOtherUsers = "obfuscate"
 	config.WrapperrCustomize.StatsOrderByDuration = true
 	config.WrapperrCustomize.StatsOrderByPlays = true
 	config.WrapperrCustomize.GetUserMovieStats = true
@@ -159,6 +159,62 @@ func CreateConfigFile() error {
 	}
 
 	return nil
+}
+
+// migrateObfuscateOtherUsers converts the obfuscate_other_users field from bool to string
+// for backwards compatibility with older config files
+func migrateObfuscateOtherUsers(data []byte) ([]byte, error) {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return data, err
+	}
+
+	// Check if wrapperr_customize exists
+	customizeRaw, exists := raw["wrapperr_customize"]
+	if !exists {
+		return data, nil
+	}
+
+	var customize map[string]json.RawMessage
+	if err := json.Unmarshal(customizeRaw, &customize); err != nil {
+		return data, err
+	}
+
+	// Check if obfuscate_other_users exists
+	obfuscateRaw, exists := customize["obfuscate_other_users"]
+	if !exists {
+		return data, nil
+	}
+
+	// Try to parse as bool - if it works, we need to migrate
+	var boolValue bool
+	if err := json.Unmarshal(obfuscateRaw, &boolValue); err == nil {
+		// It's a bool, convert to string
+		var newValue string
+		if boolValue {
+			newValue = "obfuscate"
+		} else {
+			newValue = "friendly_name"
+		}
+		log.Println("Migrating obfuscate_other_users from bool to string: " + newValue)
+
+		// Update the value
+		newValueJSON, _ := json.Marshal(newValue)
+		customize["obfuscate_other_users"] = newValueJSON
+
+		// Re-marshal customize
+		newCustomize, err := json.Marshal(customize)
+		if err != nil {
+			return data, err
+		}
+		raw["wrapperr_customize"] = newCustomize
+
+		// Re-marshal the entire config
+		return json.Marshal(raw)
+	}
+
+	// Already a string, no migration needed
+	return data, nil
 }
 
 // Read the config file and return the file as an object
@@ -180,6 +236,12 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 	file, err := os.ReadFile(config_path)
 	if err != nil {
 		return config, err
+	}
+
+	// Migrate obfuscate_other_users from bool to string if needed
+	file, err = migrateObfuscateOtherUsers(file)
+	if err != nil {
+		log.Println("Warning: Failed to migrate obfuscate_other_users field: " + err.Error())
 	}
 
 	// Parse config file
