@@ -37,6 +37,14 @@ type WrapperrCustomize struct {
 	GetUserMovieStatsOldestSubtitlePre1975      string `json:"get_user_movie_stats_oldest_subtitle_pre_1975"`
 	GetUserMovieStatsOldestSubtitlePre2000      string `json:"get_user_movie_stats_oldest_subtitle_pre_2000"`
 	GetUserMovieStatsSpentTitle                 string `json:"get_user_movie_stats_spent_title"`
+	GetUserMovieStatsBirthDecadeTitle           string `json:"get_user_movie_stats_birth_decade_title"`
+	GetUserMovieStatsBirthDecadeSubtitle        string `json:"get_user_movie_stats_birth_decade_subtitle"`
+	GetUserMovieStatsBirthDecadeTitleRecent     string `json:"get_user_movie_stats_birth_decade_title_recent"`
+	GetUserMovieStatsBirthDecadeSubtitleRecent  string `json:"get_user_movie_stats_birth_decade_subtitle_recent"`
+	GetUserMovieStatsBirthDecadeTitleAncient    string `json:"get_user_movie_stats_birth_decade_title_ancient"`
+	GetUserMovieStatsBirthDecadeSubtitleAncient string `json:"get_user_movie_stats_birth_decade_subtitle_ancient"`
+	GetUserMovieStatsBirthDecadeTitleError      string `json:"get_user_movie_stats_birth_decade_title_error"`
+	GetUserMovieStatsBirthDecadeSubtitleError   string `json:"get_user_movie_stats_birth_decade_subtitle_error"`
 	GetUserShowStats                            bool   `json:"get_user_show_stats"`
 	GetUserShowBuddy                            bool   `json:"get_user_show_stats_buddy"`
 	GetUserShowStatsTitle                       string `json:"get_user_show_stats_title"`
@@ -100,6 +108,18 @@ type WrapperrCustomize struct {
 	WrapperrSecondPlural                        string `json:"wrapperr_second_plural"`
 	WrapperrSortPlays                           string `json:"wrapperr_sort_plays"`
 	WrapperrSortDuration                        string `json:"wrapperr_sort_duration"`
+}
+
+type BirthDecadeResult struct {
+	NostalgiaPeakYear     int
+	NostalgiaWindowStart  int
+	NostalgiaWindowEnd    int
+	EstimatedBirthYear    int
+	EstimatedBirthDecade  string
+	TotalMoviesAnalyzed   int
+	TotalWeightedMinutes  int
+	Error                 bool
+	ErrorMessage          string
 }
 
 type WrapperrVersion struct {
@@ -232,6 +252,17 @@ type WrapperrStatisticsUser struct {
 				PausedCounter int    `json:"paused_counter"`
 				Error         bool   `json:"error"`
 			} `json:"user_movie_oldest"`
+			UserMovieBirthDecade struct {
+				NostalgiaPeakYear     int    `json:"nostalgia_peak_year"`
+				NostalgiaWindowStart  int    `json:"nostalgia_window_start"`
+				NostalgiaWindowEnd    int    `json:"nostalgia_window_end"`
+				EstimatedBirthYear    int    `json:"estimated_birth_year"`
+				EstimatedBirthDecade  string `json:"estimated_birth_decade"`
+				TotalMoviesAnalyzed   int    `json:"total_movies_analyzed"`
+				TotalWeightedMinutes  int    `json:"total_weighted_minutes"`
+				Error                 bool   `json:"error"`
+				ErrorMessage          string `json:"error_message"`
+			} `json:"user_movie_birth_decade"`
 			MovieDuration int `json:"movie_duration"`
 			MoviePlays    int `json:"movie_plays"`
 		} `json:"data"`

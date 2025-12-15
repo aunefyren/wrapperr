@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -337,6 +338,82 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 	}
 
 	return wrapperr_data, complete_date_loop, nil
+}
+
+func CalculateBirthDecade(movies []models.TautulliEntry) models.BirthDecadeResult {
+	// Handle empty data
+	if len(movies) == 0 {
+		return models.BirthDecadeResult{
+			Error:        true,
+			ErrorMessage: "No movie data available",
+		}
+	}
+
+	// Step 1: Build year weights map
+	yearWeights := make(map[int]float64)
+	totalWeight := 0.0
+
+	for _, movie := range movies {
+		durationMinutes := float64(movie.Duration) / 60.0
+		rewatchMultiplier := 1.0 + float64(movie.Plays-1)
+		weight := durationMinutes * rewatchMultiplier
+
+		yearWeights[movie.Year] += weight
+		totalWeight += weight
+	}
+
+	// Step 2: Sort years
+	years := make([]int, 0, len(yearWeights))
+	for year := range yearWeights {
+		years = append(years, year)
+	}
+	sort.Ints(years)
+
+	// Step 3: Find weighted percentiles
+	cumulativeWeight := 0.0
+	peakYear := years[0]
+	windowStart := years[0]
+	windowEnd := years[len(years)-1]
+
+	for _, year := range years {
+		cumulativeWeight += yearWeights[year]
+		percentile := cumulativeWeight / totalWeight
+
+		if percentile >= 0.20 && windowStart == years[0] {
+			windowStart = year
+		}
+		if percentile >= 0.50 && peakYear == years[0] {
+			peakYear = year
+		}
+		if percentile >= 0.80 {
+			windowEnd = year
+			break
+		}
+	}
+
+	// Step 4: Calculate birth year and format decade
+	birthYear := peakYear - 18
+	decade := (birthYear / 10) * 10
+
+	var decadeString string
+	if birthYear < 1900 {
+		decadeString = "Early 20th century or earlier"
+	} else if birthYear >= 2020 {
+		decadeString = "2020s or later"
+	} else {
+		decadeString = fmt.Sprintf("%ds", decade)
+	}
+
+	return models.BirthDecadeResult{
+		NostalgiaPeakYear:     peakYear,
+		NostalgiaWindowStart:  windowStart,
+		NostalgiaWindowEnd:    windowEnd,
+		EstimatedBirthYear:    birthYear,
+		EstimatedBirthDecade:  decadeString,
+		TotalMoviesAnalyzed:   len(movies),
+		TotalWeightedMinutes:  int(totalWeight),
+		Error:                 false,
+	}
 }
 
 func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data []models.WrapperrDay, wrapperr_reply models.WrapperrStatisticsReply) (models.WrapperrStatisticsReply, error) {
@@ -716,11 +793,26 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
 
+		// Calculate birth decade estimation
+		birthDecadeResult := CalculateBirthDecade(wrapperr_user_movie)
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowStart = birthDecadeResult.NostalgiaWindowStart
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowEnd = birthDecadeResult.NostalgiaWindowEnd
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
+
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
 	} else {
 		wrapperr_reply.User.UserMovies.Data.MoviesDuration = []models.TautulliEntry{}
 		wrapperr_reply.User.UserMovies.Data.MoviesPlays = []models.TautulliEntry{}
+
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = true
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = "No movies to analyze"
 
 		wrapperr_reply.User.UserMovies.Message = "No movies processed."
 	}

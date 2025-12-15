@@ -213,6 +213,10 @@ function load_movies() {
                         text += you_spent(results.user.user_movies.data.movie_duration, 'movies', functions);
                     text += "</div>";
 
+                    text += "<div class='boks2'>";
+                        text += birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                    text += "</div>";
+
                 text += "</div>";
 
             text += "</div>";
@@ -249,6 +253,12 @@ function load_movies() {
                     text += "<div class='boks2'>";
                         text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true, functions);
                     text += "</div>";
+
+                    if(!results.user.user_movies.data.user_movie_birth_decade.error) {
+                        text += "<div class='boks2'>";
+                            text += birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += "</div>";
+                    }
 
                 text += "</div>";
 
@@ -661,6 +671,59 @@ function load_longest_episode(array, functions_data) {
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title));
 			html += '<br><br>';
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false)));
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function birth_decade_card(birth_decade_data, functions_data) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+
+        if(!birth_decade_data.error) {
+            var birth_year = birth_decade_data.estimated_birth_year;
+            var peak_year = birth_decade_data.nostalgia_peak_year;
+
+            if(birth_year >= 2010) {
+                // Recent/future birth year
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_title_recent
+                        .replaceAll('{peak_year}', peak_year)
+                ) + "</b>";
+                html += '<br><img src="assets/img/quest.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_recent);
+            } else if(birth_year < 1920) {
+                // Ancient birth year
+                html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_ancient) + "</b>";
+                html += '<br><img src="assets/img/old-man.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_subtitle_ancient
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else {
+                // Normal case
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_title
+                        .replaceAll('{birth_decade}', '<span style="font-size:1.2em;">' + birth_decade_data.estimated_birth_decade + '</span>')
+                ) + "</b>";
+                html += '<br><img src="assets/img/gift.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_subtitle
+                        .replaceAll('{peak_year}', peak_year)
+                        .replaceAll('{window_start}', birth_decade_data.nostalgia_window_start)
+                        .replaceAll('{window_end}', birth_decade_data.nostalgia_window_end)
+                );
+            }
+        } else {
+            // Error case
+            html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_error) + "</b>";
+            html += '<br><img src="assets/img/bored.svg" style="margin: 1em auto; display: block; width: 15em;">';
+            html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_error);
+        }
+
         html += "</div>";
     html += "</div>";
 

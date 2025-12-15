@@ -528,6 +528,38 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 		config.WrapperrCustomize.GetUserMovieStatsSpentTitle = config_default.WrapperrCustomize.GetUserMovieStatsSpentTitle
 	}
 
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError
+	}
+
 	if config.WrapperrCustomize.GetUserShowStatsTitle == "" {
 		config.WrapperrCustomize.GetUserShowStatsTitle = config_default.WrapperrCustomize.GetUserShowStatsTitle
 	}
