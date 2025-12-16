@@ -781,7 +781,7 @@ function renderNostalgiaChart(birth_decade_data) {
     // Get peak year for highlighting
     var peakYear = birth_decade_data.nostalgia_peak_year;
 
-    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve</div>';
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">When You Were Watching</div>';
 
     // Compact histogram container
     html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
@@ -851,9 +851,7 @@ function renderNostalgiaChart(birth_decade_data) {
 
     // Legend
     html += '<div style="margin-top: 0.8em; font-size: 0.7em; opacity: 0.7; text-align: center;">';
-    html += '<span style="color: rgba(255, 200, 50, 1);">● Peak</span> ';
-    html += '<span style="color: rgba(150, 200, 150, 1); margin-left: 1em;">● Window</span> ';
-    html += '<span style="color: rgba(100, 150, 200, 1); margin-left: 1em;">● Other</span>';
+    html += '<span style="color: rgba(255, 200, 50, 1);">● Peak Nostalgia Year</span>';
     html += '</div>';
 
     return html;
