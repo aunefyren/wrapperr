@@ -347,7 +347,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 // The algorithm applies logarithmic weighting based on movie age to reward choosing older,
 // less readily available content over new releases. This corrects for the bias that users
 // naturally tend to watch recent movies more on Plex. Also if a user goes out of their way
-// olde films, that should hold more weight.
+// to watch old films, that should hold more weight.
 //
 // Parameters:
 //   - movies: Array of movie watch history entries
@@ -363,14 +363,20 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		}
 	}
 
-	// Step 1: Build year weights map
-	yearWeights := make(map[int]float64)
+	// Step 1: Build year weights maps (both raw and corrected)
+	yearWeights := make(map[int]float64)    // Corrected weights for calculation
+	rawYearWeights := make(map[int]float64) // Raw weights for visualization
 	totalWeight := 0.0
+	rawTotalWeight := 0.0
 
 	for _, movie := range movies {
 		durationMinutes := float64(movie.Duration) / 60.0
 		rewatchMultiplier := 1.0 + float64(movie.Plays-1)
 		baseWeight := durationMinutes * rewatchMultiplier
+
+		// Store raw weight for visualization
+		rawYearWeights[movie.Year] += baseWeight
+		rawTotalWeight += baseWeight
 
 		// Apply availability bias correction using logarithmic scaling
 		// This rewards choosing older, less readily available content over new releases
@@ -449,12 +455,19 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		decadeString = fmt.Sprintf("%ds", decade)
 	}
 
-	// Step 5: Prepare year distribution for visualization
-	// Convert map[int]float64 to map[string]float64 with normalized percentages
+	// Step 5: Prepare year distributions
+	// Corrected year distribution (for calculation reference)
 	yearDistribution := make(map[string]float64)
 	for year, weight := range yearWeights {
 		percentage := (weight / totalWeight) * 100.0
 		yearDistribution[fmt.Sprintf("%d", year)] = percentage
+	}
+
+	// Raw year distribution (for visualization)
+	rawYearDistribution := make(map[string]float64)
+	for year, weight := range rawYearWeights {
+		percentage := (weight / rawTotalWeight) * 100.0
+		rawYearDistribution[fmt.Sprintf("%d", year)] = percentage
 	}
 
 	return models.BirthDecadeResult{
@@ -466,6 +479,7 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		TotalMoviesAnalyzed:  len(movies),
 		TotalWeightedMinutes: int(totalWeight),
 		YearDistribution:     yearDistribution,
+		RawYearDistribution:  rawYearDistribution,
 		Error:                false,
 	}
 }
@@ -859,6 +873,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.YearDistribution = birthDecadeResult.YearDistribution
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.RawYearDistribution = birthDecadeResult.RawYearDistribution
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
 

@@ -118,7 +118,8 @@ type BirthDecadeResult struct {
 	EstimatedBirthDecade  string
 	TotalMoviesAnalyzed   int
 	TotalWeightedMinutes  int
-	YearDistribution      map[string]float64
+	YearDistribution      map[string]float64 // Corrected weights for calculation
+	RawYearDistribution   map[string]float64 // Raw weights for visualization
 	Error                 bool
 	ErrorMessage          string
 }
@@ -262,6 +263,7 @@ type WrapperrStatisticsUser struct {
 				TotalMoviesAnalyzed   int                       `json:"total_movies_analyzed"`
 				TotalWeightedMinutes  int                       `json:"total_weighted_minutes"`
 				YearDistribution      map[string]float64        `json:"year_distribution"`
+				RawYearDistribution   map[string]float64        `json:"raw_year_distribution"`
 				Error                 bool                      `json:"error"`
 				ErrorMessage          string                    `json:"error_message"`
 			} `json:"user_movie_birth_decade"`

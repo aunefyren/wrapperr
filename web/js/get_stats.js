@@ -740,7 +740,7 @@ function birth_decade_card(birth_decade_data, functions_data) {
 
 function renderNostalgiaChart(birth_decade_data) {
     var html = "";
-    var yearDist = birth_decade_data.year_distribution;
+    var yearDist = birth_decade_data.raw_year_distribution;
 
     // Convert to array and sort by year
     var dataYears = Object.keys(yearDist).map(function(year) {
@@ -788,13 +788,15 @@ function renderNostalgiaChart(birth_decade_data) {
         var year = years[i].year;
         var percentage = years[i].percentage;
 
-        // Use linear scale since backend already applies availability bias correction
+        // Use logarithmic scale for visualization of raw watch data
         var barHeight;
         if(percentage === 0) {
             barHeight = 2; // Small visible bar for no data
         } else {
-            // Linear scale: percentages are already corrected by backend
-            barHeight = (percentage / maxPercentage) * 100;
+            // Log scale: log(x+1) to compress large values and show small values
+            var logMax = Math.log(maxPercentage + 1);
+            var logValue = Math.log(percentage + 1);
+            barHeight = (logValue / logMax) * 100;
         }
 
         // Determine bar color based on position
