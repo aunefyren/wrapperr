@@ -118,6 +118,7 @@ type BirthDecadeResult struct {
 	EstimatedBirthDecade  string
 	TotalMoviesAnalyzed   int
 	TotalWeightedMinutes  int
+	YearDistribution      map[string]float64
 	Error                 bool
 	ErrorMessage          string
 }
@@ -253,15 +254,16 @@ type WrapperrStatisticsUser struct {
 				Error         bool   `json:"error"`
 			} `json:"user_movie_oldest"`
 			UserMovieBirthDecade struct {
-				NostalgiaPeakYear     int    `json:"nostalgia_peak_year"`
-				NostalgiaWindowStart  int    `json:"nostalgia_window_start"`
-				NostalgiaWindowEnd    int    `json:"nostalgia_window_end"`
-				EstimatedBirthYear    int    `json:"estimated_birth_year"`
-				EstimatedBirthDecade  string `json:"estimated_birth_decade"`
-				TotalMoviesAnalyzed   int    `json:"total_movies_analyzed"`
-				TotalWeightedMinutes  int    `json:"total_weighted_minutes"`
-				Error                 bool   `json:"error"`
-				ErrorMessage          string `json:"error_message"`
+				NostalgiaPeakYear     int                       `json:"nostalgia_peak_year"`
+				NostalgiaWindowStart  int                       `json:"nostalgia_window_start"`
+				NostalgiaWindowEnd    int                       `json:"nostalgia_window_end"`
+				EstimatedBirthYear    int                       `json:"estimated_birth_year"`
+				EstimatedBirthDecade  string                    `json:"estimated_birth_decade"`
+				TotalMoviesAnalyzed   int                       `json:"total_movies_analyzed"`
+				TotalWeightedMinutes  int                       `json:"total_weighted_minutes"`
+				YearDistribution      map[string]float64        `json:"year_distribution"`
+				Error                 bool                      `json:"error"`
+				ErrorMessage          string                    `json:"error_message"`
 			} `json:"user_movie_birth_decade"`
 			MovieDuration int `json:"movie_duration"`
 			MoviePlays    int `json:"movie_plays"`

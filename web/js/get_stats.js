@@ -717,6 +717,14 @@ function birth_decade_card(birth_decade_data, functions_data) {
                         .replaceAll('{window_end}', birth_decade_data.nostalgia_window_end)
                 );
             }
+
+            // Add visualization chart if we have year distribution data
+            if(birth_decade_data.year_distribution && Object.keys(birth_decade_data.year_distribution).length > 0) {
+                html += '<br><div style="margin: 2em auto; max-width: 600px;">';
+                html += renderNostalgiaChart(birth_decade_data);
+                html += '</div>';
+            }
+
         } else {
             // Error case
             html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_error) + "</b>";
@@ -726,6 +734,120 @@ function birth_decade_card(birth_decade_data, functions_data) {
 
         html += "</div>";
     html += "</div>";
+
+    return html;
+}
+
+function renderNostalgiaChart(birth_decade_data) {
+    var html = "";
+    var yearDist = birth_decade_data.year_distribution;
+
+    // Convert to array and sort by year
+    var dataYears = Object.keys(yearDist).map(function(year) {
+        return {
+            year: parseInt(year),
+            percentage: yearDist[year]
+        };
+    }).sort(function(a, b) {
+        return a.year - b.year;
+    });
+
+    if(dataYears.length === 0) return "";
+
+    var minYear = dataYears[0].year;
+    var maxYear = dataYears[dataYears.length - 1].year;
+
+    // Fill in all intermediate years with 0% if no data
+    var years = [];
+    for(var y = minYear; y <= maxYear; y++) {
+        var existingData = dataYears.find(function(item) { return item.year === y; });
+        if(existingData) {
+            years.push(existingData);
+        } else {
+            years.push({ year: y, percentage: 0 });
+        }
+    }
+
+    // Find max percentage for scaling
+    var maxPercentage = Math.max.apply(Math, years.map(function(y) { return y.percentage; }));
+
+    // Get peak and window years for highlighting
+    var peakYear = birth_decade_data.nostalgia_peak_year;
+    var windowStart = birth_decade_data.nostalgia_window_start;
+    var windowEnd = birth_decade_data.nostalgia_window_end;
+
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve</div>';
+
+    // Compact histogram container
+    html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; border-radius: 8px; height: 120px;">';
+
+    // Create histogram bars
+    html += '<div style="display: flex; align-items: flex-end; height: 100%; gap: 1px; position: relative;">';
+
+    for(var i = 0; i < years.length; i++) {
+        var year = years[i].year;
+        var percentage = years[i].percentage;
+        var barHeight = (percentage / maxPercentage) * 100;
+
+        // For years with no data, show a minimal bar
+        if(percentage === 0) {
+            barHeight = 2; // Small visible bar
+        }
+
+        // Determine bar color based on position
+        var barColor = 'rgba(100, 150, 200, 0.7)';
+        var highlightColor = 'rgba(100, 150, 200, 1)';
+
+        if(percentage === 0) {
+            // Gray out bars with no data
+            barColor = 'rgba(80, 80, 80, 0.3)';
+            highlightColor = 'rgba(100, 100, 100, 0.5)';
+        } else if(year === peakYear) {
+            barColor = 'rgba(255, 200, 50, 0.8)';
+            highlightColor = 'rgba(255, 200, 50, 1)';
+        } else if(year >= windowStart && year <= windowEnd) {
+            barColor = 'rgba(150, 200, 150, 0.7)';
+            highlightColor = 'rgba(150, 200, 150, 1)';
+        }
+
+        html += '<div style="flex: 1; height: ' + barHeight + '%; background: ' + barColor + '; border-radius: 2px 2px 0 0; cursor: pointer; transition: all 0.2s ease; position: relative;" ';
+        html += 'onmouseover="this.style.background=\'' + highlightColor + '\'; this.style.transform=\'scaleY(1.1)\'; this.querySelector(\'.tooltip\').style.display=\'block\';" ';
+        html += 'onmouseout="this.style.background=\'' + barColor + '\'; this.style.transform=\'scaleY(1)\'; this.querySelector(\'.tooltip\').style.display=\'none\';">';
+
+        // Tooltip
+        html += '<div class="tooltip" style="display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 6px 10px; border-radius: 6px; white-space: nowrap; font-size: 0.8em; margin-bottom: 5px; z-index: 1000; pointer-events: none;">';
+        html += '<div style="font-weight: bold;">' + year + '</div>';
+        if(percentage > 0) {
+            html += '<div style="font-size: 0.9em; opacity: 0.9;">' + percentage.toFixed(1) + '%</div>';
+        } else {
+            html += '<div style="font-size: 0.9em; opacity: 0.6; font-style: italic;">No data</div>';
+        }
+        // Add triangle pointer
+        html += '<div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid rgba(0,0,0,0.9);"></div>';
+        html += '</div>';
+
+        html += '</div>';
+    }
+
+    html += '</div>';
+
+    // X-axis with year labels
+    html += '<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7em; opacity: 0.6;">';
+    html += '<div>' + minYear + '</div>';
+    if(maxYear - minYear > 10) {
+        html += '<div>' + Math.floor((minYear + maxYear) / 2) + '</div>';
+    }
+    html += '<div>' + maxYear + '</div>';
+    html += '</div>';
+
+    html += '</div>';
+
+    // Legend
+    html += '<div style="margin-top: 0.8em; font-size: 0.7em; opacity: 0.7; text-align: center;">';
+    html += '<span style="color: rgba(255, 200, 50, 1);">● Peak</span> ';
+    html += '<span style="color: rgba(150, 200, 150, 1); margin-left: 1em;">● Window</span> ';
+    html += '<span style="color: rgba(100, 150, 200, 1); margin-left: 1em;">● Other</span>';
+    html += '</div>';
 
     return html;
 }
