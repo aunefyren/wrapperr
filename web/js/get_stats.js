@@ -722,14 +722,11 @@ function birth_decade_card(birth_decade_data, functions_data) {
                 html += ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_subtitle
                         .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
-                        .replaceAll('{peak_year}', peak_year)
-                        .replaceAll('{window_start}', birth_decade_data.nostalgia_window_start)
-                        .replaceAll('{window_end}', birth_decade_data.nostalgia_window_end)
                 );
             }
 
             // Add visualization chart if we have year distribution data
-            if(birth_decade_data.year_distribution && Object.keys(birth_decade_data.year_distribution).length > 0) {
+            if(birth_decade_data.raw_year_distribution && Object.keys(birth_decade_data.raw_year_distribution).length > 0) {
                 html += '<br><div style="margin: 2em auto; max-width: 600px;">';
                 html += renderNostalgiaChart(birth_decade_data);
                 html += '</div>';

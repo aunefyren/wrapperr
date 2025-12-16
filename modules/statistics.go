@@ -457,13 +457,6 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 	}
 
 	// Step 5: Prepare year distributions
-	// Corrected year distribution (for calculation reference)
-	yearDistribution := make(map[string]float64)
-	for year, weight := range yearWeights {
-		percentage := (weight / totalWeight) * 100.0
-		yearDistribution[fmt.Sprintf("%d", year)] = percentage
-	}
-
 	// Raw year distribution (for visualization)
 	rawYearDistribution := make(map[string]float64)
 	for year, weight := range rawYearWeights {
@@ -480,7 +473,6 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		EstimatedBirthDecade: decadeString,
 		TotalMoviesAnalyzed:  len(movies),
 		TotalWeightedMinutes: int(totalWeight),
-		YearDistribution:     yearDistribution,
 		RawYearDistribution:  rawYearDistribution,
 		Error:                false,
 	}
@@ -875,7 +867,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.YearDistribution = birthDecadeResult.YearDistribution
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.RawYearDistribution = birthDecadeResult.RawYearDistribution
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
