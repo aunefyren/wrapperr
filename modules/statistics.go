@@ -442,8 +442,9 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		}
 	}
 
-	// Step 4: Calculate birth year and format decade
+	// Step 4: Calculate birth year, age, and format decade
 	birthYear := peakYear - 18
+	estimatedAge := referenceYear - birthYear
 	decade := (birthYear / 10) * 10
 
 	var decadeString string
@@ -475,6 +476,7 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		NostalgiaWindowStart: windowStart,
 		NostalgiaWindowEnd:   windowEnd,
 		EstimatedBirthYear:   birthYear,
+		EstimatedAge:         estimatedAge,
 		EstimatedBirthDecade: decadeString,
 		TotalMoviesAnalyzed:  len(movies),
 		TotalWeightedMinutes: int(totalWeight),
@@ -869,6 +871,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowStart = birthDecadeResult.NostalgiaWindowStart
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowEnd = birthDecadeResult.NostalgiaWindowEnd
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes

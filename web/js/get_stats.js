@@ -685,19 +685,28 @@ function birth_decade_card(birth_decade_data, functions_data) {
 
         if(!birth_decade_data.error) {
             var birth_year = birth_decade_data.estimated_birth_year;
+            var age = birth_decade_data.estimated_age;
+            var birth_decade = birth_decade_data.estimated_birth_decade;
             var peak_year = birth_decade_data.nostalgia_peak_year;
 
             if(birth_year >= 2010) {
                 // Recent/future birth year
                 html += "<b>" + ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_title_recent
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
                         .replaceAll('{peak_year}', peak_year)
                 ) + "</b>";
                 html += '<br><br>';
-                html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_recent);
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_subtitle_recent
+                        .replaceAll('{peak_year}', peak_year)
+                );
             } else if(birth_year < 1920) {
                 // Ancient birth year
-                html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_ancient) + "</b>";
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_movie_stats_birth_decade_title_ancient
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
                 html += '<br><br>';
                 html += ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_subtitle_ancient
@@ -707,11 +716,12 @@ function birth_decade_card(birth_decade_data, functions_data) {
                 // Normal case
                 html += "<b>" + ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_title
-                        .replaceAll('{birth_decade}', '<span style="font-size:1.2em;">' + birth_decade_data.estimated_birth_decade + '</span>')
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
                 ) + "</b>";
                 html += '<br><br>';
                 html += ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_subtitle
+                        .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
                         .replaceAll('{peak_year}', peak_year)
                         .replaceAll('{window_start}', birth_decade_data.nostalgia_window_start)
                         .replaceAll('{window_end}', birth_decade_data.nostalgia_window_end)
