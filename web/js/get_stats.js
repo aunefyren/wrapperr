@@ -776,10 +776,10 @@ function renderNostalgiaChart(birth_decade_data) {
     var windowStart = birth_decade_data.nostalgia_window_start;
     var windowEnd = birth_decade_data.nostalgia_window_end;
 
-    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve</div>';
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve <span style="font-size: 0.75em; opacity: 0.6;">(log scale)</span></div>';
 
     // Compact histogram container
-    html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; border-radius: 8px; height: 120px;">';
+    html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
 
     // Create histogram bars
     html += '<div style="display: flex; align-items: flex-end; height: 100%; gap: 1px; position: relative;">';
@@ -787,11 +787,16 @@ function renderNostalgiaChart(birth_decade_data) {
     for(var i = 0; i < years.length; i++) {
         var year = years[i].year;
         var percentage = years[i].percentage;
-        var barHeight = (percentage / maxPercentage) * 100;
 
-        // For years with no data, show a minimal bar
+        // Use logarithmic scale for better outlier handling
+        var barHeight;
         if(percentage === 0) {
-            barHeight = 2; // Small visible bar
+            barHeight = 2; // Small visible bar for no data
+        } else {
+            // Log scale: log(x+1) to handle 0 gracefully and compress large values
+            var logMax = Math.log(maxPercentage + 1);
+            var logValue = Math.log(percentage + 1);
+            barHeight = (logValue / logMax) * 100;
         }
 
         // Determine bar color based on position
