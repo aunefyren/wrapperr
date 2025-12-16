@@ -112,8 +112,6 @@ type WrapperrCustomize struct {
 
 type BirthDecadeResult struct {
 	NostalgiaPeakYear     int
-	NostalgiaWindowStart  int
-	NostalgiaWindowEnd    int
 	EstimatedBirthYear    int
 	EstimatedAge          int
 	EstimatedBirthDecade  string
@@ -256,8 +254,6 @@ type WrapperrStatisticsUser struct {
 			} `json:"user_movie_oldest"`
 			UserMovieBirthDecade struct {
 				NostalgiaPeakYear     int                       `json:"nostalgia_peak_year"`
-				NostalgiaWindowStart  int                       `json:"nostalgia_window_start"`
-				NostalgiaWindowEnd    int                       `json:"nostalgia_window_end"`
 				EstimatedBirthYear    int                       `json:"estimated_birth_year"`
 				EstimatedAge          int                       `json:"estimated_age"`
 				EstimatedBirthDecade  string                    `json:"estimated_birth_decade"`

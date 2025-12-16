@@ -778,10 +778,8 @@ function renderNostalgiaChart(birth_decade_data) {
     // Find max percentage for scaling
     var maxPercentage = Math.max.apply(Math, years.map(function(y) { return y.percentage; }));
 
-    // Get peak and window years for highlighting
+    // Get peak year for highlighting
     var peakYear = birth_decade_data.nostalgia_peak_year;
-    var windowStart = birth_decade_data.nostalgia_window_start;
-    var windowEnd = birth_decade_data.nostalgia_window_end;
 
     html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve</div>';
 
@@ -817,9 +815,6 @@ function renderNostalgiaChart(birth_decade_data) {
         } else if(year === peakYear) {
             barColor = 'rgba(255, 200, 50, 0.8)';
             highlightColor = 'rgba(255, 200, 50, 1)';
-        } else if(year >= windowStart && year <= windowEnd) {
-            barColor = 'rgba(150, 200, 150, 0.7)';
-            highlightColor = 'rgba(150, 200, 150, 1)';
         }
 
         html += '<div style="flex: 1; height: ' + barHeight + '%; background: ' + barColor + '; border-radius: 2px 2px 0 0; cursor: pointer; transition: all 0.2s ease; position: relative;" ';

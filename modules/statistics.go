@@ -423,21 +423,13 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 	// Step 3: Find weighted percentiles
 	cumulativeWeight := 0.0
 	peakYear := years[0]
-	windowStart := years[0]
-	windowEnd := years[len(years)-1]
 
 	for _, year := range years {
 		cumulativeWeight += yearWeights[year]
 		percentile := cumulativeWeight / totalWeight
 
-		if percentile >= 0.20 && windowStart == years[0] {
-			windowStart = year
-		}
 		if percentile >= 0.50 && peakYear == years[0] {
 			peakYear = year
-		}
-		if percentile >= 0.80 {
-			windowEnd = year
 			break
 		}
 	}
@@ -466,8 +458,6 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 
 	return models.BirthDecadeResult{
 		NostalgiaPeakYear:    peakYear,
-		NostalgiaWindowStart: windowStart,
-		NostalgiaWindowEnd:   windowEnd,
 		EstimatedBirthYear:   birthYear,
 		EstimatedAge:         estimatedAge,
 		EstimatedBirthDecade: decadeString,
@@ -860,8 +850,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		referenceYear := time.Unix(int64(config.WrappedEnd), 0).Year()
 		birthDecadeResult := CalculateBirthDecade(wrapperr_user_movie, referenceYear)
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowStart = birthDecadeResult.NostalgiaWindowStart
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowEnd = birthDecadeResult.NostalgiaWindowEnd
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
