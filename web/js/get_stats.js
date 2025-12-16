@@ -788,15 +788,13 @@ function renderNostalgiaChart(birth_decade_data) {
         var year = years[i].year;
         var percentage = years[i].percentage;
 
-        // Use logarithmic scale for better outlier handling
+        // Use linear scale since backend already applies availability bias correction
         var barHeight;
         if(percentage === 0) {
             barHeight = 2; // Small visible bar for no data
         } else {
-            // Log scale: log(x+1) to handle 0 gracefully and compress large values
-            var logMax = Math.log(maxPercentage + 1);
-            var logValue = Math.log(percentage + 1);
-            barHeight = (logValue / logMax) * 100;
+            // Linear scale: percentages are already corrected by backend
+            barHeight = (percentage / maxPercentage) * 100;
         }
 
         // Determine bar color based on position

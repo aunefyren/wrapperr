@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -340,7 +341,20 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 	return wrapperr_data, complete_date_loop, nil
 }
 
-func CalculateBirthDecade(movies []models.TautulliEntry) models.BirthDecadeResult {
+// CalculateBirthDecade estimates a user's birth decade based on their movie watching patterns,
+// applying availability bias correction to account for recency bias in content selection.
+//
+// The algorithm applies logarithmic weighting based on movie age to reward choosing older,
+// less readily available content over new releases. This corrects for the bias that users
+// naturally tend to watch recent movies more on Plex. Also if a user goes out of their way
+// olde films, that should hold more weight.
+//
+// Parameters:
+//   - movies: Array of movie watch history entries
+//   - referenceYear: The year to use as reference (typically the wrapped period end year)
+//
+// Returns a BirthDecadeResult containing the estimated birth decade and nostalgia metrics.
+func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) models.BirthDecadeResult {
 	// Handle empty data
 	if len(movies) == 0 {
 		return models.BirthDecadeResult{
@@ -356,10 +370,41 @@ func CalculateBirthDecade(movies []models.TautulliEntry) models.BirthDecadeResul
 	for _, movie := range movies {
 		durationMinutes := float64(movie.Duration) / 60.0
 		rewatchMultiplier := 1.0 + float64(movie.Plays-1)
-		weight := durationMinutes * rewatchMultiplier
+		baseWeight := durationMinutes * rewatchMultiplier
 
-		yearWeights[movie.Year] += weight
-		totalWeight += weight
+		// Apply availability bias correction using logarithmic scaling
+		// This rewards choosing older, less readily available content over new releases
+		movieAge := referenceYear - movie.Year
+
+		// Handle edge cases
+		if movieAge < 0 {
+			// Future releases or data errors - treat as current year
+			movieAge = 0
+		}
+		if movieAge > 100 {
+			// Cap at 100 years to prevent extreme bias from very old films
+			movieAge = 100
+		}
+
+		// Calculate age multiplier using log10(age + 1)
+		// Examples:
+		//   Current year (age 0): log10(1) = 0.0 → minimum of 0.1
+		//   10 years old: log10(11) ≈ 1.04
+		//   25 years old: log10(26) ≈ 1.41
+		//   50 years old: log10(51) ≈ 1.71
+		//   100 years old: log10(101) ≈ 2.00
+		ageMultiplier := math.Log10(float64(movieAge + 1))
+
+		// Apply minimum multiplier to prevent current year movies from being completely eliminated
+		if ageMultiplier < 0.1 {
+			ageMultiplier = 0.1
+		}
+
+		// Calculate final adjusted weight
+		adjustedWeight := baseWeight * ageMultiplier
+
+		yearWeights[movie.Year] += adjustedWeight
+		totalWeight += adjustedWeight
 	}
 
 	// Step 2: Sort years
@@ -413,15 +458,15 @@ func CalculateBirthDecade(movies []models.TautulliEntry) models.BirthDecadeResul
 	}
 
 	return models.BirthDecadeResult{
-		NostalgiaPeakYear:     peakYear,
-		NostalgiaWindowStart:  windowStart,
-		NostalgiaWindowEnd:    windowEnd,
-		EstimatedBirthYear:    birthYear,
-		EstimatedBirthDecade:  decadeString,
-		TotalMoviesAnalyzed:   len(movies),
-		TotalWeightedMinutes:  int(totalWeight),
-		YearDistribution:      yearDistribution,
-		Error:                 false,
+		NostalgiaPeakYear:    peakYear,
+		NostalgiaWindowStart: windowStart,
+		NostalgiaWindowEnd:   windowEnd,
+		EstimatedBirthYear:   birthYear,
+		EstimatedBirthDecade: decadeString,
+		TotalMoviesAnalyzed:  len(movies),
+		TotalWeightedMinutes: int(totalWeight),
+		YearDistribution:     yearDistribution,
+		Error:                false,
 	}
 }
 
@@ -803,7 +848,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
 
 		// Calculate birth decade estimation
-		birthDecadeResult := CalculateBirthDecade(wrapperr_user_movie)
+		// Extract reference year from wrapped period end date for availability bias correction
+		referenceYear := time.Unix(int64(config.WrappedEnd), 0).Year()
+		birthDecadeResult := CalculateBirthDecade(wrapperr_user_movie, referenceYear)
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowStart = birthDecadeResult.NostalgiaWindowStart
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaWindowEnd = birthDecadeResult.NostalgiaWindowEnd
