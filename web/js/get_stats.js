@@ -693,12 +693,12 @@ function birth_decade_card(birth_decade_data, functions_data) {
                     functions_data.get_user_movie_stats_birth_decade_title_recent
                         .replaceAll('{peak_year}', peak_year)
                 ) + "</b>";
-                html += '<br><img src="assets/img/quest.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += '<br><br>';
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_recent);
             } else if(birth_year < 1920) {
                 // Ancient birth year
                 html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_ancient) + "</b>";
-                html += '<br><img src="assets/img/old-man.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += '<br><br>';
                 html += ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_subtitle_ancient
                         .replaceAll('{peak_year}', peak_year)
@@ -709,7 +709,7 @@ function birth_decade_card(birth_decade_data, functions_data) {
                     functions_data.get_user_movie_stats_birth_decade_title
                         .replaceAll('{birth_decade}', '<span style="font-size:1.2em;">' + birth_decade_data.estimated_birth_decade + '</span>')
                 ) + "</b>";
-                html += '<br><img src="assets/img/gift.svg" style="margin: 1em auto; display: block; width: 15em;">';
+                html += '<br><br>';
                 html += ReplaceStandardStrings(
                     functions_data.get_user_movie_stats_birth_decade_subtitle
                         .replaceAll('{peak_year}', peak_year)
@@ -728,7 +728,7 @@ function birth_decade_card(birth_decade_data, functions_data) {
         } else {
             // Error case
             html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_error) + "</b>";
-            html += '<br><img src="assets/img/bored.svg" style="margin: 1em auto; display: block; width: 15em;">';
+            html += '<br><br>';
             html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_error);
         }
 
@@ -776,7 +776,7 @@ function renderNostalgiaChart(birth_decade_data) {
     var windowStart = birth_decade_data.nostalgia_window_start;
     var windowEnd = birth_decade_data.nostalgia_window_end;
 
-    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve <span style="font-size: 0.75em; opacity: 0.6;">(log scale)</span></div>';
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">Your Nostalgia Curve</div>';
 
     // Compact histogram container
     html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
