@@ -118,7 +118,7 @@ type WrapperrCustomize struct {
 	WrapperrSortDuration                        string `json:"wrapperr_sort_duration"`
 }
 
-type BirthDecadeResult struct {
+type MovieBirthDecadeResult struct {
 	NostalgiaPeakYear     int
 	EstimatedBirthYear    int
 	EstimatedAge          int

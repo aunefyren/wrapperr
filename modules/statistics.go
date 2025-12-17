@@ -341,26 +341,30 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 	return wrapperr_data, complete_date_loop, nil
 }
 
-// CalculateBirthDecade estimates a user's birth decade based on their movie watching patterns,
-// applying availability bias correction to account for recency bias in content selection.
-//
-// The algorithm applies logarithmic weighting based on movie age to reward choosing older,
-// less readily available content over new releases. This corrects for the bias that users
-// naturally tend to watch recent movies more on Plex. Also if a user goes out of their way
-// to watch old films, that should hold more weight.
+// calculateBirthDecadeGeneric performs the core birth decade calculation algorithm
+// that is shared between movies and shows. It applies availability bias correction
+// using logarithmic weighting and finds the nostalgia peak year.
 //
 // Parameters:
-//   - movies: Array of movie watch history entries
+//   - content: Array of watch history entries (movies or TV episodes)
 //   - referenceYear: The year to use as reference (typically the wrapped period end year)
 //
-// Returns a BirthDecadeResult containing the estimated birth decade and nostalgia metrics.
-func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) models.BirthDecadeResult {
-	// Handle empty data
-	if len(movies) == 0 {
-		return models.BirthDecadeResult{
-			Error:        true,
-			ErrorMessage: "No movie data available",
-		}
+// Returns the calculated values as individual components, or an error if insufficient data.
+func calculateBirthDecadeGeneric(
+	content []models.TautulliEntry,
+	referenceYear int,
+) (
+	nostalgiaPeakYear int,
+	estimatedBirthYear int,
+	estimatedAge int,
+	estimatedBirthDecade string,
+	totalWeightedMinutes int,
+	rawYearDistribution map[string]float64,
+	err error,
+) {
+	// Input validation
+	if len(content) < 5 {
+		return 0, 0, 0, "", 0, nil, errors.New("Not enough data for calculation")
 	}
 
 	// Step 1: Build year weights maps (both raw and corrected)
@@ -369,58 +373,42 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 	totalWeight := 0.0
 	rawTotalWeight := 0.0
 
-	for _, movie := range movies {
-		durationMinutes := float64(movie.Duration) / 60.0
-		rewatchMultiplier := 1.0 + float64(movie.Plays-1)
+	for _, item := range content {
+		durationMinutes := float64(item.Duration) / 60.0
+		rewatchMultiplier := 1.0 + float64(item.Plays-1)
 		baseWeight := durationMinutes * rewatchMultiplier
 
 		// Store raw weight for visualization
-		rawYearWeights[movie.Year] += baseWeight
+		rawYearWeights[item.Year] += baseWeight
 		rawTotalWeight += baseWeight
 
 		// Apply availability bias correction using logarithmic scaling
-		// This rewards choosing older, less readily available content over new releases
-		movieAge := referenceYear - movie.Year
-
-		// Handle edge cases
-		if movieAge < 0 {
-			// Future releases or data errors - treat as current year
-			movieAge = 0
+		itemAge := referenceYear - item.Year
+		if itemAge < 0 {
+			itemAge = 0 // Handle future releases
 		}
-		if movieAge > 100 {
-			// Cap at 100 years to prevent extreme bias from very old films
-			movieAge = 100
+		if itemAge > 100 {
+			itemAge = 100 // Cap at 100 years
 		}
 
-		// Calculate age multiplier using log10(age + 1)
-		// Examples:
-		//   Current year (age 0): log10(1) = 0.0 → minimum of 0.1
-		//   10 years old: log10(11) ≈ 1.04
-		//   25 years old: log10(26) ≈ 1.41
-		//   50 years old: log10(51) ≈ 1.71
-		//   100 years old: log10(101) ≈ 2.00
-		ageMultiplier := math.Log10(float64(movieAge + 1))
-
-		// Apply minimum multiplier to prevent current year movies from being completely eliminated
+		ageMultiplier := math.Log10(float64(itemAge + 1))
 		if ageMultiplier < 0.1 {
-			ageMultiplier = 0.1
+			ageMultiplier = 0.1 // Minimum multiplier
 		}
 
-		// Calculate final adjusted weight
 		adjustedWeight := baseWeight * ageMultiplier
-
-		yearWeights[movie.Year] += adjustedWeight
+		yearWeights[item.Year] += adjustedWeight
 		totalWeight += adjustedWeight
 	}
 
-	// Step 2: Sort years
+	// Step 2: Sort years for percentile calculation
 	years := make([]int, 0, len(yearWeights))
 	for year := range yearWeights {
 		years = append(years, year)
 	}
 	sort.Ints(years)
 
-	// Step 3: Find weighted percentiles
+	// Step 3: Find 50th percentile (nostalgia peak)
 	cumulativeWeight := 0.0
 	peakYear := years[0]
 
@@ -434,12 +422,14 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		}
 	}
 
-	// Step 4: Calculate birth year, age, and format decade
+	// Step 4: Calculate birth year (peak - 18 years) and age
 	birthYear := peakYear - 18
-	estimatedAge := referenceYear - birthYear
-	decade := (birthYear / 10) * 10
+	age := referenceYear - birthYear
 
+	// Step 5: Format decade string
+	decade := (birthYear / 10) * 10
 	var decadeString string
+
 	if birthYear < 1900 {
 		decadeString = "Early 20th century or earlier"
 	} else if birthYear >= 2020 {
@@ -448,22 +438,53 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 		decadeString = fmt.Sprintf("%ds", decade)
 	}
 
-	// Step 5: Prepare year distributions
-	// Raw year distribution (for visualization)
-	rawYearDistribution := make(map[string]float64)
+	// Step 6: Prepare raw year distribution for visualization
+	rawDist := make(map[string]float64)
 	for year, weight := range rawYearWeights {
 		percentage := (weight / rawTotalWeight) * 100.0
-		rawYearDistribution[fmt.Sprintf("%d", year)] = percentage
+		rawDist[fmt.Sprintf("%d", year)] = percentage
 	}
 
-	return models.BirthDecadeResult{
+	return peakYear, birthYear, age, decadeString, int(totalWeight), rawDist, nil
+}
+
+// CalculateMovieShowBirthDecade analyzes Movie viewing patterns to estimate a user's age based on nostalgia.
+// The algorithm applies logarithmic weighting based on movie age to reward choosing older,
+// less readily available content over new releases. This corrects for the bias that users
+// naturally tend to watch recent movies more on Plex. Also if a user goes out of their way
+// to watch old films, that should hold more weight.
+//
+// Returns a MovieBirthDecadeResult containing the estimated birth decade and nostalgia metrics.
+func CalculateMovieBirthDecade(movies []models.TautulliEntry, referenceYear int) models.MovieBirthDecadeResult {
+	// Validate minimum data requirement
+	if len(movies) < 5 {
+		return models.MovieBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: "Need at least 5 movies with valid years for prediction",
+		}
+	}
+
+	// Call generic calculation logic
+	peakYear, birthYear, age, decadeStr, weightedMins, rawDist, err := calculateBirthDecadeGeneric(
+		movies,
+		referenceYear,
+	)
+
+	if err != nil {
+		return models.MovieBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: err.Error(),
+		}
+	}
+
+	return models.MovieBirthDecadeResult{
 		NostalgiaPeakYear:    peakYear,
 		EstimatedBirthYear:   birthYear,
-		EstimatedAge:         estimatedAge,
-		EstimatedBirthDecade: decadeString,
+		EstimatedAge:         age,
+		EstimatedBirthDecade: decadeStr,
 		TotalMoviesAnalyzed:  len(movies),
-		TotalWeightedMinutes: int(totalWeight),
-		RawYearDistribution:  rawYearDistribution,
+		TotalWeightedMinutes: weightedMins,
+		RawYearDistribution:  rawDist,
 		Error:                false,
 	}
 }
@@ -472,109 +493,35 @@ func CalculateBirthDecade(movies []models.TautulliEntry, referenceYear int) mode
 // It applies the same availability bias correction as movies, weighting episodes by their air date.
 // Returns a ShowBirthDecadeResult containing the estimated birth decade and nostalgia metrics.
 func CalculateShowBirthDecade(episodes []models.TautulliEntry, referenceYear int) models.ShowBirthDecadeResult {
-	// Handle empty data
-	if len(episodes) == 0 {
+	// Validate minimum data requirement
+	if len(episodes) < 5 {
 		return models.ShowBirthDecadeResult{
 			Error:        true,
-			ErrorMessage: "No show data available",
+			ErrorMessage: "Need at least 5 episodes with valid years for prediction",
 		}
 	}
 
-	// Step 1: Build year weights maps (both raw and corrected)
-	yearWeights := make(map[int]float64)    // Corrected weights for calculation
-	rawYearWeights := make(map[int]float64) // Raw weights for visualization
-	totalWeight := 0.0
-	rawTotalWeight := 0.0
+	// Call generic calculation logic
+	peakYear, birthYear, age, decadeStr, weightedMins, rawDist, err := calculateBirthDecadeGeneric(
+		episodes,
+		referenceYear,
+	)
 
-	for _, episode := range episodes {
-		durationMinutes := float64(episode.Duration) / 60.0
-		rewatchMultiplier := 1.0 + float64(episode.Plays-1)
-		baseWeight := durationMinutes * rewatchMultiplier
-
-		// Store raw weight for visualization
-		rawYearWeights[episode.Year] += baseWeight
-		rawTotalWeight += baseWeight
-
-		// Apply availability bias correction using logarithmic scaling
-		// This rewards choosing older, less readily available content over new releases
-		episodeAge := referenceYear - episode.Year
-
-		// Handle edge cases
-		if episodeAge < 0 {
-			// Future releases or data errors - treat as current year
-			episodeAge = 0
+	if err != nil {
+		return models.ShowBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: err.Error(),
 		}
-		if episodeAge > 100 {
-			// Cap at 100 years to prevent extreme bias from very old episodes
-			episodeAge = 100
-		}
-
-		// Calculate age multiplier using log10(age + 1)
-		ageMultiplier := math.Log10(float64(episodeAge + 1))
-
-		// Apply minimum multiplier to prevent current year episodes from being completely eliminated
-		if ageMultiplier < 0.1 {
-			ageMultiplier = 0.1
-		}
-
-		// Calculate final adjusted weight
-		adjustedWeight := baseWeight * ageMultiplier
-
-		yearWeights[episode.Year] += adjustedWeight
-		totalWeight += adjustedWeight
-	}
-
-	// Step 2: Sort years
-	years := make([]int, 0, len(yearWeights))
-	for year := range yearWeights {
-		years = append(years, year)
-	}
-	sort.Ints(years)
-
-	// Step 3: Find weighted percentiles
-	cumulativeWeight := 0.0
-	peakYear := years[0]
-
-	for _, year := range years {
-		cumulativeWeight += yearWeights[year]
-		percentile := cumulativeWeight / totalWeight
-
-		if percentile >= 0.50 && peakYear == years[0] {
-			peakYear = year
-			break
-		}
-	}
-
-	// Step 4: Calculate birth year, age, and format decade
-	birthYear := peakYear - 18
-	estimatedAge := referenceYear - birthYear
-	decade := (birthYear / 10) * 10
-
-	var decadeString string
-	if birthYear < 1900 {
-		decadeString = "Early 20th century or earlier"
-	} else if birthYear >= 2020 {
-		decadeString = "2020s or later"
-	} else {
-		decadeString = fmt.Sprintf("%ds", decade)
-	}
-
-	// Step 5: Prepare year distributions
-	// Raw year distribution (for visualization)
-	rawYearDistribution := make(map[string]float64)
-	for year, weight := range rawYearWeights {
-		percentage := (weight / rawTotalWeight) * 100.0
-		rawYearDistribution[fmt.Sprintf("%d", year)] = percentage
 	}
 
 	return models.ShowBirthDecadeResult{
 		NostalgiaPeakYear:    peakYear,
 		EstimatedBirthYear:   birthYear,
-		EstimatedAge:         estimatedAge,
-		EstimatedBirthDecade: decadeString,
+		EstimatedAge:         age,
+		EstimatedBirthDecade: decadeStr,
 		TotalShowsAnalyzed:   len(episodes),
-		TotalWeightedMinutes: int(totalWeight),
-		RawYearDistribution:  rawYearDistribution,
+		TotalWeightedMinutes: weightedMins,
+		RawYearDistribution:  rawDist,
 		Error:                false,
 	}
 }
@@ -974,7 +921,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		// Calculate birth decade estimation
 		// Extract reference year from wrapped period end date for availability bias correction
 		referenceYear := time.Unix(int64(config.WrappedEnd), 0).Year()
-		birthDecadeResult := CalculateBirthDecade(wrapperr_user_movie, referenceYear)
+		birthDecadeResult := CalculateMovieBirthDecade(wrapperr_user_movie, referenceYear)
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge

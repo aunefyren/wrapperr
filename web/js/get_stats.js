@@ -214,7 +214,7 @@ function load_movies() {
                     text += "</div>";
 
                     text += "<div class='boks2'>";
-                        text += birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
                     text += "</div>";
 
                 text += "</div>";
@@ -256,7 +256,7 @@ function load_movies() {
 
                     if(!results.user.user_movies.data.user_movie_birth_decade.error) {
                         text += "<div class='boks2'>";
-                            text += birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                            text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
                         text += "</div>";
                     }
 
@@ -685,66 +685,76 @@ function load_longest_episode(array, functions_data) {
     return html;
 }
 
-function birth_decade_card(birth_decade_data, functions_data) {
+/**
+ * Renders a birth decade age prediction card with media-specific text strings.
+ * @param {Object} birthDecadeData - The birth decade calculation results
+ * @param {Object} configStrings - Config strings object containing media-specific text
+ * @param {string} mediaType - Either 'movie' or 'show'
+ * @returns {string} HTML string for the card
+ */
+function renderBirthDecadeCard(birthDecadeData, configStrings, mediaType) {
     var html = "";
+
+    // Build config key prefix based on media type
+    var prefix = 'get_user_' + mediaType + '_stats_birth_decade_';
 
     html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
         html += "<div class='stats'>";
 
-        if(!birth_decade_data.error) {
-            var birth_year = birth_decade_data.estimated_birth_year;
-            var age = birth_decade_data.estimated_age;
-            var birth_decade = birth_decade_data.estimated_birth_decade;
-            var peak_year = birth_decade_data.nostalgia_peak_year;
+        if(!birthDecadeData.error) {
+            var birth_year = birthDecadeData.estimated_birth_year;
+            var age = birthDecadeData.estimated_age;
+            var birth_decade = birthDecadeData.estimated_birth_decade;
+            var peak_year = birthDecadeData.nostalgia_peak_year;
 
             if(birth_year >= 2010) {
-                // Recent/future birth year
+                // Recent/future birth year case
                 html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_title_recent
+                    configStrings[prefix + 'title_recent']
                         .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
                         .replaceAll('{peak_year}', peak_year)
                 ) + "</b>";
                 html += '<br><br>';
                 html += ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_subtitle_recent
+                    configStrings[prefix + 'subtitle_recent']
                         .replaceAll('{peak_year}', peak_year)
                 );
             } else if(birth_year < 1920) {
-                // Ancient birth year
+                // Ancient birth year case
                 html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_title_ancient
+                    configStrings[prefix + 'title_ancient']
                         .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
                 ) + "</b>";
                 html += '<br><br>';
                 html += ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_subtitle_ancient
+                    configStrings[prefix + 'subtitle_ancient']
                         .replaceAll('{peak_year}', peak_year)
                 );
             } else {
                 // Normal case
                 html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_title
+                    configStrings[prefix + 'title']
                         .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
                 ) + "</b>";
                 html += '<br><br>';
                 html += ReplaceStandardStrings(
-                    functions_data.get_user_movie_stats_birth_decade_subtitle
+                    configStrings[prefix + 'subtitle']
                         .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
                 );
             }
 
             // Add visualization chart if we have year distribution data
-            if(birth_decade_data.raw_year_distribution && Object.keys(birth_decade_data.raw_year_distribution).length > 0) {
+            if(birthDecadeData.raw_year_distribution && Object.keys(birthDecadeData.raw_year_distribution).length > 0) {
                 html += '<br><div style="margin: 2em auto; max-width: 600px;">';
-                html += renderNostalgiaChart(birth_decade_data);
+                html += renderNostalgiaChart(birthDecadeData);
                 html += '</div>';
             }
 
         } else {
             // Error case
-            html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_error) + "</b>";
+            html += "<b>" + ReplaceStandardStrings(configStrings[prefix + 'title_error']) + "</b>";
             html += '<br><br>';
-            html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_error);
+            html += ReplaceStandardStrings(configStrings[prefix + 'subtitle_error']);
         }
 
         html += "</div>";
@@ -753,72 +763,18 @@ function birth_decade_card(birth_decade_data, functions_data) {
     return html;
 }
 
+/**
+ * Renders the movie birth decade age prediction card
+ */
+function movie_birth_decade_card(birth_decade_data, functions_data) {
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'movie');
+}
+
+/**
+ * Renders the TV show birth decade age prediction card
+ */
 function show_birth_decade_card(birth_decade_data, functions_data) {
-    var html = "";
-
-    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
-        html += "<div class='stats'>";
-
-        if(!birth_decade_data.error) {
-            var birth_year = birth_decade_data.estimated_birth_year;
-            var age = birth_decade_data.estimated_age;
-            var birth_decade = birth_decade_data.estimated_birth_decade;
-            var peak_year = birth_decade_data.nostalgia_peak_year;
-
-            if(birth_year >= 2010) {
-                // Recent/future birth year
-                html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_title_recent
-                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
-                        .replaceAll('{peak_year}', peak_year)
-                ) + "</b>";
-                html += '<br><br>';
-                html += ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_subtitle_recent
-                        .replaceAll('{peak_year}', peak_year)
-                );
-            } else if(birth_year < 1920) {
-                // Ancient birth year
-                html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_title_ancient
-                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
-                ) + "</b>";
-                html += '<br><br>';
-                html += ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_subtitle_ancient
-                        .replaceAll('{peak_year}', peak_year)
-                );
-            } else {
-                // Normal case
-                html += "<b>" + ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_title
-                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
-                ) + "</b>";
-                html += '<br><br>';
-                html += ReplaceStandardStrings(
-                    functions_data.get_user_show_stats_birth_decade_subtitle
-                        .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
-                );
-            }
-
-            // Add visualization chart if we have year distribution data
-            if(birth_decade_data.raw_year_distribution && Object.keys(birth_decade_data.raw_year_distribution).length > 0) {
-                html += '<br><div style="margin: 2em auto; max-width: 600px;">';
-                html += renderNostalgiaChart(birth_decade_data);
-                html += '</div>';
-            }
-
-        } else {
-            // Error case
-            html += "<b>" + ReplaceStandardStrings(functions_data.get_user_show_stats_birth_decade_title_error) + "</b>";
-            html += '<br><br>';
-            html += ReplaceStandardStrings(functions_data.get_user_show_stats_birth_decade_subtitle_error);
-        }
-
-        html += "</div>";
-    html += "</div>";
-
-    return html;
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'show');
 }
 
 function renderNostalgiaChart(birth_decade_data) {
