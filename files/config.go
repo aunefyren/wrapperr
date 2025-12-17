@@ -624,6 +624,38 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 		config.WrapperrCustomize.GetUserShowStatsBuddySubtitleNone = config_default.WrapperrCustomize.GetUserShowStatsBuddySubtitleNone
 	}
 
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError
+	}
+
 	if config.WrapperrCustomize.GetUserMusicStatsTitle == "" {
 		config.WrapperrCustomize.GetUserMusicStatsTitle = config_default.WrapperrCustomize.GetUserMusicStatsTitle
 	}

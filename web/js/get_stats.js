@@ -338,6 +338,10 @@ function load_shows() {
                         text += you_spent(results.user.user_shows.data.show_duration, 'shows', functions);
                     text += "</div>";
 
+                    text += "<div class='boks2'>";
+                        text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                    text += "</div>";
+
                 text += "</div>";
 
             text += "</div>";
@@ -376,6 +380,10 @@ function load_shows() {
 						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest, functions);
 					text += "</div>";
 				}
+
+                text += "<div class='boks2'>";
+                    text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                text += "</div>";
 
             text += "</div>";
         text += "</div>";
@@ -737,6 +745,74 @@ function birth_decade_card(birth_decade_data, functions_data) {
             html += "<b>" + ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_title_error) + "</b>";
             html += '<br><br>';
             html += ReplaceStandardStrings(functions_data.get_user_movie_stats_birth_decade_subtitle_error);
+        }
+
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+function show_birth_decade_card(birth_decade_data, functions_data) {
+    var html = "";
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+
+        if(!birth_decade_data.error) {
+            var birth_year = birth_decade_data.estimated_birth_year;
+            var age = birth_decade_data.estimated_age;
+            var birth_decade = birth_decade_data.estimated_birth_decade;
+            var peak_year = birth_decade_data.nostalgia_peak_year;
+
+            if(birth_year >= 2010) {
+                // Recent/future birth year
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_title_recent
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                        .replaceAll('{peak_year}', peak_year)
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_subtitle_recent
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else if(birth_year < 1920) {
+                // Ancient birth year
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_title_ancient
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_subtitle_ancient
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else {
+                // Normal case
+                html += "<b>" + ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_title
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    functions_data.get_user_show_stats_birth_decade_subtitle
+                        .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
+                );
+            }
+
+            // Add visualization chart if we have year distribution data
+            if(birth_decade_data.raw_year_distribution && Object.keys(birth_decade_data.raw_year_distribution).length > 0) {
+                html += '<br><div style="margin: 2em auto; max-width: 600px;">';
+                html += renderNostalgiaChart(birth_decade_data);
+                html += '</div>';
+            }
+
+        } else {
+            // Error case
+            html += "<b>" + ReplaceStandardStrings(functions_data.get_user_show_stats_birth_decade_title_error) + "</b>";
+            html += '<br><br>';
+            html += ReplaceStandardStrings(functions_data.get_user_show_stats_birth_decade_subtitle_error);
         }
 
         html += "</div>";

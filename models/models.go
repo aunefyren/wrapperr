@@ -63,6 +63,14 @@ type WrapperrCustomize struct {
 	GetUserShowStatsBuddySubtitle               string `json:"get_user_show_stats_buddy_subtitle"`
 	GetUserShowStatsBuddyTitleNone              string `json:"get_user_show_stats_buddy_title_none"`
 	GetUserShowStatsBuddySubtitleNone           string `json:"get_user_show_stats_buddy_subtitle_none"`
+	GetUserShowStatsBirthDecadeTitle            string `json:"get_user_show_stats_birth_decade_title"`
+	GetUserShowStatsBirthDecadeSubtitle         string `json:"get_user_show_stats_birth_decade_subtitle"`
+	GetUserShowStatsBirthDecadeTitleRecent      string `json:"get_user_show_stats_birth_decade_title_recent"`
+	GetUserShowStatsBirthDecadeSubtitleRecent   string `json:"get_user_show_stats_birth_decade_subtitle_recent"`
+	GetUserShowStatsBirthDecadeTitleAncient     string `json:"get_user_show_stats_birth_decade_title_ancient"`
+	GetUserShowStatsBirthDecadeSubtitleAncient  string `json:"get_user_show_stats_birth_decade_subtitle_ancient"`
+	GetUserShowStatsBirthDecadeTitleError       string `json:"get_user_show_stats_birth_decade_title_error"`
+	GetUserShowStatsBirthDecadeSubtitleError    string `json:"get_user_show_stats_birth_decade_subtitle_error"`
 	GetUserMusicStats                           bool   `json:"get_user_music_stats"`
 	GetUserMusicStatsTitle                      string `json:"get_user_music_stats_title"`
 	GetUserMusicStatsSubtitle                   string `json:"get_user_music_stats_subtitle"`
@@ -116,6 +124,18 @@ type BirthDecadeResult struct {
 	EstimatedAge          int
 	EstimatedBirthDecade  string
 	TotalMoviesAnalyzed   int
+	TotalWeightedMinutes  int
+	RawYearDistribution   map[string]float64 // Raw weights for visualization
+	Error                 bool
+	ErrorMessage          string
+}
+
+type ShowBirthDecadeResult struct {
+	NostalgiaPeakYear     int
+	EstimatedBirthYear    int
+	EstimatedAge          int
+	EstimatedBirthDecade  string
+	TotalShowsAnalyzed    int
 	TotalWeightedMinutes  int
 	RawYearDistribution   map[string]float64 // Raw weights for visualization
 	Error                 bool
@@ -281,6 +301,17 @@ type WrapperrStatisticsUser struct {
 				Plays            int    `json:"plays"`
 				Error            bool   `json:"error"`
 			} `json:"episode_duration_longest"`
+			UserShowBirthDecade struct {
+				NostalgiaPeakYear     int                `json:"nostalgia_peak_year"`
+				EstimatedBirthYear    int                `json:"estimated_birth_year"`
+				EstimatedAge          int                `json:"estimated_age"`
+				EstimatedBirthDecade  string             `json:"estimated_birth_decade"`
+				TotalShowsAnalyzed    int                `json:"total_shows_analyzed"`
+				TotalWeightedMinutes  int                `json:"total_weighted_minutes"`
+				RawYearDistribution   map[string]float64 `json:"raw_year_distribution"`
+				Error                 bool               `json:"error"`
+				ErrorMessage          string             `json:"error_message"`
+			} `json:"user_show_birth_decade"`
 			ShowDuration int               `json:"show_duration"`
 			ShowPlays    int               `json:"show_plays"`
 			ShowBuddy    WrapperrShowBuddy `json:"show_buddy"`
