@@ -45,6 +45,8 @@ type WrapperrCustomize struct {
 	GetUserMovieStatsBirthDecadeSubtitleAncient string `json:"get_user_movie_stats_birth_decade_subtitle_ancient"`
 	GetUserMovieStatsBirthDecadeTitleError      string `json:"get_user_movie_stats_birth_decade_title_error"`
 	GetUserMovieStatsBirthDecadeSubtitleError   string `json:"get_user_movie_stats_birth_decade_subtitle_error"`
+	GetUserMovieStatsBirthDecadeChartTitle      string `json:"get_user_movie_stats_birth_decade_chart_title"`
+	GetUserMovieStatsBirthDecadeChartLegend     string `json:"get_user_movie_stats_birth_decade_chart_legend"`
 	GetUserShowStats                            bool   `json:"get_user_show_stats"`
 	GetUserShowBuddy                            bool   `json:"get_user_show_stats_buddy"`
 	GetUserShowStatsTitle                       string `json:"get_user_show_stats_title"`
@@ -71,6 +73,8 @@ type WrapperrCustomize struct {
 	GetUserShowStatsBirthDecadeSubtitleAncient  string `json:"get_user_show_stats_birth_decade_subtitle_ancient"`
 	GetUserShowStatsBirthDecadeTitleError       string `json:"get_user_show_stats_birth_decade_title_error"`
 	GetUserShowStatsBirthDecadeSubtitleError    string `json:"get_user_show_stats_birth_decade_subtitle_error"`
+	GetUserShowStatsBirthDecadeChartTitle       string `json:"get_user_show_stats_birth_decade_chart_title"`
+	GetUserShowStatsBirthDecadeChartLegend      string `json:"get_user_show_stats_birth_decade_chart_legend"`
 	GetUserMusicStats                           bool   `json:"get_user_music_stats"`
 	GetUserMusicStatsTitle                      string `json:"get_user_music_stats_title"`
 	GetUserMusicStatsSubtitle                   string `json:"get_user_music_stats_subtitle"`

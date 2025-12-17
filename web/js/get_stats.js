@@ -746,7 +746,9 @@ function renderBirthDecadeCard(birthDecadeData, configStrings, mediaType) {
             // Add visualization chart if we have year distribution data
             if(birthDecadeData.raw_year_distribution && Object.keys(birthDecadeData.raw_year_distribution).length > 0) {
                 html += '<br><div style="margin: 2em auto; max-width: 600px;">';
-                html += renderNostalgiaChart(birthDecadeData);
+                var chartTitle = configStrings[prefix + 'chart_title'];
+                var chartLegend = configStrings[prefix + 'chart_legend'];
+                html += renderNostalgiaChart(birthDecadeData, chartTitle, chartLegend);
                 html += '</div>';
             }
 
@@ -777,7 +779,7 @@ function show_birth_decade_card(birth_decade_data, functions_data) {
     return renderBirthDecadeCard(birth_decade_data, functions_data, 'show');
 }
 
-function renderNostalgiaChart(birth_decade_data) {
+function renderNostalgiaChart(birth_decade_data, chartTitle, chartLegend) {
     var html = "";
     var yearDist = birth_decade_data.raw_year_distribution;
 
@@ -813,7 +815,7 @@ function renderNostalgiaChart(birth_decade_data) {
     // Get peak year for highlighting
     var peakYear = birth_decade_data.nostalgia_peak_year;
 
-    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">When You Were Watching</div>';
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">' + chartTitle + '</div>';
 
     // Compact histogram container
     html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
@@ -883,7 +885,7 @@ function renderNostalgiaChart(birth_decade_data) {
 
     // Legend
     html += '<div style="margin-top: 0.8em; font-size: 0.7em; opacity: 0.7; text-align: center;">';
-    html += '<span style="color: rgba(255, 200, 50, 1);">● Peak Nostalgia Year</span>';
+    html += '<span style="color: rgba(255, 200, 50, 1);">● ' + chartLegend + '</span>';
     html += '</div>';
 
     return html;

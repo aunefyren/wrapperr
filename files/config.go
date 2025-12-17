@@ -560,6 +560,14 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError
 	}
 
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend
+	}
+
 	if config.WrapperrCustomize.GetUserShowStatsTitle == "" {
 		config.WrapperrCustomize.GetUserShowStatsTitle = config_default.WrapperrCustomize.GetUserShowStatsTitle
 	}
@@ -654,6 +662,14 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 
 	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError == "" {
 		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend
 	}
 
 	if config.WrapperrCustomize.GetUserMusicStatsTitle == "" {
