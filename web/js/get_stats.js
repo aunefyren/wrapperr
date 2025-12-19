@@ -45,9 +45,12 @@ function get_stats() {
                 document.getElementById("plex_signout_button").style.opacity = '1';
                 document.getElementById('results_error').innerHTML = result.error;
 
-            } else {    
+            } else {
                 results = result;
-                load_page(results);
+                // Pre-fetch all user-specific posters before displaying wrapped
+                prefetchUserPosters(results, function() {
+                    load_page(results);
+                });
             }
         }
     };
@@ -530,6 +533,17 @@ function oldest_movie(array, functions_data) {
             html += '<br>';
             html += '<br>';
 
+            // Add poster
+            if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                html += 'onerror="this.src=\'assets/img/old-man.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
+                html += 'style="margin: 1em auto; display: block;">';
+            } else {
+                // Fallback to original illustration
+                html += '<img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            }
+
             if(array.year < 1950) {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_1950);
             } else if(array.year < 1975) {
@@ -539,8 +553,6 @@ function oldest_movie(array, functions_data) {
             } else {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle);
             }
-
-            html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
         html += "</div>";
     html += "</div>";
 
@@ -606,6 +618,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')'));
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                        html += 'onerror="this.style.display=\'none\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             } else {
@@ -613,6 +634,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title_one);
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                        html += 'onerror="this.style.display=\'none\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             }
@@ -720,6 +750,15 @@ function top_list(array, title, music, show, year, div_id) {
             html += "<div class='stats-list'>";
                 for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
+
+                        // Add poster thumbnail if enabled
+                        if(functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
+                            var posterUrl = api_url + "get/poster/" + array[i].tautulli_server_hash + "/" + array[i].rating_key + ".jpg";
+                            html += "<div class='poster-thumbnail'>";
+                                html += "<img src='" + posterUrl + "' alt='Poster' onerror='this.parentElement.style.display=\"none\"' />";
+                            html += "</div>";
+                        }
+
                         html += "<div class='number'>";
                             html += i+1 + ". ";
                         html += "</div>";
@@ -1255,3 +1294,159 @@ $(window).scroll(function() {
     return string
 
   }
+
+// Pre-fetch all user-specific posters before displaying wrapped
+function prefetchUserPosters(results, callback) {
+    if (!functions.enable_posters) {
+        callback();
+        return;
+    }
+
+    var postersToFetch = [];
+
+    // Collect all unique posters from user's data
+    function addPoster(item) {
+        if (item && item.thumb && item.rating_key && item.tautulli_server_hash) {
+            var key = item.tautulli_server_hash + "_" + item.rating_key;
+            if (!postersToFetch.find(p => p.key === key)) {
+                postersToFetch.push({
+                    key: key,
+                    server_hash: item.tautulli_server_hash,
+                    rating_key: item.rating_key,
+                    thumb_path: item.thumb
+                });
+            }
+        }
+    }
+
+    // Collect from user movies
+    if (results.user.user_movies && results.user.user_movies.data) {
+        if (results.user.user_movies.data.movies_duration) {
+            results.user.user_movies.data.movies_duration.forEach(addPoster);
+        }
+        if (results.user.user_movies.data.movies_plays) {
+            results.user.user_movies.data.movies_plays.forEach(addPoster);
+        }
+        if (results.user.user_movies.data.user_movie_oldest) {
+            addPoster(results.user.user_movies.data.user_movie_oldest);
+        }
+        if (results.user.user_movies.data.user_movie_most_paused) {
+            addPoster(results.user.user_movies.data.user_movie_most_paused);
+        }
+    }
+
+    // Collect from user shows
+    if (results.user.user_shows && results.user.user_shows.data) {
+        if (results.user.user_shows.data.shows_duration) {
+            results.user.user_shows.data.shows_duration.forEach(addPoster);
+        }
+        if (results.user.user_shows.data.shows_plays) {
+            results.user.user_shows.data.shows_plays.forEach(addPoster);
+        }
+        if (results.user.user_shows.data.user_show_longest_episode) {
+            addPoster(results.user.user_shows.data.user_show_longest_episode);
+        }
+    }
+
+    if (postersToFetch.length === 0) {
+        callback();
+        return;
+    }
+
+    var completed = 0;
+    var failed = 0;
+
+    // Function to check if ALL posters are ready by attempting to load them
+    function checkPostersReady(attempt, maxAttempts, checkCallback) {
+        var checksComplete = 0;
+        var checksSuccessful = 0;
+        var totalPosters = postersToFetch.length;
+
+        // Check ALL posters, not just a sample
+        postersToFetch.forEach(function(poster) {
+            var img = new Image();
+            var posterUrl = api_url + "get/poster/" + poster.server_hash + "/" + poster.rating_key + ".jpg?" + Date.now();
+
+            var timeoutId = setTimeout(function() {
+                // Treat timeout as failure
+                checksComplete++;
+                if (checksComplete >= totalPosters) {
+                    evaluateResults();
+                }
+            }, 3000); // 3 second timeout per image
+
+            img.onload = function() {
+                clearTimeout(timeoutId);
+                checksSuccessful++;
+                checksComplete++;
+                if (checksComplete >= totalPosters) {
+                    evaluateResults();
+                }
+            };
+
+            img.onerror = function() {
+                clearTimeout(timeoutId);
+                checksComplete++;
+                if (checksComplete >= totalPosters) {
+                    evaluateResults();
+                }
+            };
+
+            img.src = posterUrl;
+        });
+
+        function evaluateResults() {
+            var successRate = checksSuccessful / totalPosters;
+            console.log("[Posters] Attempt " + attempt + "/" + maxAttempts + ": " + checksSuccessful + "/" + totalPosters + " posters ready (" + Math.round(successRate * 100) + "%)");
+
+            if (successRate === 1.0) {
+                // 100% of posters loaded successfully
+                console.log("[Posters] All posters loaded, displaying page");
+                checkCallback();
+            } else if (attempt >= maxAttempts) {
+                // Max attempts reached, proceed anyway
+                console.log("[Posters] Max attempts reached, displaying page with " + checksSuccessful + "/" + totalPosters + " posters");
+                checkCallback();
+            } else {
+                // Retry after delay
+                console.log("[Posters] Retrying in 1 second...");
+                setTimeout(function() {
+                    checkPostersReady(attempt + 1, maxAttempts, checkCallback);
+                }, 1000);
+            }
+        }
+    }
+
+    postersToFetch.forEach(function(poster) {
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", api_url + "download/poster", true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+
+        xhr.onload = function() {
+            completed++;
+            if (completed + failed >= postersToFetch.length) {
+                // All download requests sent, wait 2 seconds before checking if posters are ready
+                // This gives the backend time to start downloading
+                setTimeout(function() {
+                    checkPostersReady(1, 20, callback);
+                }, 2000);
+            }
+        };
+
+        xhr.onerror = function() {
+            failed++;
+            if (completed + failed >= postersToFetch.length) {
+                // Even with errors, wait then check if any posters are ready
+                setTimeout(function() {
+                    checkPostersReady(1, 20, callback);
+                }, 2000);
+            }
+        };
+
+        xhr.send(JSON.stringify({
+            server_hash: poster.server_hash,
+            rating_key: poster.rating_key,
+            thumb_path: poster.thumb_path
+        }));
+    });
+}

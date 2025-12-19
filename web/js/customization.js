@@ -39,6 +39,20 @@ function loadAdminPage() {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<label for="enable_posters" title="Display movie and TV show posters in statistics. Posters are downloaded from Tautulli and cached locally.">Enable Posters:<br>';
+    html += '<input type="checkbox" class="form-control" id="enable_posters" ';
+    if(enable_posters) {
+        html += 'checked="' + enable_posters + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="poster_cache_max_age_days" title="Maximum age in days before posters are re-downloaded. Default: 30 days.">Poster Cache Age (days):<br>';
+    html += '<input type="number" class="form-control" id="poster_cache_max_age_days" value="' + poster_cache_max_age_days + '" min="1" max="365" autocomplete="off" placeholder="30" required /><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="obfuscate_other_users" title="Replace other\'s username with randomly generated names.">Obfuscate other usernames:<br>';
     html += '<input type="checkbox" class="form-control" id="obfuscate_other_users" ';
     if(obfuscate_other_users) {
@@ -815,6 +829,7 @@ function loadAdminPage() {
     document.getElementById("stats_outro_title").value = stats_outro_title;
     document.getElementById("stats_outro_subtitle").value = stats_outro_subtitle;
     document.getElementById("stats_top_list_length").value = stats_top_list_length;
+    document.getElementById("poster_cache_max_age_days").value = poster_cache_max_age_days;
 
     document.getElementById("get_user_movie_stats_title").value = get_user_movie_stats_title;
     document.getElementById("get_user_movie_stats_subtitle").value = get_user_movie_stats_subtitle;
@@ -891,6 +906,8 @@ function set_wrapperr_customization_call() {
     stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
     stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
     stats_top_list_length = parseInt(document.getElementById("stats_top_list_length").value);
+    enable_posters = document.getElementById('enable_posters').checked;
+    poster_cache_max_age_days = parseInt(document.getElementById("poster_cache_max_age_days").value) || 30;
     obfuscate_other_users = document.getElementById('obfuscate_other_users').checked;
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
@@ -1003,6 +1020,8 @@ function set_wrapperr_customization_call() {
             "stats_order_by_plays" : stats_order_by_plays,
             "stats_order_by_duration" : stats_order_by_duration,
             "stats_top_list_length" : stats_top_list_length,
+            "enable_posters" : enable_posters,
+            "poster_cache_max_age_days" : poster_cache_max_age_days,
             "obfuscate_other_users": obfuscate_other_users,
             "get_user_movie_stats" : get_user_movie_stats,
             "get_user_movie_stats_title" : get_user_movie_stats_title,

@@ -11,6 +11,8 @@ type WrapperrCustomize struct {
 	StatsOrderByPlays                           bool   `json:"stats_order_by_plays"`
 	StatsOrderByDuration                        bool   `json:"stats_order_by_duration"`
 	StatsTopListLength                          int    `json:"stats_top_list_length"`
+	EnablePosters                               bool   `json:"enable_posters"`
+	PosterCacheMaxAgeDays                       int    `json:"poster_cache_max_age_days"`
 	ObfuscateOtherUsers                         bool   `json:"obfuscate_other_users"`
 	GetUserMovieStats                           bool   `json:"get_user_movie_stats"`
 	GetUserMovieStatsTitle                      string `json:"get_user_movie_stats_title"`

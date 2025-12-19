@@ -523,3 +523,25 @@ func ApiIgnoreUser(context *gin.Context) {
 	context.JSON(http.StatusOK, gin.H{"message": "User toggeled."})
 	return
 }
+
+// ApiCleanPosterCache manually cleans expired posters
+func ApiCleanPosterCache(context *gin.Context) {
+	config, err := files.GetConfig()
+	if err != nil {
+		log.Println("Failed to load config. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config"})
+		return
+	}
+
+	maxAge := config.WrapperrCustomize.PosterCacheMaxAgeDays
+	err = files.CleanExpiredPosters(maxAge)
+	if err != nil {
+		log.Println("Failed to clean poster cache. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to clean poster cache"})
+		return
+	}
+
+	ipString := utilities.GetOriginIPString(context)
+	log.Println("Poster cache cleaned." + ipString)
+	context.JSON(http.StatusOK, gin.H{"message": "Poster cache cleaned successfully"})
+}

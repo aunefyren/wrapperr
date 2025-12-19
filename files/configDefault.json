@@ -10,6 +10,8 @@
         "stats_order_by_plays":true,
         "stats_order_by_duration":true,
         "stats_top_list_length": 10,
+        "enable_posters": false,
+        "poster_cache_max_age_days": 30,
         "obfuscate_other_users": true,
         "get_user_movie_stats":true,
         "get_user_movie_stats_title":"Movies!",
