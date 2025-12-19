@@ -333,8 +333,47 @@ func ExtractUserPosterReferences(reply models.WrapperrStatisticsReply) []PosterR
 		}
 	}
 
-	// Note: Special cards (oldest movie, most paused, longest episode) don't have
-	// poster data in their structure (only title/year), so we don't extract them
+	// Extract from special cards
+	// Oldest Movie
+	if reply.User.UserMovies.Data.UserMovieOldest.Thumb != "" &&
+		reply.User.UserMovies.Data.UserMovieOldest.RatingKey != 0 &&
+		reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash != "" {
+		key := fmt.Sprintf("%s_%d", reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash,
+			reply.User.UserMovies.Data.UserMovieOldest.RatingKey)
+		posterMap[key] = PosterReference{
+			ServerHash: reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash,
+			RatingKey:  reply.User.UserMovies.Data.UserMovieOldest.RatingKey,
+			ThumbPath:  reply.User.UserMovies.Data.UserMovieOldest.Thumb,
+		}
+	}
+
+	// Most Paused Movie
+	if reply.User.UserMovies.Data.UserMovieMostPaused.Thumb != "" &&
+		reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey != 0 &&
+		reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash != "" {
+		key := fmt.Sprintf("%s_%d", reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash,
+			reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey)
+		posterMap[key] = PosterReference{
+			ServerHash: reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash,
+			RatingKey:  reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey,
+			ThumbPath:  reply.User.UserMovies.Data.UserMovieMostPaused.Thumb,
+		}
+	}
+
+	// Longest Episode (show poster)
+	if reply.User.UserShows.Data.EpisodeDurationLongest.Thumb != "" &&
+		reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey != 0 &&
+		reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash != "" {
+		key := fmt.Sprintf("%s_%d", reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash,
+			reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey)
+		posterMap[key] = PosterReference{
+			ServerHash: reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash,
+			RatingKey:  reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey,
+			ThumbPath:  reply.User.UserShows.Data.EpisodeDurationLongest.Thumb,
+		}
+	}
+
+	// Note: Show Buddy uses ShowsDuration[0] which is already extracted in the loop above
 
 	// Convert map to slice
 	posters := make([]PosterReference, 0, len(posterMap))

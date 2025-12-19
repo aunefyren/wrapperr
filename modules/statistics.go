@@ -704,6 +704,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
 
 		// Find average movie completion, duration sum and play sum
 		movie_completion_sum := 0
@@ -723,6 +726,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
 
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
@@ -765,6 +771,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.ParentTitle = wrapperr_user_episode[0].ParentTitle
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Plays = wrapperr_user_episode[0].Plays
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Title = wrapperr_user_episode[0].Title
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Thumb = wrapperr_user_episode[0].Thumb
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey = wrapperr_user_episode[0].GrandparentRatingKey
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash = wrapperr_user_episode[0].TautulliServerHash
 
 		// Find duration sum and play sum
 		episode_duration_sum := 0

@@ -219,20 +219,26 @@ type WrapperrStatisticsUser struct {
 			MoviesDuration      []TautulliEntry `json:"movies_duration"`
 			MoviesPlays         []TautulliEntry `json:"movies_plays"`
 			UserMovieMostPaused struct {
-				Title         string `json:"title"`
-				Year          int    `json:"year"`
-				Plays         int    `json:"plays"`
-				Duration      int    `json:"duration"`
-				PausedCounter int    `json:"paused_counter"`
+				Title              string `json:"title"`
+				Year               int    `json:"year"`
+				Plays              int    `json:"plays"`
+				Duration           int    `json:"duration"`
+				PausedCounter      int    `json:"paused_counter"`
+				Thumb              string `json:"thumb"`
+				RatingKey          int    `json:"rating_key"`
+				TautulliServerHash string `json:"tautulli_server_hash"`
 			} `json:"user_movie_most_paused"`
 			UserMovieFinishingPercent float64 `json:"user_movie_finishing_percent"`
 			UserMovieOldest           struct {
-				Title         string `json:"title"`
-				Year          int    `json:"year"`
-				Plays         int    `json:"plays"`
-				Duration      int    `json:"duration"`
-				PausedCounter int    `json:"paused_counter"`
-				Error         bool   `json:"error"`
+				Title              string `json:"title"`
+				Year               int    `json:"year"`
+				Plays              int    `json:"plays"`
+				Duration           int    `json:"duration"`
+				PausedCounter      int    `json:"paused_counter"`
+				Error              bool   `json:"error"`
+				Thumb              string `json:"thumb"`
+				RatingKey          int    `json:"rating_key"`
+				TautulliServerHash string `json:"tautulli_server_hash"`
 			} `json:"user_movie_oldest"`
 			MovieDuration int `json:"movie_duration"`
 			MoviePlays    int `json:"movie_plays"`
@@ -245,12 +251,15 @@ type WrapperrStatisticsUser struct {
 			ShowsDuration          []TautulliEntry `json:"shows_duration"`
 			ShowsPlays             []TautulliEntry `json:"shows_plays"`
 			EpisodeDurationLongest struct {
-				Title            string `json:"title"`
-				ParentTitle      string `json:"parent_title"`
-				GrandparentTitle string `json:"grandparent_title"`
-				Duration         int    `json:"duration"`
-				Plays            int    `json:"plays"`
-				Error            bool   `json:"error"`
+				Title              string `json:"title"`
+				ParentTitle        string `json:"parent_title"`
+				GrandparentTitle   string `json:"grandparent_title"`
+				Duration           int    `json:"duration"`
+				Plays              int    `json:"plays"`
+				Error              bool   `json:"error"`
+				Thumb              string `json:"thumb"`
+				RatingKey          int    `json:"rating_key"`
+				TautulliServerHash string `json:"tautulli_server_hash"`
 			} `json:"episode_duration_longest"`
 			ShowDuration int               `json:"show_duration"`
 			ShowPlays    int               `json:"show_plays"`
