@@ -442,8 +442,16 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				}
 
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_user_show = append(wrapperr_user_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					log.Printf("[DEBUG] Show poster fix: %s - RatingKey: %d -> %d, Thumb: %s",
+						showEntry.GrandparentTitle, wrapperr_data[i].Data[j].RatingKey, showEntry.RatingKey, showEntry.Thumb)
+					wrapperr_user_show = append(wrapperr_user_show, showEntry)
 				}
 
 			}
@@ -588,8 +596,16 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// If show was not found, add it to array
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_year_show = append(wrapperr_year_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					log.Printf("[DEBUG] Year show poster fix: %s - RatingKey: %d -> %d, Thumb: %s",
+						showEntry.GrandparentTitle, wrapperr_data[i].Data[j].RatingKey, showEntry.RatingKey, showEntry.Thumb)
+					wrapperr_year_show = append(wrapperr_year_show, showEntry)
 				}
 
 				// Look for user within pre-defined array
