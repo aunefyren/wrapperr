@@ -264,3 +264,175 @@ func GetPosterPath(serverHash string, filename string) (string, error) {
 
 	return absPath, nil
 }
+
+// PosterReference holds information needed to download a poster
+type PosterReference struct {
+	ServerHash string
+	RatingKey  int
+	ThumbPath  string
+}
+
+// ExtractUserPosterReferences extracts all unique poster references from user statistics
+// Only extracts from user-specific data (not year-wide stats which are cached)
+func ExtractUserPosterReferences(reply models.WrapperrStatisticsReply) []PosterReference {
+	posterMap := make(map[string]PosterReference) // Use map to deduplicate
+
+	// Extract from user movies - duration list
+	if reply.User.UserMovies.Data.MoviesDuration != nil {
+		for _, entry := range reply.User.UserMovies.Data.MoviesDuration {
+			if entry.Thumb != "" && entry.RatingKey != 0 && entry.TautulliServerHash != "" {
+				key := fmt.Sprintf("%s_%d", entry.TautulliServerHash, entry.RatingKey)
+				posterMap[key] = PosterReference{
+					ServerHash: entry.TautulliServerHash,
+					RatingKey:  entry.RatingKey,
+					ThumbPath:  entry.Thumb,
+				}
+			}
+		}
+	}
+
+	// Extract from user movies - plays list
+	if reply.User.UserMovies.Data.MoviesPlays != nil {
+		for _, entry := range reply.User.UserMovies.Data.MoviesPlays {
+			if entry.Thumb != "" && entry.RatingKey != 0 && entry.TautulliServerHash != "" {
+				key := fmt.Sprintf("%s_%d", entry.TautulliServerHash, entry.RatingKey)
+				posterMap[key] = PosterReference{
+					ServerHash: entry.TautulliServerHash,
+					RatingKey:  entry.RatingKey,
+					ThumbPath:  entry.Thumb,
+				}
+			}
+		}
+	}
+
+	// Extract from user shows - duration list
+	if reply.User.UserShows.Data.ShowsDuration != nil {
+		for _, entry := range reply.User.UserShows.Data.ShowsDuration {
+			if entry.Thumb != "" && entry.RatingKey != 0 && entry.TautulliServerHash != "" {
+				key := fmt.Sprintf("%s_%d", entry.TautulliServerHash, entry.RatingKey)
+				posterMap[key] = PosterReference{
+					ServerHash: entry.TautulliServerHash,
+					RatingKey:  entry.RatingKey,
+					ThumbPath:  entry.Thumb,
+				}
+			}
+		}
+	}
+
+	// Extract from user shows - plays list
+	if reply.User.UserShows.Data.ShowsPlays != nil {
+		for _, entry := range reply.User.UserShows.Data.ShowsPlays {
+			if entry.Thumb != "" && entry.RatingKey != 0 && entry.TautulliServerHash != "" {
+				key := fmt.Sprintf("%s_%d", entry.TautulliServerHash, entry.RatingKey)
+				posterMap[key] = PosterReference{
+					ServerHash: entry.TautulliServerHash,
+					RatingKey:  entry.RatingKey,
+					ThumbPath:  entry.Thumb,
+				}
+			}
+		}
+	}
+
+	// Note: Special cards (oldest movie, most paused, longest episode) don't have
+	// poster data in their structure (only title/year), so we don't extract them
+
+	// Convert map to slice
+	posters := make([]PosterReference, 0, len(posterMap))
+	for _, ref := range posterMap {
+		posters = append(posters, ref)
+	}
+
+	return posters
+}
+
+// PreloadUserPosters downloads posters for user-specific statistics in parallel
+// Returns counts of successful, skipped (already cached), and failed downloads
+func PreloadUserPosters(
+	posterRefs []PosterReference,
+	tautulliConfigs []models.TautulliConfig,
+	maxAgeDays int,
+	maxConcurrency int,
+) (successCount int, skippedCount int, errorCount int) {
+	if len(posterRefs) == 0 {
+		return 0, 0, 0
+	}
+
+	// Build server config lookup map
+	serverConfigMap := make(map[string]models.TautulliConfig)
+	for _, config := range tautulliConfigs {
+		hash := GetTautulliServerHash(config)
+		serverConfigMap[hash] = config
+	}
+
+	// Create channels for work distribution and results
+	type downloadResult struct {
+		success bool
+		skipped bool
+		error   error
+	}
+
+	jobs := make(chan PosterReference, len(posterRefs))
+	results := make(chan downloadResult, len(posterRefs))
+
+	// Start worker goroutines
+	for w := 0; w < maxConcurrency; w++ {
+		go func() {
+			for ref := range jobs {
+				// Find the correct Tautulli config
+				tautulliConfig, found := serverConfigMap[ref.ServerHash]
+				if !found {
+					log.Printf("[Posters] Warning: Could not find Tautulli config for hash %s", ref.ServerHash)
+					results <- downloadResult{success: false, skipped: false, error: errors.New("server config not found")}
+					continue
+				}
+
+				// Check if poster already exists
+				exists, _ := PosterExists(tautulliConfig, ref.RatingKey, maxAgeDays)
+				if exists {
+					results <- downloadResult{success: false, skipped: true, error: nil}
+					continue
+				}
+
+				// Download poster
+				_, err := DownloadPoster(tautulliConfig, ref.ThumbPath, ref.RatingKey)
+				if err != nil {
+					log.Printf("[Posters] Failed to preload poster for rating_key %d: %v", ref.RatingKey, err)
+					results <- downloadResult{success: false, skipped: false, error: err}
+					continue
+				}
+
+				results <- downloadResult{success: true, skipped: false, error: nil}
+
+				// Rate limiting between successful downloads
+				time.Sleep(100 * time.Millisecond)
+			}
+		}()
+	}
+
+	// Send jobs to workers
+	for _, ref := range posterRefs {
+		jobs <- ref
+	}
+	close(jobs)
+
+	// Collect results
+	successCount = 0
+	skippedCount = 0
+	errorCount = 0
+
+	for i := 0; i < len(posterRefs); i++ {
+		result := <-results
+		if result.success {
+			successCount++
+		} else if result.skipped {
+			skippedCount++
+		} else {
+			errorCount++
+		}
+	}
+
+	log.Printf("[Posters] Preload complete: %d successful, %d skipped (cached), %d errors",
+		successCount, skippedCount, errorCount)
+
+	return successCount, skippedCount, errorCount
+}
