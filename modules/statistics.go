@@ -256,7 +256,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 						var parentRatingKey int = 0
 						parentRatingKeyInt, err := strconv.Atoi(fmt.Sprintf("%v", tautulli_data[j].ParentRatingKey))
 						if err == nil {
-							grandparentRatingKey = parentRatingKeyInt
+							parentRatingKey = parentRatingKeyInt
 						}
 
 						var ratingKey int = 0
