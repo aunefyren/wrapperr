@@ -748,6 +748,10 @@ function top_list(array, title, music, show, year, div_id) {
                 for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
 
+                        html += "<div class='number'>";
+                            html += i+1 + ". ";
+                        html += "</div>";
+
                         // Add poster thumbnail if enabled
                         if(functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
                             var posterUrl = api_url + "get/poster/" + array[i].tautulli_server_hash + "/" + array[i].rating_key + ".jpg";
@@ -755,10 +759,6 @@ function top_list(array, title, music, show, year, div_id) {
                                 html += "<img src='" + posterUrl + "' alt='Poster' onerror='this.parentElement.style.display=\"none\"' />";
                             html += "</div>";
                         }
-
-                        html += "<div class='number'>";
-                            html += i+1 + ". ";
-                        html += "</div>";
 
                         html += "<div class='movie_name'>";
 							if(music === "track" || music === "album") {

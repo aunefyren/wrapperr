@@ -344,7 +344,7 @@ img {
 }
 
 .number {
-  text-align: right;
+  text-align: left;
   margin: 0.1em;
   display: inline-block;
   vertical-align: top;
