@@ -449,8 +449,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 					showEntry.RatingKey = showEntry.GrandparentRatingKey
 					// Update thumb path to point to show instead of episode/season
 					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
-					log.Printf("[DEBUG] Show poster fix: %s - RatingKey: %d -> %d, Thumb: %s",
-						showEntry.GrandparentTitle, wrapperr_data[i].Data[j].RatingKey, showEntry.RatingKey, showEntry.Thumb)
 					wrapperr_user_show = append(wrapperr_user_show, showEntry)
 				}
 
@@ -603,8 +601,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 					showEntry.RatingKey = showEntry.GrandparentRatingKey
 					// Update thumb path to point to show instead of episode/season
 					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
-					log.Printf("[DEBUG] Year show poster fix: %s - RatingKey: %d -> %d, Thumb: %s",
-						showEntry.GrandparentTitle, wrapperr_data[i].Data[j].RatingKey, showEntry.RatingKey, showEntry.Thumb)
 					wrapperr_year_show = append(wrapperr_year_show, showEntry)
 				}
 
