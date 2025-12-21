@@ -326,7 +326,6 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 					posterRefs,
 					config.TautulliConfig,
 					config.WrapperrCustomize.PosterCacheMaxAgeDays,
-					3, // maxConcurrency
 				)
 
 				log.Printf("[Posters] Preload complete for user %s: %d new, %d cached, %d failed (out of %d total)",

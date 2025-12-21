@@ -148,6 +148,22 @@ func PosterExists(tautulliConfig models.TautulliConfig, ratingKey int, maxAgeDay
 	return true, posterPath
 }
 
+// convertEntriesToPosterReferences converts TautulliEntry slice to PosterReference slice
+func convertEntriesToPosterReferences(entries []models.TautulliEntry) []PosterReference {
+	refs := make([]PosterReference, 0, len(entries))
+	for _, entry := range entries {
+		if entry.Thumb == "" || entry.RatingKey == 0 || entry.TautulliServerHash == "" {
+			continue
+		}
+		refs = append(refs, PosterReference{
+			ServerHash: entry.TautulliServerHash,
+			RatingKey:  entry.RatingKey,
+			ThumbPath:  entry.Thumb,
+		})
+	}
+	return refs
+}
+
 // DownloadPostersForEntries batch downloads posters for a list of entries
 // Called during cache build process
 func DownloadPostersForEntries(
@@ -155,54 +171,22 @@ func DownloadPostersForEntries(
 	tautulliConfigs []models.TautulliConfig,
 	maxAgeDays int,
 ) error {
-	// Map server hashes to configs for quick lookup
-	serverConfigMap := make(map[string]models.TautulliConfig)
-	for _, config := range tautulliConfigs {
-		hash := GetTautulliServerHash(config)
-		serverConfigMap[hash] = config
+	posterRefs := convertEntriesToPosterReferences(entries)
+
+	if len(posterRefs) == 0 {
+		log.Println("[Posters] No valid posters to download")
+		return nil
 	}
 
-	successCount := 0
-	errorCount := 0
-	skippedCount := 0
-
-	for _, entry := range entries {
-		// Skip entries without poster data
-		if entry.Thumb == "" || entry.RatingKey == 0 {
-			continue
-		}
-
-		// Find the correct Tautulli config
-		tautulliConfig, found := serverConfigMap[entry.TautulliServerHash]
-		if !found {
-			log.Printf("[Posters] Warning: Could not find Tautulli config for hash %s", entry.TautulliServerHash)
-			errorCount++
-			continue
-		}
-
-		// Check if poster already exists and is valid
-		exists, _ := PosterExists(tautulliConfig, entry.RatingKey, maxAgeDays)
-		if exists {
-			skippedCount++
-			continue
-		}
-
-		// Download poster
-		_, err := DownloadPoster(tautulliConfig, entry.Thumb, entry.RatingKey)
-		if err != nil {
-			log.Printf("[Posters] Failed to download poster for rating_key %d: %v", entry.RatingKey, err)
-			errorCount++
-			continue
-		}
-
-		successCount++
-
-		// Rate limiting - don't hammer the server
-		time.Sleep(100 * time.Millisecond)
-	}
+	successCount, skippedCount, errorCount := PreloadUserPosters(
+		posterRefs,
+		tautulliConfigs,
+		maxAgeDays,
+	)
 
 	log.Printf("[Posters] Download complete: %d successful, %d skipped (cached), %d errors",
 		successCount, skippedCount, errorCount)
+
 	return nil
 }
 
@@ -416,8 +400,8 @@ func PreloadUserPosters(
 	posterRefs []PosterReference,
 	tautulliConfigs []models.TautulliConfig,
 	maxAgeDays int,
-	maxConcurrency int,
 ) (successCount int, skippedCount int, errorCount int) {
+	maxConcurrency := 3
 	if len(posterRefs) == 0 {
 		return 0, 0, 0
 	}
