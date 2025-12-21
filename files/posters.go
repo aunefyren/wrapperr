@@ -384,6 +384,32 @@ func ExtractUserPosterReferences(reply models.WrapperrStatisticsReply) []PosterR
 	return posters
 }
 
+// ClearPosterCache removes all cached posters by deleting the entire posters directory
+func ClearPosterCache() error {
+	log.Println("[Posters] Starting poster cache clearing...")
+
+	// Check if directory exists
+	if _, err := os.Stat(posters_base_path); os.IsNotExist(err) {
+		log.Println("[Posters] Poster cache directory does not exist, nothing to clear")
+		return nil
+	}
+
+	// Remove all contents
+	err := os.RemoveAll(posters_base_path)
+	if err != nil {
+		return fmt.Errorf("failed to clear poster cache: %w", err)
+	}
+
+	// Recreate the base directory
+	err = os.MkdirAll(posters_base_path, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to recreate poster cache directory: %w", err)
+	}
+
+	log.Println("[Posters] Poster cache cleared successfully")
+	return nil
+}
+
 // PreloadUserPosters downloads posters for user-specific statistics in parallel
 // Returns counts of successful, skipped (already cached), and failed downloads
 func PreloadUserPosters(

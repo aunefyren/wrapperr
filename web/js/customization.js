@@ -812,6 +812,11 @@ function loadAdminPage() {
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
+    html += '<div class="form-group newline" title="Delete all cached posters. They will be re-downloaded when needed.">';
+    html += '<label for="clear_poster_cache">Clear photo cache now:<br>';
+    html += '<input type="checkbox" class="form-control" id="clear_poster_cache" checked /></label>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
     html += `<button type="submit" class="form-control btn" onclick="set_wrapperr_customization_call();" id="set_wrapperr_customization_form_button"><img src="${root}/assets/done.svg" class="btn_logo"></img><p2 id="set_wrapperr_customization_form_button_text">Save</p2></button>`;
     html += '</div>';
@@ -989,6 +994,7 @@ function set_wrapperr_customization_call() {
     get_year_stats_leaderboard_title = document.getElementById('get_year_stats_leaderboard_title').value;
     get_year_stats_duration_sum_title = document.getElementById('get_year_stats_duration_sum_title').value;
     clear_cache = document.getElementById('clear_cache').checked;
+    clear_poster_cache = document.getElementById('clear_poster_cache').checked;
 
     wrapperr_and = document.getElementById("wrapperr_and").value;
     wrapperr_play = document.getElementById("wrapperr_play").value;
@@ -1006,6 +1012,7 @@ function set_wrapperr_customization_call() {
     
     wrapperr_customization_form = {
         "clear_cache" : clear_cache,
+        "clear_poster_cache" : clear_poster_cache,
         "data_type" : "wrapperr_customize",
         "tautulli_config" : [],
         "wrapperr_data" : {},

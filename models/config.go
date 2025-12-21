@@ -45,6 +45,7 @@ type WrapperrConfigLegacy struct {
 
 type SetWrapperrConfig struct {
 	ClearCache        bool              `json:"clear_cache"`
+	ClearPosterCache  bool              `json:"clear_poster_cache"`
 	DataType          string            `json:"data_type"`
 	TautulliConfig    []TautulliConfig  `json:"tautulli_config"`
 	WrapperrCustomize WrapperrCustomize `json:"wrapperr_customize"`

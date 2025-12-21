@@ -147,6 +147,15 @@ func ApiSetConfig(context *gin.Context) {
 		}
 	}
 
+	if config_payload.ClearPosterCache {
+		log.Println("Clear poster cache setting set to true. Clearing poster cache.")
+
+		err = files.ClearPosterCache()
+		if err != nil {
+			log.Println("Failed to clear poster cache. Error: " + err.Error())
+		}
+	}
+
 	log.Println("New Wrapperr configuration saved for type: " + config_payload.DataType + ".")
 	context.JSON(http.StatusOK, gin.H{"message": "Saved new Wrapperr config."})
 

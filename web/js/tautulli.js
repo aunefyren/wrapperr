@@ -104,6 +104,11 @@ function loadAdminPage() {
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
+    html += '<div class="form-group newline" title="Delete all cached posters. They will be re-downloaded when needed.">';
+    html += '<label for="clear_poster_cache">Clear photo cache now:<br>';
+    html += '<input type="checkbox" class="form-control" id="clear_poster_cache" checked /></label>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
     html += `<button type="submit" class="form-control btn" onclick="set_tautulli_settings_call();" id="set_tautulli_form_button"><img src="${root}/assets/done.svg" class="btn_logo"></img><p2 id="set_tautulli_form_button_text">Save</p2></button>`;
     html += '</div>';
@@ -275,17 +280,19 @@ function set_tautulli_settings_call(dont_call_api) {
     }
 
     clear_cache = document.getElementById('clear_cache').checked;
+    clear_poster_cache = document.getElementById('clear_poster_cache').checked;
 
     if(!dont_call_api) {
-        set_tautulli_settings_call_two(clear_cache, tautulli_settings_array)
+        set_tautulli_settings_call_two(clear_cache, clear_poster_cache, tautulli_settings_array)
     } else {
         return tautulli_settings_array
     }
 }
 
-function set_tautulli_settings_call_two(clear_cache, tautulli_settings_array) {
+function set_tautulli_settings_call_two(clear_cache, clear_poster_cache, tautulli_settings_array) {
     tautulli_settings_form = {
         "clear_cache" : clear_cache,
+        "clear_poster_cache" : clear_poster_cache,
         "data_type" : "tautulli_config",
         "tautulli_config" : tautulli_settings_array,
         "wrapperr_data" : {},
