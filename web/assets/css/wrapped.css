@@ -617,8 +617,8 @@ hr {
 /* Poster thumbnails in top lists */
 .poster-thumbnail {
     display: inline-block;
-    width: 50px;
-    height: 75px;
+    width: 60px;
+    height: 90px;
     margin-left: 10px;
     margin-right: 10px;
     vertical-align: middle;
@@ -648,8 +648,8 @@ hr {
 /* Responsive design */
 @media (max-width: 768px) {
     .poster-thumbnail {
-        width: 40px;
-        height: 60px;
+        width: 48px;
+        height: 72px;
         margin-right: 8px;
     }
 
