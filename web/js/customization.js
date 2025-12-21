@@ -39,6 +39,19 @@ function loadAdminPage() {
     html += '</div>';
 
     html += '<div class="form-group">';
+    html += '<label for="obfuscate_other_users" title="Replace other\'s username with randomly generated names.">Obfuscate other usernames:<br>';
+    html += '<input type="checkbox" class="form-control" id="obfuscate_other_users" ';
+    if(obfuscate_other_users) {
+        html += 'checked="' + obfuscate_other_users + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group newline">';
+    html += '<hr>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
     html += '<label for="enable_posters" title="Display movie and TV show posters in statistics. Posters are downloaded from Tautulli and cached locally.">Enable Posters:<br>';
     html += '<input type="checkbox" class="form-control" id="enable_posters" ';
     if(enable_posters) {
@@ -50,15 +63,6 @@ function loadAdminPage() {
     html += '<div class="form-group">';
     html += '<label for="poster_cache_max_age_days" title="Maximum age in days before posters are re-downloaded. Default: 30 days.">Poster Cache Age (days):<br>';
     html += '<input type="number" class="form-control" id="poster_cache_max_age_days" value="' + poster_cache_max_age_days + '" min="1" max="365" autocomplete="off" placeholder="30" required /><br>';
-    html += '</div>';
-
-    html += '<div class="form-group">';
-    html += '<label for="obfuscate_other_users" title="Replace other\'s username with randomly generated names.">Obfuscate other usernames:<br>';
-    html += '<input type="checkbox" class="form-control" id="obfuscate_other_users" ';
-    if(obfuscate_other_users) {
-        html += 'checked="' + obfuscate_other_users + '" ';
-    }
-    html += '/><br>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -807,12 +811,12 @@ function loadAdminPage() {
     html += '<div class="warning">!<br>Many of the settings here need a clean cache to be applied.</div>';
     html += '</div>';
 
-    html += '<div class="form-group newline" title="Clear the cache now to include the newest settings.">';
+    html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
     html += '<label for="clear_cache">Clear cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
-    html += '<div class="form-group newline" title="Delete all cached posters. They will be re-downloaded when needed.">';
+    html += '<div class="form-group" title="Delete all cached posters. They will be re-downloaded when needed.">';
     html += '<label for="clear_poster_cache">Clear photo cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_poster_cache" checked /></label>';
     html += '</div>';

@@ -99,12 +99,12 @@ function loadAdminPage() {
     html += '<div class="warning">!<br>If you changed any server names you must clear the cache for Wrapperr to function.</div>';
     html += '</div>';
 
-    html += '<div class="form-group newline" title="Clear the cache now to include the newest settings.">';
+    html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
     html += '<label for="clear_cache">Clear cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
     html += '</div>';
 
-    html += '<div class="form-group newline" title="Delete all cached posters. They will be re-downloaded when needed.">';
+    html += '<div class="form-group" title="Delete all cached posters. They will be re-downloaded when needed.">';
     html += '<label for="clear_poster_cache">Clear photo cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_poster_cache" checked /></label>';
     html += '</div>';
