@@ -21,6 +21,7 @@ type WrapperrConfig struct {
 	PlexAuth           bool              `json:"plex_auth"`
 	BasicAuth          bool              `json:"basic_auth"`
 	WinterTheme        bool              `json:"winter_theme"`
+	DisableAdminPage   bool              `json:"disable_admin_page"`
 }
 
 type WrapperrConfigLegacy struct {

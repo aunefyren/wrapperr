@@ -119,5 +119,6 @@
 	"create_share_links": true,
 	"plex_auth": true,
 	"winter_theme": true,
-    "basic_auth": false
+    "basic_auth": false,
+    "disable_admin_page": false
 }

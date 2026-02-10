@@ -126,6 +126,7 @@ func CreateConfigFile() error {
 	config.UseCache = true
 	config.PlexAuth = true
 	config.UseLogs = true
+	config.DisableAdminPage = false
 
 	var tautulli_config = models.TautulliConfig{
 		TautulliGrouping: true,
