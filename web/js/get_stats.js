@@ -45,7 +45,7 @@ function get_stats() {
                 document.getElementById("plex_signout_button").style.opacity = '1';
                 document.getElementById('results_error').innerHTML = result.error;
 
-            } else {    
+            } else {
                 results = result;
                 load_page(results);
             }
@@ -530,6 +530,17 @@ function oldest_movie(array, functions_data) {
             html += '<br>';
             html += '<br>';
 
+            // Add poster
+            if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                html += 'onerror="this.src=\'assets/img/old-man.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
+                html += 'style="margin: 1em auto; display: block;">';
+            } else {
+                // Fallback to original illustration
+                html += '<img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            }
+
             if(array.year < 1950) {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_1950);
             } else if(array.year < 1975) {
@@ -539,8 +550,6 @@ function oldest_movie(array, functions_data) {
             } else {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle);
             }
-
-            html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
         html += "</div>";
     html += "</div>";
 
@@ -606,6 +615,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')'));
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                        html += 'onerror="this.style.display=\'none\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             } else {
@@ -613,6 +631,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title_one);
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
+                        html += 'onerror="this.style.display=\'none\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             }
@@ -637,13 +664,36 @@ function load_showbuddy(buddy_object, top_show, functions_data) {
             if(!buddy_object.error) {
                 if(!buddy_object.buddy_found) {
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title_none.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>'));
-                    html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;"><br>';
+                    html += '<br>';
+
+                    // Add show poster if available
+                    if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + top_show.tautulli_server_hash + "/" + top_show.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
+                        html += 'onerror="this.src=\'assets/img/quest.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    } else {
+                        html += '<img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
+                    }
+
+                    html += '<br>';
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle_none);
                 } else {
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>').replaceAll('{buddy_username}', buddy_object.buddy_name));
+                    html += '<br>';
+
+                    // Add show poster if available
+                    if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
+                        var posterUrl = api_url + "get/poster/" + top_show.tautulli_server_hash + "/" + top_show.rating_key + ".jpg";
+                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
+                        html += 'onerror="this.src=\'assets/img/social-event.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
+                        html += 'style="margin: 1em auto; display: block;">';
+                    } else {
+                        html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
+                    }
+
                     var combined = parseInt(top_show.duration) + parseInt(buddy_object.buddy_duration);
                     var combined_2 = seconds_to_time(combined);
-                    html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle.replaceAll('{buddy_duration_sum}', combined_2).replaceAll('{top_show_title}', top_show.grandparent_title));
                 }
             }
@@ -660,6 +710,16 @@ function load_longest_episode(array, functions_data) {
         html += "<div class='stats'>";
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title));
 			html += '<br><br>';
+
+            // Add show poster if available
+            if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
+                html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
+                html += 'onerror="this.style.display=\'none\';" ';
+                html += 'style="margin: 1em auto; display: block;">';
+                html += '<br>';
+            }
+
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false)));
         html += "</div>";
     html += "</div>";
@@ -720,9 +780,18 @@ function top_list(array, title, music, show, year, div_id) {
             html += "<div class='stats-list'>";
                 for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
+
                         html += "<div class='number'>";
                             html += i+1 + ". ";
                         html += "</div>";
+
+                        // Add poster thumbnail if enabled
+                        if(functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
+                            var posterUrl = api_url + "get/poster/" + array[i].tautulli_server_hash + "/" + array[i].rating_key + ".jpg";
+                            html += "<div class='poster-thumbnail'>";
+                                html += "<img src='" + posterUrl + "' alt='Poster' onerror='this.parentElement.style.display=\"none\"' />";
+                            html += "</div>";
+                        }
 
                         html += "<div class='movie_name'>";
 							if(music === "track" || music === "album") {
@@ -1255,3 +1324,4 @@ $(window).scroll(function() {
     return string
 
   }
+

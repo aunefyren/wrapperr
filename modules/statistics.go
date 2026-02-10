@@ -288,6 +288,14 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							OriginallyAvailableAt: *tautulli_data[j].OriginallyAvailableAt,
 						}
 
+						// Capture Thumb field if available
+						if tautulli_data[j].Thumb != nil {
+							tautulli_entry.Thumb = *tautulli_data[j].Thumb
+						}
+
+						// Add server hash for multi-server poster support
+						tautulli_entry.TautulliServerHash = files.GetTautulliServerHash(config.TautulliConfig[q])
+
 						// Append to day data
 						wrapperr_day.Data = append(wrapperr_day.Data, tautulli_entry)
 					}
@@ -434,8 +442,14 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				}
 
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_user_show = append(wrapperr_user_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					wrapperr_user_show = append(wrapperr_user_show, showEntry)
 				}
 
 			}
@@ -580,8 +594,14 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// If show was not found, add it to array
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_year_show = append(wrapperr_year_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					wrapperr_year_show = append(wrapperr_year_show, showEntry)
 				}
 
 				// Look for user within pre-defined array
@@ -696,6 +716,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
 
 		// Find average movie completion, duration sum and play sum
 		movie_completion_sum := 0
@@ -715,6 +738,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
 
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
@@ -757,6 +783,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.ParentTitle = wrapperr_user_episode[0].ParentTitle
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Plays = wrapperr_user_episode[0].Plays
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Title = wrapperr_user_episode[0].Title
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Thumb = wrapperr_user_episode[0].Thumb
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey = wrapperr_user_episode[0].GrandparentRatingKey
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash = wrapperr_user_episode[0].TautulliServerHash
 
 		// Find duration sum and play sum
 		episode_duration_sum := 0
@@ -1192,6 +1221,45 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 	} else {
 		wrapperr_reply.User.UserShows.Data.ShowBuddy.Message = "Show buddy is disabled in the settings."
 		wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
+	}
+
+	// Preload posters for server-wide year stats if enabled
+	// Only download posters for server-wide top lists (shared across all users)
+	// User-specific top lists and special cards will be loaded as they are required.
+	if config.UseCache && config.WrapperrCustomize.EnablePosters {
+		log.Println("Preloading posters for server-wide year stats...")
+
+		var yearStatsEntries []models.TautulliEntry
+
+		// Collect entries from server-wide year stats only
+		if config.WrapperrCustomize.GetYearStatsMovies {
+			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration...)
+			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays...)
+		}
+
+		if config.WrapperrCustomize.GetYearStatsShows {
+			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearShows.Data.ShowsDuration...)
+			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearShows.Data.ShowsPlays...)
+		}
+
+		// Music posters not implemented yet
+		// if config.WrapperrCustomize.GetYearStatsMusic {
+		//     yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration...)
+		//     yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays...)
+		// }
+
+		// Download only the server-wide year stats posters during cache build
+		if len(yearStatsEntries) > 0 {
+			err := files.DownloadPostersForEntries(
+				yearStatsEntries,
+				config.TautulliConfig,
+				config.WrapperrCustomize.PosterCacheMaxAgeDays,
+			)
+			if err != nil {
+				log.Println("Warning: Year stats poster download encountered errors: " + err.Error())
+				// Don't return error - posters are optional
+			}
+		}
 	}
 
 	return wrapperr_reply, nil
