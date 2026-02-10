@@ -174,6 +174,7 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			admin.POST("/get/cache-statistics", routes.ApiWrapperCacheStatistics)
 			admin.POST("/get/users", routes.ApiGetUsers)
 			admin.POST("/get/users/:userId", routes.ApiGetUser)
+			admin.POST("/get/users/:userId/statistics", routes.ApiGetUserStatistics)
 			admin.POST("/get/users/:userId/ignore", routes.ApiIgnoreUser)
 			admin.POST("/sync/users", routes.ApiSyncTautulliUsers)
 		}

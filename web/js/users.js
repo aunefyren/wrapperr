@@ -76,6 +76,7 @@ function placeUsers(usersArray) {
             <div class="user-header">Tautulli servers</div>
             <div class="user-header-short">Ignore user</div>
             <div class="user-header-short">History</div>
+            <div class="user-header-short">View As User</div>
         </div>
     `;
 
@@ -89,6 +90,20 @@ function placeUsers(usersArray) {
             `;
         } else {
             historyDiv = `
+            <div class="user-logbutton">
+            </div>
+            `;
+        }
+
+        var wrappedDiv = "";
+        if(user.user_active) {
+            wrappedDiv = `
+            <div class="user-logbutton">
+                <button class="form-control btn" name="wrappedButton" id="wrappedButton_${user.user_id}" onclick="viewUserWrapped(${user.user_id});" style="width: 2em; height: 2em; padding: 0.25em;" title="View Wrapped As User"><img src="${root}/assets/gift_icon.svg" class="btn_solo"></img><p2 id="wrappedButtonImage"></p2></button>
+            </div>
+            `;
+        } else {
+            wrappedDiv = `
             <div class="user-logbutton">
             </div>
             `;
@@ -128,6 +143,7 @@ function placeUsers(usersArray) {
                         <input style="margin: auto;" class="clickable" type="checkbox" id="ignore_user_check_${user.user_id}" name="ignore_user_check_${user.user_id}" onclick="toggleUserIgnore('${user.user_id}', ${user.user_ignore})" value="" ${ignoredUserString}>
                     </div>
                     ${historyDiv}
+                    ${wrappedDiv}
                 </div>
             </div>
         `;
@@ -254,5 +270,40 @@ function toggleUserIgnore(userId, currentIgnoreValue) {
     xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(data_obj);
+    return;
+}
+
+function viewUserWrapped(userId) {
+    // Fetch wrapped statistics first
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4) {
+            try {
+                var result = JSON.parse(this.responseText);
+            } catch(error) {
+                alert('Failed to parse API response.');
+                console.log('Failed to parse API response. Error: ' + this.responseText);
+                return;
+            }
+
+            if(result.error) {
+                alert(result.error);
+            } else {
+                // Store the wrapped data in sessionStorage with a unique key
+                var dataKey = 'viewWrappedAsUser_' + Date.now() + '_' + userId;
+                sessionStorage.setItem(dataKey, JSON.stringify(result));
+                
+                // Open frontpage in new window with the data key as query parameter
+                var baseUrl = window.location.origin + (root || '');
+                var wrappedUrl = baseUrl + '/?viewWrappedAsUser=' + dataKey;
+                window.open(wrappedUrl, '_blank');
+            }
+        }
+    };
+    xhttp.withCredentials = true;
+    xhttp.open("post", api_url + "get/users/" + userId + "/statistics");
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.setRequestHeader("Authorization", cookie);
+    xhttp.send();
     return;
 }

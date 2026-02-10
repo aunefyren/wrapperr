@@ -250,11 +250,36 @@
                 var url = new URL(url_string);
                 var hash = url.searchParams.get("hash");
                 var close_me = url.searchParams.get("close_me");
+                var viewWrappedAsUser = url.searchParams.get("viewWrappedAsUser");
 
                 // Attempt to close the tab if instructed to
                 if(close_me !== null) {
                     window.close();
                     return;
+                }
+
+                // If viewWrappedAsUser parameter is present, load wrapped data from sessionStorage
+                if(viewWrappedAsUser !== null) {
+                    try {
+                        var wrappedData = sessionStorage.getItem(viewWrappedAsUser);
+                        if(wrappedData) {
+                            var parsedData = JSON.parse(wrappedData);
+                            // Clean up the sessionStorage entry
+                            sessionStorage.removeItem(viewWrappedAsUser);
+                            // Load the wrapped page directly
+                            document.getElementById('loading').style.display = "none";
+                            document.getElementById('intro_text').innerHTML = '';
+                            document.getElementById('stats').innerHTML = '<img id="loading_icon" src="./assets/loading.gif" style="border-radius: 25px; background-color: white; padding: 1em;width: 4em; height: 4em; display:block; margin: auto;">';
+                            // Get functions first, then load the page
+                            get_wrapper_version_for_admin(parsedData);
+                            return;
+                        } else {
+                            document.getElementById('results_error').innerHTML = "Wrapped data not found for user. Please try again from the admin pages.";
+                        }
+                    } catch(error) {
+                        console.log("Error loading viewWrappedAsUser data: " + error);
+                        document.getElementById('results_error').innerHTML = "Failed to load wrapped data.";
+                    }
                 }
 
                 // If a hash is received, attempt to load shared link
