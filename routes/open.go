@@ -11,6 +11,7 @@ import (
 	"github.com/aunefyren/wrapperr/models"
 	"github.com/aunefyren/wrapperr/modules"
 	"github.com/aunefyren/wrapperr/utilities"
+	"github.com/pquerna/otp/totp"
 
 	"github.com/gin-gonic/gin"
 )
@@ -58,7 +59,7 @@ func ApiGetWrapperrVersion(context *gin.Context) {
 
 // API route which returns if whether or not a Wrapperr admin is configured.
 func ApiGetAdminState(context *gin.Context) {
-	admin, err := files.GetAdminState()
+	admin, mfaBool, err := files.GetAdminState()
 	if err != nil {
 		log.Println("Failed to load admin state. Error: " + err.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})
@@ -69,7 +70,7 @@ func ApiGetAdminState(context *gin.Context) {
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Retrieved Wrapperr admin state." + ipString)
 
-	context.JSON(http.StatusOK, gin.H{"message": "Retrieved Wrapperr version.", "error": false, "data": admin})
+	context.JSON(http.StatusOK, gin.H{"message": "Retrieved Wrapperr version.", "error": false, "data": admin, "mfa": mfaBool})
 	return
 }
 
@@ -99,7 +100,7 @@ func ApiGetFunctions(context *gin.Context) {
 
 // API route used to create the admin account and claim the Wrapperr server
 func ApiCreateAdmin(context *gin.Context) {
-	admin, err := files.GetAdminState()
+	admin, _, err := files.GetAdminState()
 	if err != nil {
 		log.Println("Failed to load admin state. Error: " + err.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})
@@ -181,7 +182,7 @@ func ApiWrapperrConfigured(context *gin.Context) {
 
 // API route which trades admin login credentials for an admin JWT session token. Valid for three days.
 func ApiLogInAdmin(context *gin.Context) {
-	admin, err := files.GetAdminState()
+	admin, mfaActive, err := files.GetAdminState()
 	if err != nil {
 		log.Println("Failed to load admin state. Error: " + err.Error())
 		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})
@@ -212,10 +213,11 @@ func ApiLogInAdmin(context *gin.Context) {
 
 		var username string
 		var password string
+		var mfaCode string
 
 		if !config.BasicAuth {
 			// Read payload from Post input
-			var admin_payload models.AdminConfig
+			var admin_payload models.AdminLoginRequest
 			if err := context.ShouldBindJSON(&admin_payload); err != nil {
 				log.Println("Failed to parse request. Error: " + err.Error())
 				context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
@@ -225,6 +227,7 @@ func ApiLogInAdmin(context *gin.Context) {
 
 			username = admin_payload.AdminUsername
 			password = admin_payload.AdminPassword
+			mfaCode = admin_payload.AdminMFACode
 
 			// Hash new password
 			passwordValidity := utilities.ComparePasswords(adminConfig.AdminPassword, password)
@@ -236,6 +239,16 @@ func ApiLogInAdmin(context *gin.Context) {
 				context.JSON(http.StatusUnauthorized, gin.H{"error": "Login failed. Username or password is incorrect."})
 				context.Abort()
 				return
+			}
+
+			if mfaActive {
+				mfaValid := totp.Validate(mfaCode, adminConfig.AdminMFASecret)
+				if !mfaValid {
+					log.Println("Admin login failed. Invalid MFA token.")
+					context.JSON(http.StatusUnauthorized, gin.H{"error": "Admin login failed."})
+					context.Abort()
+					return
+				}
 			}
 		} else {
 			err = utilities.ValidateBasicAuth(context, adminConfig)

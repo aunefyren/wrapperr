@@ -25,7 +25,7 @@ var timezonesPath, _ = filepath.Abs("./files/timezones.json")
 func GetConfigState() (bool, error) {
 
 	// Check if an admin is configured. Wrapperr must be claimed by an admin to function.
-	admin, err := GetAdminState()
+	admin, _, err := GetAdminState()
 	if err != nil {
 		log.Println("Get config state threw error trying to validate admin state.")
 		return false, err

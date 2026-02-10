@@ -13,19 +13,24 @@ import (
 var admin_config_path, _ = filepath.Abs("./config/admin.json")
 
 // Check if the config file has been configured for usage
-func GetAdminState() (bool, error) {
+func GetAdminState() (bool, bool, error) {
 	// Retrieve config object from function
 	admin_config, err := GetAdminConfig()
 	if err != nil {
 		log.Println("Admin config state retrieval threw error.")
-		return false, err
+		return false, false, err
+	}
+
+	mfaActive := false
+	if admin_config.AdminMFASecret != "" {
+		mfaActive = true
 	}
 
 	// Check if certain parameters are set. These are essential parameters the user must configure for basic functionality.
 	if admin_config.AdminUsername != "" && admin_config.AdminPassword != "" {
-		return true, nil
+		return true, mfaActive, nil
 	} else {
-		return false, nil
+		return false, mfaActive, nil
 	}
 }
 
