@@ -81,6 +81,7 @@ type TautulliEntry struct {
 	Year                  int    `json:"year"`
 	OriginallyAvailableAt string `json:"originally_available_at"`
 	Plays                 int    `json:"plays"`
+	GUID                  string `json:"guid"`
 }
 
 type TautulliGetUsersReply struct {
