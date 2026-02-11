@@ -409,7 +409,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 					// Use GUID as primary identifier (consistent across servers) to avoid issues with TBA titles
 					// Fall back to title-based matching if GUID is not available
 					episode_match := false
-					if wrapperr_user_episode[d].GUID != "" && wrapperr_data[i].Data[j].GUID != "" && !strings.HasPrefix("local://", wrapperr_user_episode[d].GUID) && !strings.HasPrefix("local://", wrapperr_data[i].Data[j].GUID) {
+					if wrapperr_user_episode[d].GUID != "" && wrapperr_data[i].Data[j].GUID != "" && !strings.HasPrefix(wrapperr_user_episode[d].GUID, "local://") && !strings.HasPrefix(wrapperr_data[i].Data[j].GUID, "local://") {
 						// Use GUID for reliable matching across servers
 						episode_match = wrapperr_user_episode[d].GUID == wrapperr_data[i].Data[j].GUID
 					} else {
