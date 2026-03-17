@@ -178,6 +178,8 @@ function get_config(cookie) {
                 stats_outro_title = result.data.wrapperr_customize.stats_outro_title;
                 stats_outro_subtitle = result.data.wrapperr_customize.stats_outro_subtitle;
                 stats_top_list_length = result.data.wrapperr_customize.stats_top_list_length;
+                enable_posters = result.data.wrapperr_customize.enable_posters || false;
+                poster_cache_max_age_days = result.data.wrapperr_customize.poster_cache_max_age_days || 30;
                 obfuscate_other_users = result.data.wrapperr_customize.obfuscate_other_users;
 
                 get_user_movie_stats = result.data.wrapperr_customize.get_user_movie_stats;

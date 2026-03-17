@@ -370,7 +370,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 		new_save_loc, backupErr := BackUpConfig(config_path)
 		if backupErr != nil {
 			log.Println("Failed to back up config file: " + backupErr.Error())
-			return config, err
+			return config, errors.New("Failed to back up config file.")
 		}
 		log.Println("Backed up un-migrateable config to '" + new_save_loc + "'. Loading default.")
 
@@ -391,14 +391,14 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 	// Load default config file for filling in missing/empty values
 	defaultFile, err := os.ReadFile(default_config_path)
 	if err != nil {
-		log.Println("Get config file threw error trying to open the template file.")
-		return config, err
+		log.Println("Get config file threw error trying to open the template file. Error: " + err.Error())
+		return config, errors.New("Get config file threw error trying to open the template file.")
 	}
 
 	config_default := models.WrapperrConfig{}
 	if err = json.Unmarshal(defaultFile, &config_default); err != nil {
-		log.Println("Get config file threw error trying to parse the template file.")
-		return config, err
+		log.Println("Get config file threw error trying to parse the template file. Error: " + err.Error())
+		return config, errors.New("Get config file threw error trying to parse the template file.")
 	}
 
 	// Update the Wrapperr version the config file is created for
@@ -469,7 +469,8 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 
 	config, err = VerifyNonEmptyCustomValues(config, config_default)
 	if err != nil {
-		return config, err
+		log.Println("Failed to verify non empty values. Error: " + err.Error())
+		return config, errors.New("Failed to verify non empty values.")
 	}
 
 	// Save new version of config json

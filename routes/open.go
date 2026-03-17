@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -491,4 +492,87 @@ func ApiLoginPlexAuth(context *gin.Context) {
 
 	context.JSON(http.StatusCreated, string_reply)
 	return
+}
+
+// ApiGetPoster serves cached poster images
+func ApiGetPoster(context *gin.Context) {
+	serverHash := context.Param("serverHash")
+	filename := context.Param("filename")
+
+	// Validate inputs
+	if serverHash == "" || filename == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poster request"})
+		return
+	}
+
+	// Get poster path with security validation
+	posterPath, err := files.GetPosterPath(serverHash, filename)
+	if err != nil {
+		ipString := utilities.GetOriginIPString(context)
+		log.Printf("[Posters] Blocked invalid path request: %s %s", err.Error(), ipString)
+		context.JSON(http.StatusForbidden, gin.H{"error": "Invalid path"})
+		return
+	}
+
+	// Check if file exists
+	if _, err := os.Stat(posterPath); os.IsNotExist(err) {
+		context.JSON(http.StatusNotFound, gin.H{"error": "Poster not found"})
+		return
+	}
+
+	// Serve the file
+	context.File(posterPath)
+}
+
+// ApiDownloadPoster handles on-demand poster downloads (lazy loading)
+func ApiDownloadPoster(context *gin.Context) {
+	type PosterRequest struct {
+		ServerHash string `json:"server_hash"`
+		RatingKey  int    `json:"rating_key"`
+		ThumbPath  string `json:"thumb_path"`
+	}
+
+	var request PosterRequest
+	if err := context.BindJSON(&request); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Load config
+	config, err := files.GetConfig()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config"})
+		return
+	}
+
+	// Check if posters are enabled
+	if !config.WrapperrCustomize.EnablePosters {
+		context.JSON(http.StatusForbidden, gin.H{"error": "Posters are disabled"})
+		return
+	}
+
+	// Find matching Tautulli config
+	var matchedConfig *models.TautulliConfig
+	for _, tautulliConfig := range config.TautulliConfig {
+		if files.GetTautulliServerHash(tautulliConfig) == request.ServerHash {
+			matchedConfig = &tautulliConfig
+			break
+		}
+	}
+
+	if matchedConfig == nil {
+		context.JSON(http.StatusNotFound, gin.H{"error": "Server not found"})
+		return
+	}
+
+	// Download the poster asynchronously
+	go func() {
+		_, err := files.DownloadPoster(*matchedConfig, request.ThumbPath, request.RatingKey)
+		if err != nil {
+			log.Printf("[Posters] Lazy download failed for rating_key %d: %v", request.RatingKey, err)
+		}
+	}()
+
+	// Return success immediately (download happens in background)
+	context.JSON(http.StatusAccepted, gin.H{"message": "Poster download queued"})
 }
