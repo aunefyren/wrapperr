@@ -286,6 +286,7 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							UserID:                tautulli_data[j].UserID,
 							Year:                  year,
 							OriginallyAvailableAt: *tautulli_data[j].OriginallyAvailableAt,
+							GUID:                  tautulli_data[j].GUID,
 						}
 
 						// Append to day data
@@ -405,8 +406,18 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// Look for episode within pre-defined array
 				for d := 0; d < len(wrapperr_user_episode); d++ {
+					// Use GUID as primary identifier (consistent across servers) to avoid issues with TBA titles
+					// Fall back to title-based matching if GUID is not available
+					episode_match := false
+					if wrapperr_user_episode[d].GUID != "" && wrapperr_data[i].Data[j].GUID != "" && !strings.HasPrefix(wrapperr_user_episode[d].GUID, "local://") && !strings.HasPrefix(wrapperr_data[i].Data[j].GUID, "local://") {
+						// Use GUID for reliable matching across servers
+						episode_match = wrapperr_user_episode[d].GUID == wrapperr_data[i].Data[j].GUID
+					} else {
+						// Fallback to original matching logic when GUID is not available
+						episode_match = ((wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_episode[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle
+					}
 
-					if ((wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_episode[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
+					if episode_match {
 						wrapperr_user_episode[d].Plays += 1
 						wrapperr_user_episode[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_episode[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
