@@ -563,7 +563,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:          1,
 						DurationMovies: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:  wrapperr_data[i].Data[j].PausedCounter,
-						User:           wrapperr_data[i].Data[j].FriendlyName,
+						User:           wrapperr_data[i].Data[j].User,
+						FriendlyName:   wrapperr_data[i].Data[j].FriendlyName,
 						UserID:         wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -613,7 +614,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:         1,
 						DurationShows: wrapperr_data[i].Data[j].Duration,
 						PausedCounter: wrapperr_data[i].Data[j].PausedCounter,
-						User:          wrapperr_data[i].Data[j].FriendlyName,
+						User:          wrapperr_data[i].Data[j].User,
+						FriendlyName:  wrapperr_data[i].Data[j].FriendlyName,
 						UserID:        wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -663,7 +665,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:           1,
 						DurationArtists: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:   wrapperr_data[i].Data[j].PausedCounter,
-						User:            wrapperr_data[i].Data[j].FriendlyName,
+						User:            wrapperr_data[i].Data[j].User,
+						FriendlyName:    wrapperr_data[i].Data[j].FriendlyName,
 						UserID:          wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -1042,48 +1045,56 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		for d := 0; d < len(wrapperr_year_user); d++ {
 			wrapperr_year_user[d].Duration = wrapperr_year_user[d].DurationMovies + wrapperr_year_user[d].DurationShows + wrapperr_year_user[d].DurationArtists
 
-			if config.WrapperrCustomize.ObfuscateOtherUsers {
+			currentUserID := wrapperr_year_user[d].UserID
 
-				// Declare variables
-				var newName string
-				currentUserID := wrapperr_year_user[d].UserID
+			// Handle username display based on config setting
+			// Only modify other users, not the current user
+			if currentUserID != user_id {
+				switch config.WrapperrCustomize.ObfuscateOtherUsers {
+				case "plex_username":
+					// Use Plex username (User field) - already set, just ensure FriendlyName matches
+					wrapperr_year_user[d].FriendlyName = wrapperr_year_user[d].User
+				case "friendly_name":
+					// Use Tautulli friendly name - already set in FriendlyName, just ensure User matches
+					wrapperr_year_user[d].User = wrapperr_year_user[d].FriendlyName
+				case "obfuscate":
+					// Obfuscate with random names
+					var newName string
 
-				// Give new name
-				if currentUserID == 0 {
-					newName = "Managed user"
-				} else {
-					// Generate random name
-					newNameGen := nameGenerator.Generate()
+					// Give new name
+					if currentUserID == 0 {
+						newName = "Managed user"
+					} else {
+						// Generate random name
+						newNameGen := nameGenerator.Generate()
 
-					// Try to improve random name
-					newNameGenArray := strings.Split(newNameGen, "-")
-					newNamePartOne := newNameGenArray[0]
-					newNamePartTwo := newNameGenArray[1]
-					newName = strings.Title(newNamePartOne) + " " + strings.Title(newNamePartTwo)
-				}
-
-				// Create obfucasted struct type
-				obfuscatedUser := obfuscatedUser{
-					userID:  wrapperr_year_user[d].UserID,
-					newName: newName,
-				}
-
-				// Verify user is not already in catalog
-				userIDFound := false
-				for o := 0; o < len(obfuscateCatalog); o++ {
-					if obfuscateCatalog[o].userID == currentUserID {
-						userIDFound = true
-						break
+						// Try to improve random name
+						newNameGenArray := strings.Split(newNameGen, "-")
+						newNamePartOne := newNameGenArray[0]
+						newNamePartTwo := newNameGenArray[1]
+						newName = strings.Title(newNamePartOne) + " " + strings.Title(newNamePartTwo)
 					}
-				}
 
-				// If not found, push to catalog
-				if !userIDFound {
-					obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
-				}
+					// Create obfuscated struct type
+					obfuscatedUser := obfuscatedUser{
+						userID:  wrapperr_year_user[d].UserID,
+						newName: newName,
+					}
 
-				// Obfuscate user in dataset if it is not themself
-				if currentUserID != user_id {
+					// Verify user is not already in catalog
+					userIDFound := false
+					for o := 0; o < len(obfuscateCatalog); o++ {
+						if obfuscateCatalog[o].userID == currentUserID {
+							userIDFound = true
+							break
+						}
+					}
+
+					// If not found, push to catalog
+					if !userIDFound {
+						obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
+					}
+
 					wrapperr_year_user[d].FriendlyName = newName
 					wrapperr_year_user[d].User = newName
 					wrapperr_year_user[d].UserID = 0
@@ -1150,7 +1161,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 			wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
 		} else {
 
-			err, buddy_name, buddy_id, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
+			err, buddy_friendly_name, buddy_plex_username, buddy_id, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
 
 			var show_buddy models.WrapperrShowBuddy
 
@@ -1161,9 +1172,15 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				show_buddy.Error = true
 			} else {
 
-				// Obfuscate username of buddy if enabled
-				if config.WrapperrCustomize.ObfuscateOtherUsers {
-					// Verify user is not already in catalog of users to maintain name consistancy
+				// Determine which name to use based on config setting
+				var buddy_name string
+				switch config.WrapperrCustomize.ObfuscateOtherUsers {
+				case "plex_username":
+					buddy_name = buddy_plex_username
+				case "friendly_name":
+					buddy_name = buddy_friendly_name
+				case "obfuscate":
+					// Verify user is not already in catalog of users to maintain name consistency
 					userIDFound := false
 					userNameFound := ""
 					for o := 0; o < len(obfuscateCatalog); o++ {
@@ -1184,6 +1201,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 					// Remove buddy id
 					buddy_id = 0
+				default:
+					// Default to friendly name for backwards compatibility
+					buddy_name = buddy_friendly_name
 				}
 
 				show_buddy.Message = "Show buddy retrieved."
@@ -1209,10 +1229,11 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 }
 
-func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, int, bool, int) {
+func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, string, int, bool, int) {
 
 	var top_show_users []models.WrapperrYearUserEntry
-	var top_show_buddy_name = "Something went wrong."
+	var top_show_buddy_friendly_name = "Something went wrong."
+	var top_show_buddy_plex_username = "Something went wrong."
 	var top_show_buddy_id = 0
 	var top_show_buddy_duration = 0
 	var top_show_buddy_found = false
@@ -1254,6 +1275,7 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 						Plays:        1,
 						Duration:     wrapperr_data[i].Data[j].Duration,
 						FriendlyName: wrapperr_data[i].Data[j].FriendlyName,
+						User:         wrapperr_data[i].Data[j].User,
 						UserID:       wrapperr_data[i].Data[j].UserID,
 					}
 					top_show_users = append(top_show_users, user_entry)
@@ -1266,7 +1288,7 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 	}
 
 	if len(top_show_users) < 2 {
-		return nil, "None", 0, false, 0
+		return nil, "None", "None", 0, false, 0
 	}
 
 	sortutil.DescByField(top_show_users, "Duration")
@@ -1284,7 +1306,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 	for index, user := range top_show_users {
 
 		if user.UserID != user_id && len(top_show_users) == 2 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1293,7 +1316,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 		}
 
 		if user.UserID != user_id && index == user_index-1 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1302,7 +1326,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 		}
 
 		if user.UserID != user_id && index == user_index+1 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1312,6 +1337,6 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 
 	}
 
-	return error_bool, top_show_buddy_name, top_show_buddy_id, top_show_buddy_found, top_show_buddy_duration
+	return error_bool, top_show_buddy_friendly_name, top_show_buddy_plex_username, top_show_buddy_id, top_show_buddy_found, top_show_buddy_duration
 
 }
