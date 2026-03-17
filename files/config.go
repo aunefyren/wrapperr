@@ -3,9 +3,11 @@ package files
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/aunefyren/wrapperr/models"
 
@@ -21,10 +23,183 @@ var certPath, _ = filepath.Abs("./config/cert.pem")
 var certKeyPath, _ = filepath.Abs("./config/key.pem")
 var timezonesPath, _ = filepath.Abs("./files/timezones.json")
 
-// Check if the config file has been configured for usage
+// migrationFn takes raw config JSON and returns transformed JSON
+// each function is responsible for bumping "wrapperr_version" to the target version
+type migrationFn func([]byte) ([]byte, error)
+
+// migrations is the ordered chain of version-to-version migrations
+// each entry defines the version a config must currently be at to apply that step
+// add new entries here as the project evolves
+var migrations = []struct {
+	targetVersion string
+	fn            migrationFn
+}{
+	// v3.0.0 and earlier used a single tautulli_config object instead of an array.
+	// ConvertLegacyToCurrentConfig previously handled this via a separate code path
+	{"", migrateV0toV3_1_0},
+	{"v3.0.4", migrateV0toV3_1_0},
+	{"v3.2.10", migrateV3_2_0toV3_3_0},
+}
+
+// migrateConfig walks the migration chain, applying each applicable step in order
+// it reads "wrapperr_version" after every step to advance through the chain correctly
+func migrateConfig(data []byte) ([]byte, error) {
+	for {
+		var versioned struct {
+			Version string `json:"wrapperr_version"`
+		}
+		if err := json.Unmarshal(data, &versioned); err != nil {
+			return nil, err
+		}
+
+		// dev mode release tag
+		if strings.EqualFold(versioned.Version, "{{RELEASE_TAG}}") {
+			return data, nil
+		}
+
+		applied := false
+		for _, m := range migrations {
+			if versionLessThan(versioned.Version, m.targetVersion) {
+				log.Printf("Migrating config from %s to %s", versioned.Version, m.targetVersion)
+				var err error
+				data, err = m.fn(data)
+				if err != nil {
+					return nil, err
+				}
+				applied = true
+				break
+			}
+		}
+
+		if !applied {
+			return data, nil
+		}
+	}
+}
+
+// checks if version a is older than b
+func versionLessThan(a, b string) bool {
+	return compareVersions(a, b) < 0
+}
+
+// checks if version are the same, older or newer
+func compareVersions(a, b string) int {
+	aParts := parseVersion(a)
+	bParts := parseVersion(b)
+	for i := range bParts {
+		if aParts[i] != bParts[i] {
+			if aParts[i] < bParts[i] {
+				return -1
+			}
+			return 1
+		}
+	}
+	return 0
+}
+
+// parses a v3.2.1 version string into parts
+func parseVersion(v string) [3]int {
+	v = strings.TrimPrefix(v, "v")
+	var major, minor, patch int
+	fmt.Sscanf(v, "%d.%d.%d", &major, &minor, &patch)
+	return [3]int{major, minor, patch}
+}
+
+// migrateV0toV310 converts the old single tautulli_config object into the
+// tautulli_config array introduced in v3.1.0
+func migrateV0toV3_1_0(data []byte) ([]byte, error) {
+	newVersion := "v3.1.0"
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	// if tautulli_config is already an array, nothing to do
+	var probe []json.RawMessage
+	if err := json.Unmarshal(raw["tautulli_config"], &probe); err == nil {
+		// Already an array — just bump the version.
+		raw["wrapperr_version"], _ = json.Marshal(newVersion)
+		return json.Marshal(raw)
+	}
+
+	// it is a single object, wrap it in an array
+	var legacy models.TautulliConfigLegacy
+	if err := json.Unmarshal(raw["tautulli_config"], &legacy); err != nil {
+		return nil, err
+	}
+
+	modern := models.TautulliConfig{
+		TautulliApiKey:    legacy.TautulliApiKey,
+		TautulliIP:        legacy.TautulliIP,
+		TautulliLibraries: legacy.TautulliLibraries,
+		TautulliRoot:      legacy.TautulliRoot,
+		TautulliGrouping:  legacy.TautulliGrouping,
+		TautulliHttps:     legacy.TautulliHttps,
+		TautulliLength:    legacy.TautulliLength,
+		TautulliPort:      legacy.TautulliPort,
+		TautulliName:      "Server 1",
+	}
+
+	newArray, err := json.Marshal([]models.TautulliConfig{modern})
+	if err != nil {
+		return nil, err
+	}
+
+	raw["tautulli_config"] = newArray
+	raw["wrapperr_version"], _ = json.Marshal(newVersion)
+
+	log.Println("Migrated tautulli_config from single object to array (%s).", newVersion)
+	return json.Marshal(raw)
+}
+
+// converts obfuscate_other_users from bool to string.
+func migrateV3_2_0toV3_3_0(data []byte) ([]byte, error) {
+	newVersion := "v3.3.0"
+
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return nil, err
+	}
+
+	customizeRaw, exists := raw["wrapperr_customize"]
+	if !exists {
+		raw["wrapperr_version"], _ = json.Marshal(newVersion)
+		return json.Marshal(raw)
+	}
+
+	var customize map[string]json.RawMessage
+	if err := json.Unmarshal(customizeRaw, &customize); err != nil {
+		return nil, err
+	}
+
+	if obfuscateRaw, exists := customize["obfuscate_other_users"]; exists {
+		var boolValue bool
+		if err := json.Unmarshal(obfuscateRaw, &boolValue); err == nil {
+			// it is still a bool, convert to string.
+			newValue := "friendly_name"
+			if boolValue {
+				newValue = "obfuscate"
+			}
+			customize["obfuscate_other_users"], _ = json.Marshal(newValue)
+			log.Printf("Migrated obfuscate_other_users bool to string: %q (%s).", newValue, newVersion)
+
+			newCustomize, err := json.Marshal(customize)
+			if err != nil {
+				return nil, err
+			}
+			raw["wrapperr_customize"] = newCustomize
+		}
+	}
+
+	raw["wrapperr_version"], _ = json.Marshal(newVersion)
+	return json.Marshal(raw)
+}
+
+// check if the config file has been configured for usage
 func GetConfigState() (bool, error) {
 
-	// Check if an admin is configured. Wrapperr must be claimed by an admin to function.
+	// check if an admin is configured. Wrapperr must be claimed by an admin to function.
 	admin, err := GetAdminState()
 	if err != nil {
 		log.Println("Get config state threw error trying to validate admin state.")
@@ -33,14 +208,15 @@ func GetConfigState() (bool, error) {
 		return false, nil
 	}
 
-	// Retrieve config object from function
+	// retrieve config object from function
 	config, err := GetConfig()
 	if err != nil {
 		log.Println("Get config state threw error trying to retrieve config.")
 		return false, err
 	}
 
-	// Check if certain parameters are set. These are essential parameters the user must configure for basic functionality.
+	// check if certain parameters are set
+	// these are essential parameters the user must configure for basic functionality
 	if config.TautulliConfig[0].TautulliApiKey != "" && config.TautulliConfig[0].TautulliIP != "" && config.TautulliConfig[0].TautulliLength != 0 && config.Timezone != "" && config.WrappedStart != 0 && config.WrappedEnd != 0 && config.WrapperrVersion != "" {
 		return true, nil
 	} else {
@@ -48,7 +224,7 @@ func GetConfigState() (bool, error) {
 	}
 }
 
-// Get private key from the config file
+// get private key from the config file
 func GetPrivateKey() (string, error) {
 
 	// Retrieve config object from function
@@ -78,7 +254,7 @@ func GetPrivateKey() (string, error) {
 	}
 }
 
-// Update private key to random string
+// update private key to random string
 func UpdatePrivateKey() (string, error) {
 
 	// Retrieve config object from function
@@ -161,62 +337,6 @@ func CreateConfigFile() error {
 	return nil
 }
 
-// migrateObfuscateOtherUsers converts the obfuscate_other_users field from bool to string
-// for backwards compatibility with older config files
-func migrateObfuscateOtherUsers(data []byte) ([]byte, error) {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return data, err
-	}
-
-	// Check if wrapperr_customize exists
-	customizeRaw, exists := raw["wrapperr_customize"]
-	if !exists {
-		return data, nil
-	}
-
-	var customize map[string]json.RawMessage
-	if err := json.Unmarshal(customizeRaw, &customize); err != nil {
-		return data, err
-	}
-
-	// Check if obfuscate_other_users exists
-	obfuscateRaw, exists := customize["obfuscate_other_users"]
-	if !exists {
-		return data, nil
-	}
-
-	// Try to parse as bool - if it works, we need to migrate
-	var boolValue bool
-	if err := json.Unmarshal(obfuscateRaw, &boolValue); err == nil {
-		// It's a bool, convert to string
-		var newValue string
-		if boolValue {
-			newValue = "obfuscate"
-		} else {
-			newValue = "friendly_name"
-		}
-		log.Println("Migrating obfuscate_other_users from bool to string: " + newValue)
-
-		// Update the value
-		newValueJSON, _ := json.Marshal(newValue)
-		customize["obfuscate_other_users"] = newValueJSON
-
-		// Re-marshal customize
-		newCustomize, err := json.Marshal(customize)
-		if err != nil {
-			return data, err
-		}
-		raw["wrapperr_customize"] = newCustomize
-
-		// Re-marshal the entire config
-		return json.Marshal(raw)
-	}
-
-	// Already a string, no migration needed
-	return data, nil
-}
-
 // Read the config file and return the file as an object
 func GetConfig() (config models.WrapperrConfig, err error) {
 	config = models.WrapperrConfig{}
@@ -228,100 +348,54 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 
 		err = CreateConfigFile()
 		if err != nil {
-			return config, err
+			log.Println("Failed to create config file. Error: " + err.Error())
+			return config, errors.New("Failed to create config file.")
 		}
 	}
 
-	// Load config file
+	// load config file
 	file, err := os.ReadFile(config_path)
 	if err != nil {
-		return config, err
+		log.Println("Failed to read file. Error: " + err.Error())
+		return config, errors.New("Failed to read file.")
 	}
 
-	// Migrate obfuscate_other_users from bool to string if needed
-	file, err = migrateObfuscateOtherUsers(file)
+	// run the migration chain
+	file, err = migrateConfig(file)
 	if err != nil {
-		log.Println("Warning: Failed to migrate obfuscate_other_users field: " + err.Error())
+		// migration failed, back up the broken config and fall back to the default
+		log.Println("Config migration failed: " + err.Error())
+
+		new_save_loc, backupErr := BackUpConfig(config_path)
+		if backupErr != nil {
+			log.Println("Failed to back up config file: " + backupErr.Error())
+			return config, err
+		}
+		log.Println("Backed up un-migrateable config to '" + new_save_loc + "'. Loading default.")
+
+		file, err = os.ReadFile(default_config_path)
+		if err != nil {
+			log.Println("Failed to read file after migration. Error: " + err.Error())
+			return config, errors.New("Failed to read file after migration.")
+		}
 	}
 
-	// Parse config file
+	// unmarshal into the current struct, shape is guaranteed correct after migration
 	config = models.WrapperrConfig{}
-	err = json.Unmarshal(file, &config)
-	if err != nil {
-		return config, err
-	}
-	if err != nil {
-
-		// Parse config file
-		log.Println("Failed to parse config file. Trying legacy format. Error: " + err.Error())
-		// Load config file
-		file, err = os.ReadFile(config_path)
-		if err != nil {
-			log.Fatal("Error when opening file: ", err)
-		}
-
-		config_legacy := models.WrapperrConfigLegacy{}
-		err = json.Unmarshal(file, &config)
-
-		convert_failed := false
-
-		if err != nil {
-			// Back up old config as legacy didn't work
-			log.Println("Failed to parse config file as legacy. Replacing, but saving backup. Error: " + err.Error())
-			convert_failed = true
-		}
-
-		if !convert_failed {
-			// Attempt to convert Go struct
-			config, err = ConvertLegacyToCurrentConfig(config, config_legacy)
-			if err != nil {
-				log.Println("Failed to convert config from legacy to modern. Replacing, but saving backup. Error: " + err.Error())
-				convert_failed = true
-			}
-		}
-
-		// if nothing worked, replace config file
-		if convert_failed {
-			log.Println("Get config file threw error trying to open the template file.")
-
-			// Backup old config
-			new_save_loc, err := BackUpConfig(config_path)
-			if err != nil {
-				log.Println("Failed to rename old config file.")
-				return config, err
-			} else {
-				log.Println("Old config file saved to '" + new_save_loc + "'.")
-			}
-
-			// Load default config file
-			file, err := os.ReadFile(default_config_path)
-			if err != nil {
-				log.Println("Get config file threw error trying to open the template file.")
-				return config, err
-			}
-
-			// Parse default config file
-			config = models.WrapperrConfig{}
-			err = json.Unmarshal(file, &config)
-			if err != nil {
-				log.Println("Get config file threw error trying to parse the template file.")
-				return config, err
-			}
-		}
-
+	if err = json.Unmarshal(file, &config); err != nil {
+		log.Println("Failed to unmarshal file. Error: " + err.Error())
+		return config, errors.New("Failed to unmarshal file.")
 	}
 
-	// Load default config file
-	file, err = os.ReadFile(default_config_path)
+	// Load default config file for filling in missing/empty values
+	defaultFile, err := os.ReadFile(default_config_path)
 	if err != nil {
 		log.Println("Get config file threw error trying to open the template file.")
 		return config, err
 	}
 
-	// Parse default config file
 	config_default := models.WrapperrConfig{}
-	err = json.Unmarshal(file, &config_default)
-	if err != nil {
+	if err = json.Unmarshal(defaultFile, &config_default); err != nil {
 		log.Println("Get config file threw error trying to parse the template file.")
 		return config, err
 	}
@@ -363,7 +437,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 
 	// Set Wrapperr end time to dec if there is no time
 	if config.WrappedEnd == 0 {
-		config.WrappedEnd = config_default.WrappedEnd // If no start time, set to 31 Dec
+		config.WrappedEnd = config_default.WrappedEnd
 	}
 
 	if config.TautulliConfig == nil || len(config.TautulliConfig) == 0 {
@@ -416,45 +490,6 @@ func BackUpConfig(ConfigPath string) (string, error) {
 	return new_save_loc, nil
 }
 
-func ConvertLegacyToCurrentConfig(config models.WrapperrConfig, config_legacy models.WrapperrConfigLegacy) (models.WrapperrConfig, error) {
-
-	var NewTautulli models.TautulliConfig
-
-	NewTautulli.TautulliApiKey = config_legacy.TautulliConfig.TautulliApiKey
-	NewTautulli.TautulliIP = config_legacy.TautulliConfig.TautulliIP
-	NewTautulli.TautulliLibraries = config_legacy.TautulliConfig.TautulliLibraries
-	NewTautulli.TautulliRoot = config_legacy.TautulliConfig.TautulliRoot
-	NewTautulli.TautulliGrouping = config_legacy.TautulliConfig.TautulliGrouping
-	NewTautulli.TautulliHttps = config_legacy.TautulliConfig.TautulliHttps
-	NewTautulli.TautulliLength = config_legacy.TautulliConfig.TautulliLength
-	NewTautulli.TautulliPort = config_legacy.TautulliConfig.TautulliPort
-
-	NewTautulli.TautulliName = "Server 1"
-
-	config.TautulliConfig = append(config.TautulliConfig, NewTautulli)
-
-	config.WrapperrCustomize = config_legacy.WrapperrCustomize
-	config.WrapperrVersion = config_legacy.WrapperrVersion
-	config.Timezone = config_legacy.Timezone
-	config.ApplicationName = config_legacy.ApplicationName
-	config.ApplicationURL = config_legacy.ApplicationURL
-	config.UseCache = config_legacy.UseCache
-	config.UseLogs = config_legacy.UseLogs
-	config.ClientKey = config_legacy.ClientKey
-	config.WrapperrRoot = config_legacy.WrapperrRoot
-	config.PrivateKey = config_legacy.PrivateKey
-	config.CreateShareLinks = config_legacy.CreateShareLinks
-	config.WrappedStart = config_legacy.WrappedStart
-	config.WrappedEnd = config_legacy.WrappedEnd
-	config.WrapperrPort = config_legacy.WrapperrPort
-	config.PlexAuth = config_legacy.PlexAuth
-	config.WinterTheme = config_legacy.WinterTheme
-
-	log.Println("Config migrated.")
-
-	return config, nil
-}
-
 // verify values and replace empty ones
 func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default models.WrapperrConfig) (models.WrapperrConfig, error) {
 
@@ -475,19 +510,19 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 	}
 
 	if config.WrapperrCustomize.StatsIntroTitle == "" {
-		config.WrapperrCustomize.StatsIntroTitle = config_default.WrapperrCustomize.StatsIntroTitle // If no intro title string, set to default intro title
+		config.WrapperrCustomize.StatsIntroTitle = config_default.WrapperrCustomize.StatsIntroTitle
 	}
 
 	if config.WrapperrCustomize.StatsIntroSubtitle == "" {
-		config.WrapperrCustomize.StatsIntroSubtitle = config_default.WrapperrCustomize.StatsIntroSubtitle // If no intro subtitle string, set to default intro subtitle
+		config.WrapperrCustomize.StatsIntroSubtitle = config_default.WrapperrCustomize.StatsIntroSubtitle
 	}
 
 	if config.WrapperrCustomize.StatsOutroTitle == "" {
-		config.WrapperrCustomize.StatsOutroTitle = config_default.WrapperrCustomize.StatsOutroTitle // If no outro title string, set to default outro title
+		config.WrapperrCustomize.StatsOutroTitle = config_default.WrapperrCustomize.StatsOutroTitle
 	}
 
 	if config.WrapperrCustomize.StatsOutroSubtitle == "" {
-		config.WrapperrCustomize.StatsOutroSubtitle = config_default.WrapperrCustomize.StatsOutroSubtitle // If no outro subtitle string, set to default outro subtitle
+		config.WrapperrCustomize.StatsOutroSubtitle = config_default.WrapperrCustomize.StatsOutroSubtitle
 	}
 
 	if !config.WrapperrCustomize.StatsOrderByDuration && !config.WrapperrCustomize.StatsOrderByPlays {
