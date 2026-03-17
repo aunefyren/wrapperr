@@ -915,13 +915,9 @@ function set_wrapperr_customization_call() {
     stats_order_by_plays = document.getElementById('stats_order_by_plays').checked;
     stats_order_by_duration = document.getElementById('stats_order_by_duration').checked;
     stats_top_list_length = parseInt(document.getElementById("stats_top_list_length").value);
-<<<<<<< addPlexPosters
     enable_posters = document.getElementById('enable_posters').checked;
     poster_cache_max_age_days = parseInt(document.getElementById("poster_cache_max_age_days").value) || 30;
-    obfuscate_other_users = document.getElementById('obfuscate_other_users').checked;
-=======
     obfuscate_other_users = document.getElementById('obfuscate_other_users').value;
->>>>>>> main
 
     get_user_movie_stats = document.getElementById('get_user_movie_stats').checked;
     get_user_movie_stats_title = document.getElementById('get_user_movie_stats_title').value;

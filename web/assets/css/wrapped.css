@@ -297,15 +297,25 @@ img {
 .item:hover {
   background-color: var(--black) !important;
   border-radius: 0.5em;
-  margin: 0.5em 0;
+  margin: 0.5em 0 !important;
   max-height: none;
+  min-height: 2em;
+  overflow: auto;
 }
 
 .item {
   padding: 0.5em;
   display: flex;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-content: center;
   justify-content: space-between;
+  align-items: center;
   transition: 1s;
+  margin: 0 !important;
+  max-height: 6em;
+  overflow: hidden;
 }
 
 .item-expandable {
@@ -663,7 +673,6 @@ hr {
 .stats-list .item {
     display: flex;
     align-items: flex-start;
-    margin-bottom: 0.5em;
 }
 
 .stats-list .item .number {
