@@ -149,7 +149,7 @@ func migrateV0toV3_1_0(data []byte) ([]byte, error) {
 	raw["tautulli_config"] = newArray
 	raw["wrapperr_version"], _ = json.Marshal(newVersion)
 
-	log.Println("Migrated tautulli_config from single object to array (%s).", newVersion)
+	log.Printf("Migrated tautulli_config from single object to array (%s).", newVersion)
 	return json.Marshal(raw)
 }
 
