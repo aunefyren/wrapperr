@@ -145,17 +145,22 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 		// Requires no auth token
 		open := api.Group("")
 		{
+			// config pages
 			open.POST("/get/wrapperr-version", routes.ApiGetWrapperrVersion)
 			open.POST("/get/admin-state", routes.ApiGetAdminState)
 			open.POST("/get/functions", routes.ApiGetFunctions)
-			open.POST("/create/admin", routes.ApiCreateAdmin)
 			open.POST("/get/config-state", routes.ApiWrapperrConfigured)
-			open.POST("/login/admin", routes.ApiLogInAdmin)
 			open.POST("/get/tautulli-connection", routes.ApiGetTautulliConncection)
+
+			// usage pages
 			open.POST("/get/share-link", routes.ApiGetShareLink)
 			open.POST("/login/plex-auth", routes.ApiLoginPlexAuth)
 			open.GET("/get/poster/:serverHash/:filename", routes.ApiGetPoster)
 			open.POST("/download/poster", routes.ApiDownloadPoster)
+
+			// admin pages
+			open.POST("/login/admin", routes.ApiLogInAdmin)
+			open.POST("/create/admin", routes.ApiCreateAdmin)
 		}
 
 		// Can be user auth based on config
@@ -186,6 +191,7 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			admin.POST("/get/cache-statistics", routes.ApiWrapperCacheStatistics)
 			admin.POST("/get/users", routes.ApiGetUsers)
 			admin.POST("/get/users/:userId", routes.ApiGetUser)
+			admin.POST("/get/users/:userId/statistics", routes.ApiGetUserStatistics)
 			admin.POST("/get/users/:userId/ignore", routes.ApiIgnoreUser)
 			admin.POST("/sync/users", routes.ApiSyncTautulliUsers)
 			admin.POST("/clean/poster-cache", routes.ApiCleanPosterCache)
@@ -212,40 +218,42 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 		c.HTML(http.StatusOK, "frontpage.html", nil)
 	})
 
-	// Static endpoint for admin functions
-	router.GET(root+"/admin", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "admin.html", nil)
-	})
+	if !config.DisableAdminPage {
+		// Static endpoint for admin functions
+		router.GET(root+"/admin", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "admin.html", nil)
+		})
 
-	// Static endpoint for Tautulli admin functions
-	router.GET(root+"/admin/tautulli", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "tautulli.html", nil)
-	})
+		// Static endpoint for Tautulli admin functions
+		router.GET(root+"/admin/tautulli", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "tautulli.html", nil)
+		})
 
-	// Static endpoint for admin settings functions
-	router.GET(root+"/admin/settings", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "settings.html", nil)
-	})
+		// Static endpoint for admin settings functions
+		router.GET(root+"/admin/settings", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "settings.html", nil)
+		})
 
-	// Static endpoint for admin customization functions
-	router.GET(root+"/admin/customization", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "customization.html", nil)
-	})
+		// Static endpoint for admin customization functions
+		router.GET(root+"/admin/customization", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "customization.html", nil)
+		})
 
-	// Static endpoint for admin caching functions
-	router.GET(root+"/admin/caching", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "caching.html", nil)
-	})
+		// Static endpoint for admin caching functions
+		router.GET(root+"/admin/caching", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "caching.html", nil)
+		})
 
-	// Static endpoint for admin log functions
-	router.GET(root+"/admin/logs", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "logs.html", nil)
-	})
+		// Static endpoint for admin log functions
+		router.GET(root+"/admin/logs", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "logs.html", nil)
+		})
 
-	// Static endpoint for admin users functions
-	router.GET(root+"/admin/users", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "users.html", nil)
-	})
+		// Static endpoint for admin users functions
+		router.GET(root+"/admin/users", func(c *gin.Context) {
+			c.HTML(http.StatusOK, "users.html", nil)
+		})
+	}
 
 	// Static endpoint for robots.txt
 	router.GET(root+"/robots.txt", func(c *gin.Context) {

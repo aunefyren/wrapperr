@@ -18,17 +18,23 @@ import (
 
 func AuthMiddleware(admin bool) gin.HandlerFunc {
 	return func(context *gin.Context) {
-		authorizationHeader := context.GetHeader("Authorization")
-		if authorizationHeader == "" {
-			context.JSON(401, gin.H{"error": "Request does not contain an access token"})
-			context.Abort()
-			return
-		}
-
 		config, err := files.GetConfig()
 		if err != nil {
 			log.Println("Failed to load Wrapperr settings. Error: " + err.Error())
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr settings."})
+			context.Abort()
+			return
+		}
+
+		if config.DisableAdminPage {
+			context.JSON(http.StatusForbidden, gin.H{"error": "No access."})
+			context.Abort()
+			return
+		}
+
+		authorizationHeader := context.GetHeader("Authorization")
+		if authorizationHeader == "" {
+			context.JSON(401, gin.H{"error": "Request does not contain an access token"})
 			context.Abort()
 			return
 		}
