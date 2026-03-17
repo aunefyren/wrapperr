@@ -213,6 +213,10 @@ function load_movies() {
                         text += you_spent(results.user.user_movies.data.movie_duration, 'movies', functions);
                     text += "</div>";
 
+                    text += "<div class='boks2'>";
+                        text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                    text += "</div>";
+
                 text += "</div>";
 
             text += "</div>";
@@ -249,6 +253,12 @@ function load_movies() {
                     text += "<div class='boks2'>";
                         text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true, functions);
                     text += "</div>";
+
+                    if(!results.user.user_movies.data.user_movie_birth_decade.error) {
+                        text += "<div class='boks2'>";
+                            text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += "</div>";
+                    }
 
                 text += "</div>";
 
@@ -328,6 +338,10 @@ function load_shows() {
                         text += you_spent(results.user.user_shows.data.show_duration, 'shows', functions);
                     text += "</div>";
 
+                    text += "<div class='boks2'>";
+                        text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                    text += "</div>";
+
                 text += "</div>";
 
             text += "</div>";
@@ -366,6 +380,10 @@ function load_shows() {
 						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest, functions);
 					text += "</div>";
 				}
+
+                text += "<div class='boks2'>";
+                    text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                text += "</div>";
 
             text += "</div>";
         text += "</div>";
@@ -663,6 +681,212 @@ function load_longest_episode(array, functions_data) {
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false)));
         html += "</div>";
     html += "</div>";
+
+    return html;
+}
+
+/**
+ * Renders a birth decade age prediction card with media-specific text strings.
+ * @param {Object} birthDecadeData - The birth decade calculation results
+ * @param {Object} configStrings - Config strings object containing media-specific text
+ * @param {string} mediaType - Either 'movie' or 'show'
+ * @returns {string} HTML string for the card
+ */
+function renderBirthDecadeCard(birthDecadeData, configStrings, mediaType) {
+    var html = "";
+
+    // Build config key prefix based on media type
+    var prefix = 'get_user_' + mediaType + '_stats_birth_decade_';
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+
+        if(!birthDecadeData.error) {
+            var birth_year = birthDecadeData.estimated_birth_year;
+            var age = birthDecadeData.estimated_age;
+            var birth_decade = birthDecadeData.estimated_birth_decade;
+            var peak_year = birthDecadeData.nostalgia_peak_year;
+
+            if(birth_year >= 2010) {
+                // Recent/future birth year case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title_recent']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                        .replaceAll('{peak_year}', peak_year)
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle_recent']
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else if(birth_year < 1920) {
+                // Ancient birth year case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title_ancient']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle_ancient']
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else {
+                // Normal case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle']
+                        .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
+                );
+            }
+
+            // Add visualization chart if we have year distribution data
+            if(birthDecadeData.raw_year_distribution && Object.keys(birthDecadeData.raw_year_distribution).length > 0) {
+                html += '<br><div style="margin: 2em auto; max-width: 600px;">';
+                var chartTitle = configStrings[prefix + 'chart_title'];
+                var chartLegend = configStrings[prefix + 'chart_legend'];
+                html += renderNostalgiaChart(birthDecadeData, chartTitle, chartLegend);
+                html += '</div>';
+            }
+
+        } else {
+            // Error case
+            html += "<b>" + ReplaceStandardStrings(configStrings[prefix + 'title_error']) + "</b>";
+            html += '<br><br>';
+            html += ReplaceStandardStrings(configStrings[prefix + 'subtitle_error']);
+        }
+
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+/**
+ * Renders the movie birth decade age prediction card
+ */
+function movie_birth_decade_card(birth_decade_data, functions_data) {
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'movie');
+}
+
+/**
+ * Renders the TV show birth decade age prediction card
+ */
+function show_birth_decade_card(birth_decade_data, functions_data) {
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'show');
+}
+
+function renderNostalgiaChart(birth_decade_data, chartTitle, chartLegend) {
+    var html = "";
+    var yearDist = birth_decade_data.raw_year_distribution;
+
+    // Convert to array and sort by year
+    var dataYears = Object.keys(yearDist).map(function(year) {
+        return {
+            year: parseInt(year),
+            percentage: yearDist[year]
+        };
+    }).sort(function(a, b) {
+        return a.year - b.year;
+    });
+
+    if(dataYears.length === 0) return "";
+
+    var minYear = dataYears[0].year;
+    var maxYear = dataYears[dataYears.length - 1].year;
+
+    // Fill in all intermediate years with 0% if no data
+    var years = [];
+    for(var y = minYear; y <= maxYear; y++) {
+        var existingData = dataYears.find(function(item) { return item.year === y; });
+        if(existingData) {
+            years.push(existingData);
+        } else {
+            years.push({ year: y, percentage: 0 });
+        }
+    }
+
+    // Find max percentage for scaling
+    var maxPercentage = Math.max.apply(Math, years.map(function(y) { return y.percentage; }));
+
+    // Get peak year for highlighting
+    var peakYear = birth_decade_data.nostalgia_peak_year;
+
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">' + chartTitle + '</div>';
+
+    // Compact histogram container
+    html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
+
+    // Create histogram bars
+    html += '<div style="display: flex; align-items: flex-end; height: 100%; gap: 1px; position: relative;">';
+
+    for(var i = 0; i < years.length; i++) {
+        var year = years[i].year;
+        var percentage = years[i].percentage;
+
+        // Use logarithmic scale for visualization of raw watch data
+        var barHeight;
+        if(percentage === 0) {
+            barHeight = 2; // Small visible bar for no data
+        } else {
+            // Log scale: log(x+1) to compress large values and show small values
+            var logMax = Math.log(maxPercentage + 1);
+            var logValue = Math.log(percentage + 1);
+            barHeight = (logValue / logMax) * 100;
+        }
+
+        // Determine bar color based on position
+        var barColor = 'rgba(100, 150, 200, 0.7)';
+        var highlightColor = 'rgba(100, 150, 200, 1)';
+
+        if(percentage === 0) {
+            // Gray out bars with no data
+            barColor = 'rgba(80, 80, 80, 0.3)';
+            highlightColor = 'rgba(100, 100, 100, 0.5)';
+        } else if(year === peakYear) {
+            barColor = 'rgba(255, 200, 50, 0.8)';
+            highlightColor = 'rgba(255, 200, 50, 1)';
+        }
+
+        html += '<div style="flex: 1; height: ' + barHeight + '%; background: ' + barColor + '; border-radius: 2px 2px 0 0; cursor: pointer; transition: all 0.2s ease; position: relative;" ';
+        html += 'onmouseover="this.style.background=\'' + highlightColor + '\'; this.style.transform=\'scaleY(1.1)\'; this.querySelector(\'.tooltip\').style.display=\'block\';" ';
+        html += 'onmouseout="this.style.background=\'' + barColor + '\'; this.style.transform=\'scaleY(1)\'; this.querySelector(\'.tooltip\').style.display=\'none\';">';
+
+        // Tooltip
+        html += '<div class="tooltip" style="display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 6px 10px; border-radius: 6px; white-space: nowrap; font-size: 0.8em; margin-bottom: 5px; z-index: 1000; pointer-events: none;">';
+        html += '<div style="font-weight: bold;">' + year + '</div>';
+        if(percentage > 0) {
+            html += '<div style="font-size: 0.9em; opacity: 0.9;">' + percentage.toFixed(1) + '%</div>';
+        } else {
+            html += '<div style="font-size: 0.9em; opacity: 0.6; font-style: italic;">No data</div>';
+        }
+        // Add triangle pointer
+        html += '<div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid rgba(0,0,0,0.9);"></div>';
+        html += '</div>';
+
+        html += '</div>';
+    }
+
+    html += '</div>';
+
+    // X-axis with year labels
+    html += '<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7em; opacity: 0.6;">';
+    html += '<div>' + minYear + '</div>';
+    if(maxYear - minYear > 10) {
+        html += '<div>' + Math.floor((minYear + maxYear) / 2) + '</div>';
+    }
+    html += '<div>' + maxYear + '</div>';
+    html += '</div>';
+
+    html += '</div>';
+
+    // Legend
+    html += '<div style="margin-top: 0.8em; font-size: 0.7em; opacity: 0.7; text-align: center;">';
+    html += '<span style="color: rgba(255, 200, 50, 1);">● ' + chartLegend + '</span>';
+    html += '</div>';
 
     return html;
 }

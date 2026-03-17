@@ -255,10 +255,64 @@ function loadAdminPage() {
         html += '</div>';
 
         html += '<div class="form_block">';
-        
+
             html += '<div class="form-group">';
             html += '<label for="get_user_movie_stats_spent_title" title="Title of the time spent on movies section.">Movie spent title:<br>';
             html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_spent_title" name="get_user_movie_stats_spent_title" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+        html += '</div>';
+
+        html += '<div class="form_block">';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_title" title="Title for the birth decade prediction section (normal case).">Movie birth decade title:<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_title" name="get_user_movie_stats_birth_decade_title" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_subtitle" title="Subtitle for the birth decade prediction section (normal case).">Movie birth decade subtitle:<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_subtitle" name="get_user_movie_stats_birth_decade_subtitle" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_title_recent" title="Title for birth decade when peak year is very recent (time traveler case).">Movie birth decade title (recent):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_title_recent" name="get_user_movie_stats_birth_decade_title_recent" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_subtitle_recent" title="Subtitle for birth decade when peak year is very recent.">Movie birth decade subtitle (recent):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_subtitle_recent" name="get_user_movie_stats_birth_decade_subtitle_recent" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_title_ancient" title="Title for birth decade when calculated age is very old.">Movie birth decade title (ancient):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_title_ancient" name="get_user_movie_stats_birth_decade_title_ancient" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_subtitle_ancient" title="Subtitle for birth decade when calculated age is very old.">Movie birth decade subtitle (ancient):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_subtitle_ancient" name="get_user_movie_stats_birth_decade_subtitle_ancient" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_title_error" title="Title for birth decade when not enough data is available.">Movie birth decade title (error):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_title_error" name="get_user_movie_stats_birth_decade_title_error" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_subtitle_error" title="Subtitle for birth decade when not enough data is available.">Movie birth decade subtitle (error):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_movie_stats_birth_decade_subtitle_error" name="get_user_movie_stats_birth_decade_subtitle_error" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_chart_title" title="Title for the birth decade chart.">Movie birth decade chart title:<br>';
+            html += '<input type="text" class="form-control" id="get_user_movie_stats_birth_decade_chart_title" value="' + get_user_movie_stats_birth_decade_chart_title + '" autocomplete="off" placeholder="" required /><br>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_movie_stats_birth_decade_chart_legend" title="Legend for the birth decade chart.">Movie birth decade chart legend:<br>';
+            html += '<input type="text" class="form-control" id="get_user_movie_stats_birth_decade_chart_legend" value="' + get_user_movie_stats_birth_decade_chart_legend + '" autocomplete="off" placeholder="" required /><br>';
             html += '</div>';
 
         html += '</div>';
@@ -400,10 +454,64 @@ function loadAdminPage() {
         html += '</div>';
 
         html += '<div class="form_block">';
-        
+
             html += '<div class="form-group">';
             html += '<label for="get_user_show_stats_spent_title" title="Title of the time spent on shows section.">Show spent title:<br>';
             html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_spent_title" name="get_user_show_stats_spent_title" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+        html += '</div>';
+
+        html += '<div class="form_block">';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_title" title="Title for the birth decade prediction section (normal case).">Show birth decade title:<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_title" name="get_user_show_stats_birth_decade_title" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_subtitle" title="Subtitle for the birth decade prediction section (normal case).">Show birth decade subtitle:<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_subtitle" name="get_user_show_stats_birth_decade_subtitle" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_title_recent" title="Title for birth decade when peak year is very recent (time traveler case).">Show birth decade title (recent):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_title_recent" name="get_user_show_stats_birth_decade_title_recent" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_subtitle_recent" title="Subtitle for birth decade when peak year is very recent.">Show birth decade subtitle (recent):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_subtitle_recent" name="get_user_show_stats_birth_decade_subtitle_recent" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_title_ancient" title="Title for birth decade when calculated age is very old.">Show birth decade title (ancient):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_title_ancient" name="get_user_show_stats_birth_decade_title_ancient" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_subtitle_ancient" title="Subtitle for birth decade when calculated age is very old.">Show birth decade subtitle (ancient):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_subtitle_ancient" name="get_user_show_stats_birth_decade_subtitle_ancient" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_title_error" title="Title for birth decade when not enough data is available.">Show birth decade title (error):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_title_error" name="get_user_show_stats_birth_decade_title_error" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_subtitle_error" title="Subtitle for birth decade when not enough data is available.">Show birth decade subtitle (error):<br>';
+            html += '<textarea cols="40" rows="2" class="form-control" style="overflow-x: hidden;resize:vertical;min-height: 2em;" id="get_user_show_stats_birth_decade_subtitle_error" name="get_user_show_stats_birth_decade_subtitle_error" value="" autocomplete="off"></textarea></label>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_chart_title" title="Title for the birth decade chart.">Show birth decade chart title:<br>';
+            html += '<input type="text" class="form-control" id="get_user_show_stats_birth_decade_chart_title" value="' + get_user_show_stats_birth_decade_chart_title + '" autocomplete="off" placeholder="" required /><br>';
+            html += '</div>';
+
+            html += '<div class="form-group">';
+            html += '<label for="get_user_show_stats_birth_decade_chart_legend" title="Legend for the birth decade chart.">Show birth decade chart legend:<br>';
+            html += '<input type="text" class="form-control" id="get_user_show_stats_birth_decade_chart_legend" value="' + get_user_show_stats_birth_decade_chart_legend + '" autocomplete="off" placeholder="" required /><br>';
             html += '</div>';
 
         html += '</div>';
@@ -838,6 +946,14 @@ function loadAdminPage() {
     document.getElementById("get_user_movie_stats_oldest_subtitle_pre_1975").value = get_user_movie_stats_oldest_subtitle_pre_1975;
     document.getElementById("get_user_movie_stats_oldest_subtitle_pre_2000").value = get_user_movie_stats_oldest_subtitle_pre_2000;
     document.getElementById("get_user_movie_stats_spent_title").value = get_user_movie_stats_spent_title;
+    document.getElementById("get_user_movie_stats_birth_decade_title").value = get_user_movie_stats_birth_decade_title;
+    document.getElementById("get_user_movie_stats_birth_decade_subtitle").value = get_user_movie_stats_birth_decade_subtitle;
+    document.getElementById("get_user_movie_stats_birth_decade_title_recent").value = get_user_movie_stats_birth_decade_title_recent;
+    document.getElementById("get_user_movie_stats_birth_decade_subtitle_recent").value = get_user_movie_stats_birth_decade_subtitle_recent;
+    document.getElementById("get_user_movie_stats_birth_decade_title_ancient").value = get_user_movie_stats_birth_decade_title_ancient;
+    document.getElementById("get_user_movie_stats_birth_decade_subtitle_ancient").value = get_user_movie_stats_birth_decade_subtitle_ancient;
+    document.getElementById("get_user_movie_stats_birth_decade_title_error").value = get_user_movie_stats_birth_decade_title_error;
+    document.getElementById("get_user_movie_stats_birth_decade_subtitle_error").value = get_user_movie_stats_birth_decade_subtitle_error;
 
     document.getElementById("get_user_show_stats_title").value = get_user_show_stats_title;
     document.getElementById("get_user_show_stats_subtitle").value = get_user_show_stats_subtitle;
@@ -853,6 +969,14 @@ function loadAdminPage() {
     document.getElementById("get_user_show_stats_buddy_title_none").value = get_user_show_stats_buddy_title_none;
     document.getElementById("get_user_show_stats_buddy_subtitle_none").value = get_user_show_stats_buddy_subtitle_none;
     document.getElementById("get_user_show_stats_spent_title").value = get_user_show_stats_spent_title;
+    document.getElementById("get_user_show_stats_birth_decade_title").value = get_user_show_stats_birth_decade_title;
+    document.getElementById("get_user_show_stats_birth_decade_subtitle").value = get_user_show_stats_birth_decade_subtitle;
+    document.getElementById("get_user_show_stats_birth_decade_title_recent").value = get_user_show_stats_birth_decade_title_recent;
+    document.getElementById("get_user_show_stats_birth_decade_subtitle_recent").value = get_user_show_stats_birth_decade_subtitle_recent;
+    document.getElementById("get_user_show_stats_birth_decade_title_ancient").value = get_user_show_stats_birth_decade_title_ancient;
+    document.getElementById("get_user_show_stats_birth_decade_subtitle_ancient").value = get_user_show_stats_birth_decade_subtitle_ancient;
+    document.getElementById("get_user_show_stats_birth_decade_title_error").value = get_user_show_stats_birth_decade_title_error;
+    document.getElementById("get_user_show_stats_birth_decade_subtitle_error").value = get_user_show_stats_birth_decade_subtitle_error;
 
     document.getElementById("get_user_music_stats_title").value = get_user_music_stats_title;
     document.getElementById("get_user_music_stats_subtitle").value = get_user_music_stats_subtitle;
@@ -918,6 +1042,16 @@ function set_wrapperr_customization_call() {
     get_user_movie_stats_oldest_subtitle_pre_1975 = document.getElementById('get_user_movie_stats_oldest_subtitle_pre_1975').value;
     get_user_movie_stats_oldest_subtitle_pre_2000 = document.getElementById('get_user_movie_stats_oldest_subtitle_pre_2000').value;
     get_user_movie_stats_spent_title = document.getElementById('get_user_movie_stats_spent_title').value;
+    get_user_movie_stats_birth_decade_title = document.getElementById('get_user_movie_stats_birth_decade_title').value;
+    get_user_movie_stats_birth_decade_subtitle = document.getElementById('get_user_movie_stats_birth_decade_subtitle').value;
+    get_user_movie_stats_birth_decade_title_recent = document.getElementById('get_user_movie_stats_birth_decade_title_recent').value;
+    get_user_movie_stats_birth_decade_subtitle_recent = document.getElementById('get_user_movie_stats_birth_decade_subtitle_recent').value;
+    get_user_movie_stats_birth_decade_title_ancient = document.getElementById('get_user_movie_stats_birth_decade_title_ancient').value;
+    get_user_movie_stats_birth_decade_subtitle_ancient = document.getElementById('get_user_movie_stats_birth_decade_subtitle_ancient').value;
+    get_user_movie_stats_birth_decade_title_error = document.getElementById('get_user_movie_stats_birth_decade_title_error').value;
+    get_user_movie_stats_birth_decade_subtitle_error = document.getElementById('get_user_movie_stats_birth_decade_subtitle_error').value;
+    get_user_movie_stats_birth_decade_chart_title = document.getElementById('get_user_movie_stats_birth_decade_chart_title').value;
+    get_user_movie_stats_birth_decade_chart_legend = document.getElementById('get_user_movie_stats_birth_decade_chart_legend').value;
 
     get_user_show_stats = document.getElementById('get_user_show_stats').checked;
     get_user_show_stats_buddy = document.getElementById('get_user_show_stats_buddy').checked;
@@ -937,6 +1071,16 @@ function set_wrapperr_customization_call() {
     get_user_show_stats_buddy_title_none = document.getElementById('get_user_show_stats_buddy_title_none').value;
     get_user_show_stats_buddy_subtitle_none = document.getElementById('get_user_show_stats_buddy_subtitle_none').value;
     get_user_show_stats_spent_title = document.getElementById('get_user_show_stats_spent_title').value;
+    get_user_show_stats_birth_decade_title = document.getElementById('get_user_show_stats_birth_decade_title').value;
+    get_user_show_stats_birth_decade_subtitle = document.getElementById('get_user_show_stats_birth_decade_subtitle').value;
+    get_user_show_stats_birth_decade_title_recent = document.getElementById('get_user_show_stats_birth_decade_title_recent').value;
+    get_user_show_stats_birth_decade_subtitle_recent = document.getElementById('get_user_show_stats_birth_decade_subtitle_recent').value;
+    get_user_show_stats_birth_decade_title_ancient = document.getElementById('get_user_show_stats_birth_decade_title_ancient').value;
+    get_user_show_stats_birth_decade_subtitle_ancient = document.getElementById('get_user_show_stats_birth_decade_subtitle_ancient').value;
+    get_user_show_stats_birth_decade_title_error = document.getElementById('get_user_show_stats_birth_decade_title_error').value;
+    get_user_show_stats_birth_decade_subtitle_error = document.getElementById('get_user_show_stats_birth_decade_subtitle_error').value;
+    get_user_show_stats_birth_decade_chart_title = document.getElementById('get_user_show_stats_birth_decade_chart_title').value;
+    get_user_show_stats_birth_decade_chart_legend = document.getElementById('get_user_show_stats_birth_decade_chart_legend').value;
 
     get_user_music_stats = document.getElementById('get_user_music_stats').checked;
     get_user_music_stats_title = document.getElementById('get_user_music_stats_title').value;
@@ -1029,6 +1173,16 @@ function set_wrapperr_customization_call() {
             "get_user_movie_stats_oldest_subtitle_pre_1975" : get_user_movie_stats_oldest_subtitle_pre_1975,
             "get_user_movie_stats_oldest_subtitle_pre_2000" : get_user_movie_stats_oldest_subtitle_pre_2000,
             "get_user_movie_stats_spent_title" : get_user_movie_stats_spent_title,
+            "get_user_movie_stats_birth_decade_title" : get_user_movie_stats_birth_decade_title,
+            "get_user_movie_stats_birth_decade_subtitle" : get_user_movie_stats_birth_decade_subtitle,
+            "get_user_movie_stats_birth_decade_title_recent" : get_user_movie_stats_birth_decade_title_recent,
+            "get_user_movie_stats_birth_decade_subtitle_recent" : get_user_movie_stats_birth_decade_subtitle_recent,
+            "get_user_movie_stats_birth_decade_title_ancient" : get_user_movie_stats_birth_decade_title_ancient,
+            "get_user_movie_stats_birth_decade_subtitle_ancient" : get_user_movie_stats_birth_decade_subtitle_ancient,
+            "get_user_movie_stats_birth_decade_title_error" : get_user_movie_stats_birth_decade_title_error,
+            "get_user_movie_stats_birth_decade_subtitle_error" : get_user_movie_stats_birth_decade_subtitle_error,
+            "get_user_movie_stats_birth_decade_chart_title" : get_user_movie_stats_birth_decade_chart_title,
+            "get_user_movie_stats_birth_decade_chart_legend" : get_user_movie_stats_birth_decade_chart_legend,
             "get_user_show_stats" : get_user_show_stats,
             "get_user_show_stats_buddy" : get_user_show_stats_buddy,
             "get_user_show_stats_title" : get_user_show_stats_title,
@@ -1047,6 +1201,16 @@ function set_wrapperr_customization_call() {
             "get_user_show_stats_buddy_subtitle" : get_user_show_stats_buddy_subtitle,
             "get_user_show_stats_buddy_title_none" : get_user_show_stats_buddy_title_none,
             "get_user_show_stats_buddy_subtitle_none" : get_user_show_stats_buddy_subtitle_none,
+            "get_user_show_stats_birth_decade_title" : get_user_show_stats_birth_decade_title,
+            "get_user_show_stats_birth_decade_subtitle" : get_user_show_stats_birth_decade_subtitle,
+            "get_user_show_stats_birth_decade_title_recent" : get_user_show_stats_birth_decade_title_recent,
+            "get_user_show_stats_birth_decade_subtitle_recent" : get_user_show_stats_birth_decade_subtitle_recent,
+            "get_user_show_stats_birth_decade_title_ancient" : get_user_show_stats_birth_decade_title_ancient,
+            "get_user_show_stats_birth_decade_subtitle_ancient" : get_user_show_stats_birth_decade_subtitle_ancient,
+            "get_user_show_stats_birth_decade_title_error" : get_user_show_stats_birth_decade_title_error,
+            "get_user_show_stats_birth_decade_subtitle_error" : get_user_show_stats_birth_decade_subtitle_error,
+            "get_user_show_stats_birth_decade_chart_title" : get_user_show_stats_birth_decade_chart_title,
+            "get_user_show_stats_birth_decade_chart_legend" : get_user_show_stats_birth_decade_chart_legend,
             "get_user_music_stats" : get_user_music_stats,
             "get_user_music_stats_title" : get_user_music_stats_title,
             "get_user_music_stats_subtitle" : get_user_music_stats_subtitle,
