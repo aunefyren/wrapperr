@@ -213,9 +213,11 @@ function load_movies() {
                         text += you_spent(results.user.user_movies.data.movie_duration, 'movies', functions);
                     text += "</div>";
 
-                    text += "<div class='boks2'>";
-                        text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
-                    text += "</div>";
+                    if(functions.get_user_movie_stats_birth_decade) {
+                        text += "<div class='boks2'>";
+                            text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += "</div>";
+                    }
 
                 text += "</div>";
 
@@ -254,7 +256,7 @@ function load_movies() {
                         text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true, functions);
                     text += "</div>";
 
-                    if(!results.user.user_movies.data.user_movie_birth_decade.error) {
+                    if(functions.get_user_movie_stats_birth_decade && !results.user.user_movies.data.user_movie_birth_decade.error) {
                         text += "<div class='boks2'>";
                             text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
                         text += "</div>";
@@ -338,9 +340,11 @@ function load_shows() {
                         text += you_spent(results.user.user_shows.data.show_duration, 'shows', functions);
                     text += "</div>";
 
-                    text += "<div class='boks2'>";
-                        text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
-                    text += "</div>";
+                    if(functions.get_user_show_stats_birth_decade) {
+                        text += "<div class='boks2'>";
+                            text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                        text += "</div>";
+                    }
 
                 text += "</div>";
 
@@ -381,9 +385,11 @@ function load_shows() {
 					text += "</div>";
 				}
 
-                text += "<div class='boks2'>";
-                    text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
-                text += "</div>";
+                if(functions.get_user_show_stats_birth_decade) {
+                    text += "<div class='boks2'>";
+                        text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                    text += "</div>";
+                }
 
             text += "</div>";
         text += "</div>";

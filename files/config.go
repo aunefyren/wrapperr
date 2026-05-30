@@ -38,7 +38,7 @@ var migrations = []struct {
 	// ConvertLegacyToCurrentConfig previously handled this via a separate code path
 	{"", migrateV0toV3_1_0},
 	{"v3.0.4", migrateV0toV3_1_0},
-	{"v3.2.10", migrateV3_2_0toV3_3_0},
+	{"v3.3.0", migrateV3_2_0toV3_3_0},
 }
 
 // migrateConfig walks the migration chain, applying each applicable step in order
@@ -183,14 +183,24 @@ func migrateV3_2_0toV3_3_0(data []byte) ([]byte, error) {
 			}
 			customize["obfuscate_other_users"], _ = json.Marshal(newValue)
 			log.Printf("Migrated obfuscate_other_users bool to string: %q (%s).", newValue, newVersion)
-
-			newCustomize, err := json.Marshal(customize)
-			if err != nil {
-				return nil, err
-			}
-			raw["wrapperr_customize"] = newCustomize
 		}
 	}
+
+	if _, exists := customize["get_user_movie_stats_birth_decade"]; !exists {
+		customize["get_user_movie_stats_birth_decade"], _ = json.Marshal(true)
+		log.Printf("Migrated get_user_movie_stats_birth_decade to true (%s).", newVersion)
+	}
+
+	if _, exists := customize["get_user_show_stats_birth_decade"]; !exists {
+		customize["get_user_show_stats_birth_decade"], _ = json.Marshal(true)
+		log.Printf("Migrated get_user_show_stats_birth_decade to true (%s).", newVersion)
+	}
+
+	newCustomize, err := json.Marshal(customize)
+	if err != nil {
+		return nil, err
+	}
+	raw["wrapperr_customize"] = newCustomize
 
 	raw["wrapperr_version"], _ = json.Marshal(newVersion)
 	return json.Marshal(raw)

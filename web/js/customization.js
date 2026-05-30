@@ -323,6 +323,15 @@ function loadAdminPage() {
     html += `<button class="form-control btn" name="get_user_movie_stats_custom_button" id="get_user_movie_stats_custom_button" onclick="toggle_hidden_form(\'get_user_movie_stats_custom\')"><img src="${root}/assets/tweak.svg" class="btn_logo"></img><p2 id="get_user_movie_stats_custom_button_text">Custom text</p2></button>`;
     html += '</div>';
 
+    html += '<div class="form-group">';
+    html += '<label for="get_user_movie_stats_birth_decade" title="Includes the estimated viewing age card in the movie section.">Get movie viewing age:<br>';
+    html += '<input type="checkbox" class="form-control" id="get_user_movie_stats_birth_decade" ';
+    if(get_user_movie_stats_birth_decade) {
+        html += 'checked="' + get_user_movie_stats_birth_decade + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
     html += '<div class="form-group newline">';
     html += '<hr>';
     html += '</div>';
@@ -341,6 +350,15 @@ function loadAdminPage() {
     html += '<input type="checkbox" class="form-control" id="get_user_show_stats_buddy" ';
     if(get_user_show_stats_buddy) {
         html += 'checked="' + get_user_show_stats_buddy + '" ';
+    }
+    html += '/><br>';
+    html += '</div>';
+
+    html += '<div class="form-group">';
+    html += '<label for="get_user_show_stats_birth_decade" title="Includes the estimated viewing age card in the show section.">Get show viewing age:<br>';
+    html += '<input type="checkbox" class="form-control" id="get_user_show_stats_birth_decade" ';
+    if(get_user_show_stats_birth_decade) {
+        html += 'checked="' + get_user_show_stats_birth_decade + '" ';
     }
     html += '/><br>';
     html += '</div>';
@@ -1042,6 +1060,7 @@ function set_wrapperr_customization_call() {
     get_user_movie_stats_oldest_subtitle_pre_1975 = document.getElementById('get_user_movie_stats_oldest_subtitle_pre_1975').value;
     get_user_movie_stats_oldest_subtitle_pre_2000 = document.getElementById('get_user_movie_stats_oldest_subtitle_pre_2000').value;
     get_user_movie_stats_spent_title = document.getElementById('get_user_movie_stats_spent_title').value;
+    get_user_movie_stats_birth_decade = document.getElementById('get_user_movie_stats_birth_decade').checked;
     get_user_movie_stats_birth_decade_title = document.getElementById('get_user_movie_stats_birth_decade_title').value;
     get_user_movie_stats_birth_decade_subtitle = document.getElementById('get_user_movie_stats_birth_decade_subtitle').value;
     get_user_movie_stats_birth_decade_title_recent = document.getElementById('get_user_movie_stats_birth_decade_title_recent').value;
@@ -1055,6 +1074,7 @@ function set_wrapperr_customization_call() {
 
     get_user_show_stats = document.getElementById('get_user_show_stats').checked;
     get_user_show_stats_buddy = document.getElementById('get_user_show_stats_buddy').checked;
+    get_user_show_stats_birth_decade = document.getElementById('get_user_show_stats_birth_decade').checked;
     get_user_show_stats_title = document.getElementById('get_user_show_stats_title').value;
     get_user_show_stats_subtitle = document.getElementById('get_user_show_stats_subtitle').value;
     get_user_show_stats_subsubtitle = document.getElementById('get_user_show_stats_subsubtitle').value;
@@ -1173,6 +1193,7 @@ function set_wrapperr_customization_call() {
             "get_user_movie_stats_oldest_subtitle_pre_1975" : get_user_movie_stats_oldest_subtitle_pre_1975,
             "get_user_movie_stats_oldest_subtitle_pre_2000" : get_user_movie_stats_oldest_subtitle_pre_2000,
             "get_user_movie_stats_spent_title" : get_user_movie_stats_spent_title,
+            "get_user_movie_stats_birth_decade" : get_user_movie_stats_birth_decade,
             "get_user_movie_stats_birth_decade_title" : get_user_movie_stats_birth_decade_title,
             "get_user_movie_stats_birth_decade_subtitle" : get_user_movie_stats_birth_decade_subtitle,
             "get_user_movie_stats_birth_decade_title_recent" : get_user_movie_stats_birth_decade_title_recent,
@@ -1185,6 +1206,7 @@ function set_wrapperr_customization_call() {
             "get_user_movie_stats_birth_decade_chart_legend" : get_user_movie_stats_birth_decade_chart_legend,
             "get_user_show_stats" : get_user_show_stats,
             "get_user_show_stats_buddy" : get_user_show_stats_buddy,
+            "get_user_show_stats_birth_decade" : get_user_show_stats_birth_decade,
             "get_user_show_stats_title" : get_user_show_stats_title,
             "get_user_show_stats_subtitle" : get_user_show_stats_subtitle,
             "get_user_show_stats_subsubtitle" : get_user_show_stats_subsubtitle,

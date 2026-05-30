@@ -37,6 +37,7 @@ type WrapperrCustomize struct {
 	GetUserMovieStatsOldestSubtitlePre1975      string `json:"get_user_movie_stats_oldest_subtitle_pre_1975"`
 	GetUserMovieStatsOldestSubtitlePre2000      string `json:"get_user_movie_stats_oldest_subtitle_pre_2000"`
 	GetUserMovieStatsSpentTitle                 string `json:"get_user_movie_stats_spent_title"`
+	GetUserMovieStatsBirthDecade                bool   `json:"get_user_movie_stats_birth_decade"`
 	GetUserMovieStatsBirthDecadeTitle           string `json:"get_user_movie_stats_birth_decade_title"`
 	GetUserMovieStatsBirthDecadeSubtitle        string `json:"get_user_movie_stats_birth_decade_subtitle"`
 	GetUserMovieStatsBirthDecadeTitleRecent     string `json:"get_user_movie_stats_birth_decade_title_recent"`
@@ -65,6 +66,7 @@ type WrapperrCustomize struct {
 	GetUserShowStatsBuddySubtitle               string `json:"get_user_show_stats_buddy_subtitle"`
 	GetUserShowStatsBuddyTitleNone              string `json:"get_user_show_stats_buddy_title_none"`
 	GetUserShowStatsBuddySubtitleNone           string `json:"get_user_show_stats_buddy_subtitle_none"`
+	GetUserShowStatsBirthDecade                 bool   `json:"get_user_show_stats_birth_decade"`
 	GetUserShowStatsBirthDecadeTitle            string `json:"get_user_show_stats_birth_decade_title"`
 	GetUserShowStatsBirthDecadeSubtitle         string `json:"get_user_show_stats_birth_decade_subtitle"`
 	GetUserShowStatsBirthDecadeTitleRecent      string `json:"get_user_show_stats_birth_decade_title_recent"`

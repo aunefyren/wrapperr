@@ -915,16 +915,21 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
 
-		birthDecadeResult := CalculateMovieBirthDecade(wrapperr_user_movie, referenceYear)
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.RawYearDistribution = birthDecadeResult.RawYearDistribution
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
-		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
+		if config.WrapperrCustomize.GetUserMovieStatsBirthDecade {
+			birthDecadeResult := CalculateMovieBirthDecade(wrapperr_user_movie, referenceYear)
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.RawYearDistribution = birthDecadeResult.RawYearDistribution
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
+		} else {
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = true
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = "Movie age is disabled in the settings."
+		}
 
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
@@ -981,22 +986,27 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 		// Find show buddy...
 
-		nostalgiaEpisodes := make([]models.TautulliEntry, 0, len(wrapperr_user_episode))
-		for _, ep := range wrapperr_user_episode {
-			if ep.Year != 0 {
-				nostalgiaEpisodes = append(nostalgiaEpisodes, ep)
+		if config.WrapperrCustomize.GetUserShowStatsBirthDecade {
+			nostalgiaEpisodes := make([]models.TautulliEntry, 0, len(wrapperr_user_episode))
+			for _, ep := range wrapperr_user_episode {
+				if ep.Year != 0 {
+					nostalgiaEpisodes = append(nostalgiaEpisodes, ep)
+				}
 			}
+			showBirthDecadeResult := CalculateShowBirthDecade(nostalgiaEpisodes, referenceYear)
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.NostalgiaPeakYear = showBirthDecadeResult.NostalgiaPeakYear
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthYear = showBirthDecadeResult.EstimatedBirthYear
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedAge = showBirthDecadeResult.EstimatedAge
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthDecade = showBirthDecadeResult.EstimatedBirthDecade
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalShowsAnalyzed = showBirthDecadeResult.TotalShowsAnalyzed
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalWeightedMinutes = showBirthDecadeResult.TotalWeightedMinutes
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.RawYearDistribution = showBirthDecadeResult.RawYearDistribution
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = showBirthDecadeResult.Error
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = showBirthDecadeResult.ErrorMessage
+		} else {
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = true
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = "Show age is disabled in the settings."
 		}
-		showBirthDecadeResult := CalculateShowBirthDecade(nostalgiaEpisodes, referenceYear)
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.NostalgiaPeakYear = showBirthDecadeResult.NostalgiaPeakYear
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthYear = showBirthDecadeResult.EstimatedBirthYear
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedAge = showBirthDecadeResult.EstimatedAge
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthDecade = showBirthDecadeResult.EstimatedBirthDecade
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalShowsAnalyzed = showBirthDecadeResult.TotalShowsAnalyzed
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalWeightedMinutes = showBirthDecadeResult.TotalWeightedMinutes
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.RawYearDistribution = showBirthDecadeResult.RawYearDistribution
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = showBirthDecadeResult.Error
-		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = showBirthDecadeResult.ErrorMessage
 
 		wrapperr_reply.User.UserShows.Message = "All shows processed."
 
