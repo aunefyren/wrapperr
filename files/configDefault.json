@@ -10,7 +10,7 @@
         "stats_order_by_plays":true,
         "stats_order_by_duration":true,
         "stats_top_list_length": 10,
-        "obfuscate_other_users": true,
+        "obfuscate_other_users": "obfuscate",
         "get_user_movie_stats":true,
         "get_user_movie_stats_title":"Movies!",
         "get_user_movie_stats_subtitle":"You watched {movie_count} movies. That's a lot of movies!",
@@ -139,5 +139,6 @@
 	"create_share_links": true,
 	"plex_auth": true,
 	"winter_theme": true,
-    "basic_auth": false
+    "basic_auth": false,
+    "disable_admin_page": false
 }
