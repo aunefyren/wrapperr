@@ -376,8 +376,7 @@ func calculateBirthDecadeGeneric(
 
 	for _, item := range content {
 		durationMinutes := float64(item.Duration) / 60.0
-		rewatchMultiplier := 1.0 + float64(item.Plays-1)
-		baseWeight := durationMinutes * rewatchMultiplier
+		baseWeight := durationMinutes * float64(item.Plays)
 
 		// Store raw weight for visualization
 		rawYearWeights[item.Year] += baseWeight
@@ -415,9 +414,7 @@ func calculateBirthDecadeGeneric(
 
 	for _, year := range years {
 		cumulativeWeight += yearWeights[year]
-		percentile := cumulativeWeight / totalWeight
-
-		if percentile >= 0.50 && peakYear == years[0] {
+		if cumulativeWeight/totalWeight >= 0.50 {
 			peakYear = year
 			break
 		}
@@ -532,10 +529,10 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 	end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 	start_loop_date := time.Unix(int64(config.WrappedStart), 0)
 	top_list_limit := config.WrapperrCustomize.StatsTopListLength
+	referenceYear := end_loop_date.Year()
 
 	var wrapperr_user_movie []models.TautulliEntry
 	var wrapperr_user_episode []models.TautulliEntry
-	var wrapperr_user_episode_nostalgia []models.TautulliEntry // Episode-level data for show birth decade calculation
 	var wrapperr_user_show []models.TautulliEntry
 	var wrapperr_user_track []models.TautulliEntry
 	var wrapperr_user_album []models.TautulliEntry
@@ -610,15 +607,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						wrapperr_user_episode[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_episode[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
 
-						// Also update in nostalgia array if it exists there
-						for n := 0; n < len(wrapperr_user_episode_nostalgia); n++ {
-							if wrapperr_user_episode_nostalgia[n].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode_nostalgia[n].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode_nostalgia[n].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
-								wrapperr_user_episode_nostalgia[n].Plays += 1
-								wrapperr_user_episode_nostalgia[n].Duration += wrapperr_data[i].Data[j].Duration
-								break
-							}
-						}
-
 						episode_found = true
 						break
 					}
@@ -627,11 +615,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				if !episode_found {
 					wrapperr_data[i].Data[j].Plays = 1
 					wrapperr_user_episode = append(wrapperr_user_episode, wrapperr_data[i].Data[j])
-
-					// Also add to nostalgia array if episode has valid year data
-					if wrapperr_data[i].Data[j].Year != 0 {
-						wrapperr_user_episode_nostalgia = append(wrapperr_user_episode_nostalgia, wrapperr_data[i].Data[j])
-					}
 				}
 
 				// Look for show within pre-defined array
@@ -932,9 +915,6 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
 
-		// Calculate birth decade estimation
-		// Extract reference year from wrapped period end date for availability bias correction
-		referenceYear := time.Unix(int64(config.WrappedEnd), 0).Year()
 		birthDecadeResult := CalculateMovieBirthDecade(wrapperr_user_movie, referenceYear)
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
 		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
@@ -1001,10 +981,13 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 		// Find show buddy...
 
-		// Calculate show birth decade estimation
-		// Extract reference year from wrapped period end date for availability bias correction
-		referenceYear := time.Unix(int64(config.WrappedEnd), 0).Year()
-		showBirthDecadeResult := CalculateShowBirthDecade(wrapperr_user_episode_nostalgia, referenceYear)
+		nostalgiaEpisodes := make([]models.TautulliEntry, 0, len(wrapperr_user_episode))
+		for _, ep := range wrapperr_user_episode {
+			if ep.Year != 0 {
+				nostalgiaEpisodes = append(nostalgiaEpisodes, ep)
+			}
+		}
+		showBirthDecadeResult := CalculateShowBirthDecade(nostalgiaEpisodes, referenceYear)
 		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.NostalgiaPeakYear = showBirthDecadeResult.NostalgiaPeakYear
 		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthYear = showBirthDecadeResult.EstimatedBirthYear
 		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedAge = showBirthDecadeResult.EstimatedAge
