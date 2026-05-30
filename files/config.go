@@ -38,7 +38,7 @@ var migrations = []struct {
 	// ConvertLegacyToCurrentConfig previously handled this via a separate code path
 	{"", migrateV0toV3_1_0},
 	{"v3.0.4", migrateV0toV3_1_0},
-	{"v3.2.10", migrateV3_2_0toV3_3_0},
+	{"v3.3.0", migrateV3_2_0toV3_3_0},
 }
 
 // migrateConfig walks the migration chain, applying each applicable step in order
@@ -183,14 +183,24 @@ func migrateV3_2_0toV3_3_0(data []byte) ([]byte, error) {
 			}
 			customize["obfuscate_other_users"], _ = json.Marshal(newValue)
 			log.Printf("Migrated obfuscate_other_users bool to string: %q (%s).", newValue, newVersion)
-
-			newCustomize, err := json.Marshal(customize)
-			if err != nil {
-				return nil, err
-			}
-			raw["wrapperr_customize"] = newCustomize
 		}
 	}
+
+	if _, exists := customize["get_user_movie_stats_birth_decade"]; !exists {
+		customize["get_user_movie_stats_birth_decade"], _ = json.Marshal(true)
+		log.Printf("Migrated get_user_movie_stats_birth_decade to true (%s).", newVersion)
+	}
+
+	if _, exists := customize["get_user_show_stats_birth_decade"]; !exists {
+		customize["get_user_show_stats_birth_decade"], _ = json.Marshal(true)
+		log.Printf("Migrated get_user_show_stats_birth_decade to true (%s).", newVersion)
+	}
+
+	newCustomize, err := json.Marshal(customize)
+	if err != nil {
+		return nil, err
+	}
+	raw["wrapperr_customize"] = newCustomize
 
 	raw["wrapperr_version"], _ = json.Marshal(newVersion)
 	return json.Marshal(raw)
@@ -626,6 +636,46 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 		config.WrapperrCustomize.GetUserMovieStatsSpentTitle = config_default.WrapperrCustomize.GetUserMovieStatsSpentTitle
 	}
 
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeTitleError
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeSubtitleError
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartTitle
+	}
+
+	if config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend == "" {
+		config.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend = config_default.WrapperrCustomize.GetUserMovieStatsBirthDecadeChartLegend
+	}
+
 	if config.WrapperrCustomize.GetUserShowStatsTitle == "" {
 		config.WrapperrCustomize.GetUserShowStatsTitle = config_default.WrapperrCustomize.GetUserShowStatsTitle
 	}
@@ -688,6 +738,46 @@ func VerifyNonEmptyCustomValues(config models.WrapperrConfig, config_default mod
 
 	if config.WrapperrCustomize.GetUserShowStatsBuddySubtitleNone == "" {
 		config.WrapperrCustomize.GetUserShowStatsBuddySubtitleNone = config_default.WrapperrCustomize.GetUserShowStatsBuddySubtitleNone
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleRecent
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleAncient
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeTitleError
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeSubtitleError
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeChartTitle
+	}
+
+	if config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend == "" {
+		config.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend = config_default.WrapperrCustomize.GetUserShowStatsBirthDecadeChartLegend
 	}
 
 	if config.WrapperrCustomize.GetUserMusicStatsTitle == "" {

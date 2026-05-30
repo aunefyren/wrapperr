@@ -2,3 +2,5 @@ config/*
 !config/README.md
 wrapperr.exe
 wrapperr
+CLAUDE.md
+.claude/settings.local.json
