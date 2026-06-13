@@ -80,6 +80,10 @@ function get_admin_state(basic_auth) {
             } else {
                 cookie = get_cookie('wrapperr-admin');
 
+                // Remember whether the admin account requires an MFA code so the
+                // login form can show the code field.
+                mfa_enabled = result.mfa;
+
                 if(cookie) {
                     validate_cookie_admin(cookie, basic_auth);
                 } else {

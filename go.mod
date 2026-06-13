@@ -10,10 +10,12 @@ require (
 	github.com/goombaio/namegenerator v0.0.0-20181006234301-989e774b106e
 	github.com/kardianos/osext v0.0.0-20190222173326-2bc1f35cddc0
 	github.com/patrickmn/sortutil v0.0.0-20120526081524-abeda66eb583
+	github.com/pquerna/otp v1.5.0
 	golang.org/x/crypto v0.53.0
 )
 
 require (
+	github.com/boombuler/barcode v1.1.0 // indirect
 	github.com/bytedance/gopkg v0.1.4 // indirect
 	github.com/bytedance/sonic v1.15.2 // indirect
 	github.com/bytedance/sonic/loader v0.5.1 // indirect
