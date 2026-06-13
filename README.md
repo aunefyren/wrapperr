@@ -94,6 +94,47 @@ Note, if building on another operating system, the executable could have a diffe
 <br>
 <br>
 
+### Startup flags & environment variables
+Most configuration is done from the admin interface and stored in `./config/config.json`. A subset of deploy-level options can also be set at startup, either as command-line flags or (when running in Docker) as environment variables.
+
+How it works:
+- A flag/variable is applied **only when it is explicitly provided**. Anything left unset keeps the value already in `config.json` — starting Wrapperr without any flags never overwrites your saved configuration.
+- When a value *is* provided, it is written back to `config.json`, so it persists across restarts.
+- The Docker entrypoint forwards environment variables to the matching flag. Variables follow `UPPER_SNAKE_CASE`; flags are `lowercase`; the persisted JSON keys are `lower_snake_case`. For example, `APPLICATION_URL` → `--applicationurl` → `application_url`.
+- Boolean values accept `true` / `false` (case-insensitive).
+
+| Environment variable | Flag | `config.json` key | Type | Description |
+|---|---|---|---|---|
+| `PORT` | `--port` | `wrapperr_port` | int | Port Wrapperr listens on (default `8282`). |
+| `TIMEZONE` | `--timezone` | `timezone` | string | Timezone Wrapperr runs in (e.g. `Europe/Paris`). |
+| `APPLICATION_NAME` | `--applicationname` | `application_name` | string | Display name for this Wrapperr instance. |
+| `APPLICATION_URL` | `--applicationurl` | `application_url` | string | External URL Wrapperr is reachable at. |
+| `WRAPPERR_ROOT` | `--wrapperrroot` | `wrapperr_root` | string | Sub-path Wrapperr is served from (reverse-proxy root). |
+| `CREATE_SHARE_LINK` | `--createsharelink` | `create_share_links` | bool | Allow users to generate shareable links. |
+| `PLEX_AUTH` | `--plexauth` | `plex_auth` | bool | Require users to log in with Plex Auth. |
+| `BASIC_AUTH` | `--basicauth` | `basic_auth` | bool | Require HTTP Basic auth for admin routes. |
+| `USE_CACHE` | `--usecache` | `use_cache` | bool | Cache Tautulli data to disk. |
+| `USE_LOGS` | `--uselogs` | `use_logs` | bool | Write logs to file and stdout. |
+| `WINTER_THEME` | `--wintertheme` | `winter_theme` | bool | Enable the winter theme. |
+| `DISABLE_ADMIN_PAGE` | `--disableadminpage` | `disable_admin_page` | bool | Disable the admin web pages. |
+| `PUID` | _Docker only_ | — | int | UID the container runs Wrapperr as (default `1000`). |
+| `PGID` | _Docker only_ | — | int | GID the container runs Wrapperr as (default `1000`). |
+
+`PUID` / `PGID` are handled by the Docker entrypoint, not by Wrapperr itself: when the container starts as root it takes ownership of `/app/config` and drops to that user/group, so set them to match the owner of your mounted `config` directory. They have no flag and are not stored in `config.json`. (If you start the container with `--user`, the entrypoint runs as that user directly and ignores `PUID`/`PGID`.)
+
+Example:
+
+```
+$ ./wrapperr --port 9090 --timezone America/New_York --plexauth true
+```
+
+For Docker `run`/Compose examples (including `PUID`/`PGID` and volume mounts) see the [Docker documentation in the Wiki](https://github.com/aunefyren/wrapperr/wiki).
+
+> The original lowercase Docker variable names (`port`, `timezone`, `applicationname`, `createsharelink`, `plexauth`) are still accepted as a fallback, but the `UPPER_SNAKE_CASE` names above are preferred.
+
+<br>
+<br>
+
 ### Head to the website
 If Wrapperr is successfully started, it should be accessible on ```http://localhost:8282```. From there you can click on ```admin``` in the footer at the bottom, or go to ```/admin``` in the URL. From there you can configure everything about Wrapperr in the different sections of the menu. 
 

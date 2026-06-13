@@ -288,58 +288,82 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 	return router
 }
 
+// boolToFlagString renders a bool as the "true"/"false" string used by the string-based boolean flags.
+func boolToFlagString(value bool) string {
+	if value {
+		return "true"
+	}
+	return "false"
+}
+
+// parseFlags overlays command-line flags onto the configuration loaded from disk.
+//
+// Only flags that are *explicitly* provided on the command line override the
+// corresponding config value; any flag left unset keeps the value already in
+// config.json. The config is re-saved only when at least one flag was supplied,
+// so a plain start never rewrites the file with unchanged data.
 func parseFlags(configFile models.WrapperrConfig) (models.WrapperrConfig, error) {
-	plexAuthString := "true"
-	if !configFile.PlexAuth {
-		plexAuthString = "false"
-	}
-
-	createSharelinkString := "true"
-	if !configFile.CreateShareLinks {
-		createSharelinkString = "false"
-	}
-
-	// Define flag variables with the configuration file as default values
+	// Define flag variables with the configuration file as default values.
+	// Booleans are taken as strings so an unset flag is distinguishable and
+	// "true"/"false" can be passed straight through from environment variables.
 	var port = flag.Int("port", configFile.WrapperrPort, "The port Wrapperr is listening on.")
 	var timezone = flag.String("timezone", configFile.Timezone, "The timezone Wrapperr is running in.")
-	var applicationName = flag.String("applicationname", configFile.ApplicationName, "The timezone Wrapperr is running in.")
-	var createShareLinkString = flag.String("createsharelink", createSharelinkString, "If users can generate shareable links.")
-	var plexAuth = flag.String("plexauth", plexAuthString, "If users must log in with Plex Auth.")
+	var applicationName = flag.String("applicationname", configFile.ApplicationName, "The name shown for this Wrapperr instance.")
+	var applicationURL = flag.String("applicationurl", configFile.ApplicationURL, "The external URL Wrapperr is reachable at.")
+	var wrapperrRoot = flag.String("wrapperrroot", configFile.WrapperrRoot, "The sub-path Wrapperr is served from (reverse proxy root).")
+	var createShareLink = flag.String("createsharelink", boolToFlagString(configFile.CreateShareLinks), "If users can generate shareable links.")
+	var plexAuth = flag.String("plexauth", boolToFlagString(configFile.PlexAuth), "If users must log in with Plex Auth.")
+	var basicAuth = flag.String("basicauth", boolToFlagString(configFile.BasicAuth), "If admin routes require HTTP Basic auth.")
+	var useCache = flag.String("usecache", boolToFlagString(configFile.UseCache), "If Tautulli data is cached to disk.")
+	var useLogs = flag.String("uselogs", boolToFlagString(configFile.UseLogs), "If logs are written to file and stdout.")
+	var winterTheme = flag.String("wintertheme", boolToFlagString(configFile.WinterTheme), "If the winter theme is enabled.")
+	var disableAdminPage = flag.String("disableadminpage", boolToFlagString(configFile.DisableAdminPage), "If the admin web pages are disabled.")
 
 	// Parse flags
 	flag.Parse()
 
-	// Respect the flag if provided
-	if port != nil {
+	// Record which flags were explicitly supplied on the command line.
+	// flag pointers are never nil after Parse(), so this is the only reliable
+	// way to tell a deliberately-set flag from one left at its config default.
+	provided := map[string]bool{}
+	flag.Visit(func(f *flag.Flag) { provided[f.Name] = true })
+
+	// Apply each flag only when it was actually provided.
+	if provided["port"] {
 		configFile.WrapperrPort = *port
 	}
-
-	// Respect the flag if provided
-	if timezone != nil {
+	if provided["timezone"] {
 		configFile.Timezone = *timezone
 	}
-
-	// Respect the flag if provided
-	if applicationName != nil {
+	if provided["applicationname"] {
 		configFile.ApplicationName = *applicationName
 	}
-
-	// Respect the flag if string is true
-	if createShareLinkString != nil {
-		if strings.ToLower(*createShareLinkString) == "true" {
-			configFile.CreateShareLinks = true
-		} else {
-			configFile.CreateShareLinks = false
-		}
+	if provided["applicationurl"] {
+		configFile.ApplicationURL = *applicationURL
 	}
-
-	// Respect the flag if string is true
-	if plexAuth != nil {
-		if strings.ToLower(*plexAuth) == "true" {
-			configFile.PlexAuth = true
-		} else {
-			configFile.PlexAuth = false
-		}
+	if provided["wrapperrroot"] {
+		configFile.WrapperrRoot = *wrapperrRoot
+	}
+	if provided["createsharelink"] {
+		configFile.CreateShareLinks = strings.EqualFold(*createShareLink, "true")
+	}
+	if provided["plexauth"] {
+		configFile.PlexAuth = strings.EqualFold(*plexAuth, "true")
+	}
+	if provided["basicauth"] {
+		configFile.BasicAuth = strings.EqualFold(*basicAuth, "true")
+	}
+	if provided["usecache"] {
+		configFile.UseCache = strings.EqualFold(*useCache, "true")
+	}
+	if provided["uselogs"] {
+		configFile.UseLogs = strings.EqualFold(*useLogs, "true")
+	}
+	if provided["wintertheme"] {
+		configFile.WinterTheme = strings.EqualFold(*winterTheme, "true")
+	}
+	if provided["disableadminpage"] {
+		configFile.DisableAdminPage = strings.EqualFold(*disableAdminPage, "true")
 	}
 
 	// Failsafe, if port is 0, set to default 8282
@@ -347,7 +371,12 @@ func parseFlags(configFile models.WrapperrConfig) (models.WrapperrConfig, error)
 		configFile.WrapperrPort = 8282
 	}
 
-	// Save the new configFile
+	// Nothing was overridden on the command line, so leave config.json untouched.
+	if len(provided) == 0 {
+		return configFile, nil
+	}
+
+	// Persist the overridden values back to config.json.
 	err := files.SaveConfig(configFile)
 	if err != nil {
 		return configFile, err
