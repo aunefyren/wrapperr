@@ -56,7 +56,7 @@ func AuthMiddleware(admin bool) gin.HandlerFunc {
 		}
 
 		if admin {
-			adminState, err := files.GetAdminState()
+			adminState, _, err := files.GetAdminState()
 			if err != nil {
 				log.Println("Failed to load admin state. Error: " + err.Error())
 				context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})

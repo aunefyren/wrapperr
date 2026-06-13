@@ -209,8 +209,8 @@ func migrateV3_2_0toV3_3_0(data []byte) ([]byte, error) {
 // check if the config file has been configured for usage
 func GetConfigState() (bool, error) {
 
-	// check if an admin is configured. Wrapperr must be claimed by an admin to function.
-	admin, err := GetAdminState()
+	// Check if an admin is configured. Wrapperr must be claimed by an admin to function.
+	admin, _, err := GetAdminState()
 	if err != nil {
 		log.Println("Get config state threw error trying to validate admin state.")
 		return false, err
