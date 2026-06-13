@@ -37,7 +37,11 @@ Wrapperr is a website-based application for pulling Plex user statistics within 
 - Customizable appearance/results
 - Statistics for movies, shows & music
 - Caching of Tautulli results
-- Admin interface for configuration (with regular and HTTP Basic login)
+- Admin interface for configuration (with regular, HTTP Basic, and TOTP-based MFA login)
+- Option to disable the admin web pages entirely
+- Admins can view the generated wrap for any user
+- "Viewing age" estimate based on the release years you watch
+- Poster artwork for top 10 lists and user cards
 - Pre-caching of results before user interaction
 - Shareable links with expiration
 
@@ -131,6 +135,8 @@ $ ./wrapperr --port 9090 --timezone America/New_York --plexauth true
 For Docker `run`/Compose examples (including `PUID`/`PGID` and volume mounts) see the [Docker documentation in the Wiki](https://github.com/aunefyren/wrapperr/wiki).
 
 > The original lowercase Docker variable names (`port`, `timezone`, `applicationname`, `createsharelink`, `plexauth`) are still accepted as a fallback, but the `UPPER_SNAKE_CASE` names above are preferred.
+
+> **Note on MFA and Basic auth:** Admin MFA (TOTP) only applies to the standard username/password login. When `BASIC_AUTH` is enabled, admin authentication goes through the browser's HTTP Basic prompt, which has no field for a one-time code, so the MFA step is skipped. Don't rely on MFA as a second factor while Basic auth is enabled — pick one or the other.
 
 <br>
 <br>
