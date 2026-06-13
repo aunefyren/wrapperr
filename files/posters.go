@@ -241,6 +241,11 @@ func CleanExpiredPosters(maxAgeDays int) error {
 // GetPosterPath returns the absolute path to a poster file
 // Used by the API endpoint to serve posters
 func GetPosterPath(serverHash string, filename string) (string, error) {
+	// Defense in depth: reduce each user-provided segment to its final path
+	// element, discarding any directory or traversal components before joining.
+	serverHash = filepath.Base(serverHash)
+	filename = filepath.Base(filename)
+
 	posterPath := filepath.Join(posters_base_path, serverHash, filename)
 
 	// Security check - ensure path is within posters directory

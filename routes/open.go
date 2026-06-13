@@ -22,6 +22,13 @@ import (
 // preventing the download endpoint from being used to proxy arbitrary URLs.
 var validThumbPath = regexp.MustCompile(`^/library/metadata/\d+/thumb(/\d+)?$`)
 
+// validServerHash and validPosterFilename are strict allowlists for the poster
+// serve route. They constrain the user-provided path segments to characters that
+// cannot express a directory traversal (no "/", "\", "." beyond the extension),
+// closing the path-injection surface before the values reach the filesystem.
+var validServerHash = regexp.MustCompile(`^[a-f0-9]{16}$`)
+var validPosterFilename = regexp.MustCompile(`^[0-9]+\.jpg$`)
+
 // API route which retrieves the Wrapperr version and some minor details (application name, Plex-Auth...).
 func ApiGetWrapperrVersion(context *gin.Context) {
 	configBool, err := files.GetConfigState()
@@ -505,8 +512,12 @@ func ApiGetPoster(context *gin.Context) {
 	serverHash := context.Param("serverHash")
 	filename := context.Param("filename")
 
-	// Validate inputs
-	if serverHash == "" || filename == "" {
+	// Strictly validate inputs against an allowlist before they are used to build a
+	// filesystem path. The character classes forbid path separators and traversal
+	// sequences, so the values cannot escape the posters directory.
+	if !validServerHash.MatchString(serverHash) || !validPosterFilename.MatchString(filename) {
+		ipString := utilities.GetOriginIPString(context)
+		log.Printf("[Posters] Blocked invalid poster request: hash=%q file=%q %s", serverHash, filename, ipString)
 		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poster request"})
 		return
 	}
