@@ -60,6 +60,87 @@ function get_stats() {
     loading_icon.style.display = "inline";
 }
 
+// --- Poster lazy-loading helpers ---------------------------------------------
+// Posters are downloaded by the backend in the background, so a freshly requested
+// poster may 404 on first paint. posterImgTag() emits an <img> wired to
+// handlePosterError(), which asks the backend to fetch the poster, retries a few
+// times, then applies the element's fallback (hide / hide parent / illustration).
+
+// posterImgTag builds an <img> HTML string for a cached poster.
+// opts: { className, style, alt, fallback } where fallback is "hide",
+// "hide-parent", or a URL to an illustration to swap in on final failure.
+function posterImgTag(serverHash, ratingKey, thumbPath, opts) {
+    opts = opts || {};
+    var url = api_url + "get/poster/" + serverHash + "/" + ratingKey + ".jpg";
+    var attrs = "";
+    attrs += " class='" + (opts.className || "") + "'";
+    attrs += " alt='" + (opts.alt || "Poster") + "'";
+    if (opts.style) { attrs += " style='" + opts.style + "'"; }
+    attrs += " data-poster-hash='" + serverHash + "'";
+    attrs += " data-poster-key='" + ratingKey + "'";
+    attrs += " data-poster-thumb='" + encodeURIComponent(thumbPath || "") + "'";
+    attrs += " data-poster-fallback='" + (opts.fallback || "hide") + "'";
+    attrs += " data-poster-retry='0'";
+    return "<img src='" + url + "'" + attrs + " onerror='handlePosterError(this)' />";
+}
+
+// requestPosterDownload asks the backend to fetch a missing poster (best effort).
+function requestPosterDownload(serverHash, ratingKey, thumbPath) {
+    if (!thumbPath) { return; }
+    try {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("post", api_url + "download/poster");
+        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        if (typeof functions !== "undefined" && functions.plex_auth && typeof cookie !== "undefined") {
+            xhttp.setRequestHeader("Authorization", cookie);
+        }
+        xhttp.send(JSON.stringify({
+            server_hash: serverHash,
+            rating_key: parseInt(ratingKey, 10),
+            thumb_path: thumbPath
+        }));
+    } catch (e) { /* best effort, ignore */ }
+}
+
+var POSTER_MAX_RETRIES = 4;
+
+// handlePosterError retries a failed poster load, then applies its fallback.
+function handlePosterError(img) {
+    img.onerror = null; // prevent error loops while we manage retries
+    var serverHash = img.getAttribute("data-poster-hash");
+    var ratingKey = img.getAttribute("data-poster-key");
+    var thumbPath = decodeURIComponent(img.getAttribute("data-poster-thumb") || "");
+    var fallback = img.getAttribute("data-poster-fallback") || "hide";
+    var attempts = parseInt(img.getAttribute("data-poster-retry") || "0", 10);
+
+    if (attempts === 0) {
+        // First failure: trigger a background download before retrying.
+        requestPosterDownload(serverHash, ratingKey, thumbPath);
+    }
+
+    if (attempts < POSTER_MAX_RETRIES) {
+        img.setAttribute("data-poster-retry", attempts + 1);
+        setTimeout(function() {
+            img.onerror = function() { handlePosterError(img); };
+            img.src = api_url + "get/poster/" + serverHash + "/" + ratingKey + ".jpg?r=" + (attempts + 1);
+        }, 1200 * (attempts + 1));
+        return;
+    }
+
+    // Out of retries: apply fallback.
+    if (fallback === "hide-parent" && img.parentElement) {
+        img.parentElement.style.display = "none";
+    } else if (fallback === "hide") {
+        img.style.display = "none";
+    } else {
+        // Treat fallback as an illustration URL.
+        img.classList.remove("special-poster");
+        img.style.width = "15em";
+        img.src = fallback;
+    }
+}
+// -----------------------------------------------------------------------------
+
 function load_page(data){
 
     // Remove snow and background
@@ -556,10 +637,10 @@ function oldest_movie(array, functions_data) {
 
             // Add poster
             if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
-                var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
-                html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
-                html += 'onerror="this.src=\'assets/img/old-man.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
-                html += 'style="margin: 1em auto; display: block;">';
+                html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                    className: "special-poster", alt: "Movie Poster",
+                    style: "margin: 1em auto; display: block;", fallback: "assets/img/old-man.svg"
+                });
             } else {
                 // Fallback to original illustration
                 html += '<img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
@@ -642,10 +723,10 @@ function paused_movie(array, single, functions_data) {
 
                     // Add poster
                     if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
-                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
-                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
-                        html += 'onerror="this.style.display=\'none\';" ';
-                        html += 'style="margin: 1em auto; display: block;">';
+                        html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                            className: "special-poster", alt: "Movie Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "hide"
+                        });
                     }
 
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time));
@@ -658,10 +739,10 @@ function paused_movie(array, single, functions_data) {
 
                     // Add poster
                     if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
-                        var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
-                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Movie Poster" ';
-                        html += 'onerror="this.style.display=\'none\';" ';
-                        html += 'style="margin: 1em auto; display: block;">';
+                        html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                            className: "special-poster", alt: "Movie Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "hide"
+                        });
                     }
 
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time));
@@ -692,10 +773,10 @@ function load_showbuddy(buddy_object, top_show, functions_data) {
 
                     // Add show poster if available
                     if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
-                        var posterUrl = api_url + "get/poster/" + top_show.tautulli_server_hash + "/" + top_show.rating_key + ".jpg";
-                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
-                        html += 'onerror="this.src=\'assets/img/quest.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
-                        html += 'style="margin: 1em auto; display: block;">';
+                        html += posterImgTag(top_show.tautulli_server_hash, top_show.rating_key, top_show.thumb, {
+                            className: "special-poster", alt: "Show Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "assets/img/quest.svg"
+                        });
                     } else {
                         html += '<img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
                     }
@@ -708,10 +789,10 @@ function load_showbuddy(buddy_object, top_show, functions_data) {
 
                     // Add show poster if available
                     if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
-                        var posterUrl = api_url + "get/poster/" + top_show.tautulli_server_hash + "/" + top_show.rating_key + ".jpg";
-                        html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
-                        html += 'onerror="this.src=\'assets/img/social-event.svg\'; this.classList.remove(\'special-poster\'); this.style.width=\'15em\';" ';
-                        html += 'style="margin: 1em auto; display: block;">';
+                        html += posterImgTag(top_show.tautulli_server_hash, top_show.rating_key, top_show.thumb, {
+                            className: "special-poster", alt: "Show Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "assets/img/social-event.svg"
+                        });
                     } else {
                         html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
                     }
@@ -737,10 +818,10 @@ function load_longest_episode(array, functions_data) {
 
             // Add show poster if available
             if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
-                var posterUrl = api_url + "get/poster/" + array.tautulli_server_hash + "/" + array.rating_key + ".jpg";
-                html += '<img src="' + posterUrl + '" class="special-poster" alt="Show Poster" ';
-                html += 'onerror="this.style.display=\'none\';" ';
-                html += 'style="margin: 1em auto; display: block;">';
+                html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                    className: "special-poster", alt: "Show Poster",
+                    style: "margin: 1em auto; display: block;", fallback: "hide"
+                });
                 html += '<br>';
             }
 
@@ -1015,11 +1096,12 @@ function top_list(array, title, music, show, year, div_id) {
                             html += i+1 + ". ";
                         html += "</div>";
 
-                        // Add poster thumbnail if enabled
-                        if(functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
-                            var posterUrl = api_url + "get/poster/" + array[i].tautulli_server_hash + "/" + array[i].rating_key + ".jpg";
+                        // Add poster thumbnail if enabled (skip music - posters are not downloaded for music)
+                        if(!music && functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
                             html += "<div class='poster-thumbnail'>";
-                                html += "<img src='" + posterUrl + "' alt='Poster' onerror='this.parentElement.style.display=\"none\"' />";
+                                html += posterImgTag(array[i].tautulli_server_hash, array[i].rating_key, array[i].thumb, {
+                                    alt: "Poster", fallback: "hide-parent"
+                                });
                             html += "</div>";
                         }
 

@@ -5,16 +5,22 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/middlewares"
 	"github.com/aunefyren/wrapperr/models"
 	"github.com/aunefyren/wrapperr/modules"
 	"github.com/aunefyren/wrapperr/utilities"
 
 	"github.com/gin-gonic/gin"
 )
+
+// validThumbPath restricts poster thumb paths to Tautulli's metadata image form,
+// preventing the download endpoint from being used to proxy arbitrary URLs.
+var validThumbPath = regexp.MustCompile(`^/library/metadata/\d+/thumb(/\d+)?$`)
 
 // API route which retrieves the Wrapperr version and some minor details (application name, Plex-Auth...).
 func ApiGetWrapperrVersion(context *gin.Context) {
@@ -520,6 +526,9 @@ func ApiGetPoster(context *gin.Context) {
 		return
 	}
 
+	// Let browsers cache served posters to avoid repeated requests for the same art.
+	context.Header("Cache-Control", "public, max-age=86400")
+
 	// Serve the file
 	context.File(posterPath)
 }
@@ -551,6 +560,33 @@ func ApiDownloadPoster(context *gin.Context) {
 		return
 	}
 
+	// When Plex-Auth is enabled, require a valid session before triggering a
+	// server-side download to Tautulli (mirrors the statistics endpoint).
+	if config.PlexAuth {
+		adminConfig, err := files.GetAdminConfig()
+		if err != nil {
+			log.Println("Failed to load admin configuration. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin configuration."})
+			return
+		}
+
+		authorizationHeader := context.GetHeader("Authorization")
+		_, _, err = middlewares.AuthGetPayloadFromAuthorization(authorizationHeader, config, adminConfig)
+		if err != nil {
+			ipString := utilities.GetOriginIPString(context)
+			log.Println("Failed to authorize poster download request. Error: " + err.Error() + ipString)
+			context.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to authorize request."})
+			return
+		}
+	}
+
+	// Validate the thumb path so this endpoint cannot be used to make Wrapperr
+	// request arbitrary URLs from Tautulli using its API key (SSRF protection).
+	if !validThumbPath.MatchString(request.ThumbPath) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thumb path"})
+		return
+	}
+
 	// Find matching Tautulli config
 	var matchedConfig *models.TautulliConfig
 	for _, tautulliConfig := range config.TautulliConfig {
@@ -565,13 +601,13 @@ func ApiDownloadPoster(context *gin.Context) {
 		return
 	}
 
-	// Download the poster asynchronously
-	go func() {
-		_, err := files.DownloadPoster(*matchedConfig, request.ThumbPath, request.RatingKey)
-		if err != nil {
-			log.Printf("[Posters] Lazy download failed for rating_key %d: %v", request.RatingKey, err)
-		}
-	}()
+	// Queue the download through the bounded background worker pool (deduplicated,
+	// concurrency-limited) rather than spawning an unbounded goroutine per request.
+	files.EnqueuePoster(*matchedConfig, files.PosterReference{
+		ServerHash: request.ServerHash,
+		RatingKey:  request.RatingKey,
+		ThumbPath:  request.ThumbPath,
+	}, config.WrapperrCustomize.PosterCacheMaxAgeDays)
 
 	// Return success immediately (download happens in background)
 	context.JSON(http.StatusAccepted, gin.H{"message": "Poster download queued"})

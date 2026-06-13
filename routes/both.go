@@ -309,31 +309,17 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		return
 	}
 
-	// Preload user-specific posters before returning statistics
+	// Queue poster downloads (both user-specific and server-wide year stats) so they
+	// are fetched in the background. Non-blocking: the statistics response returns
+	// immediately and the frontend lazy-loads posters as they become available.
 	if config.WrapperrCustomize.EnablePosters {
-		func() {
-			defer func() {
-				if r := recover(); r != nil {
-					log.Printf("[Posters] Panic during preload for user %s: %v", userName, r)
-				}
-			}()
+		posterRefs := files.ExtractUserPosterReferences(wrapperrReply)
+		posterRefs = append(posterRefs, files.ExtractYearPosterReferences(wrapperrReply)...)
 
-			log.Printf("[Posters] Starting preload for user %s (ID: %d)", userName, userId)
-			posterRefs := files.ExtractUserPosterReferences(wrapperrReply)
-
-			if len(posterRefs) > 0 {
-				successCount, skippedCount, errorCount := files.PreloadUserPosters(
-					posterRefs,
-					config.TautulliConfig,
-					config.WrapperrCustomize.PosterCacheMaxAgeDays,
-				)
-
-				log.Printf("[Posters] Preload complete for user %s: %d new, %d cached, %d failed (out of %d total)",
-					userName, successCount, skippedCount, errorCount, len(posterRefs))
-			} else {
-				log.Printf("[Posters] No posters to preload for user %s", userName)
-			}
-		}()
+		if len(posterRefs) > 0 {
+			files.EnqueuePosters(posterRefs, config.TautulliConfig, config.WrapperrCustomize.PosterCacheMaxAgeDays)
+			log.Printf("[Posters] Queued %d poster downloads for user %s", len(posterRefs), userName)
+		}
 	}
 
 	userhistoryEntry := models.WrapperrHistoryEntry{

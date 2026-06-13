@@ -1483,44 +1483,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
 	}
 
-	// Preload posters for server-wide year stats if enabled
-	// Only download posters for server-wide top lists (shared across all users)
-	// User-specific top lists and special cards will be loaded as they are required.
-	if config.UseCache && config.WrapperrCustomize.EnablePosters {
-		log.Println("Preloading posters for server-wide year stats...")
-
-		var yearStatsEntries []models.TautulliEntry
-
-		// Collect entries from server-wide year stats only
-		if config.WrapperrCustomize.GetYearStatsMovies {
-			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMovies.Data.MoviesDuration...)
-			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMovies.Data.MoviesPlays...)
-		}
-
-		if config.WrapperrCustomize.GetYearStatsShows {
-			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearShows.Data.ShowsDuration...)
-			yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearShows.Data.ShowsPlays...)
-		}
-
-		// Music posters not implemented yet
-		// if config.WrapperrCustomize.GetYearStatsMusic {
-		//     yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMusic.Data.ArtistsDuration...)
-		//     yearStatsEntries = append(yearStatsEntries, wrapperr_reply.YearStats.YearMusic.Data.ArtistsPlays...)
-		// }
-
-		// Download only the server-wide year stats posters during cache build
-		if len(yearStatsEntries) > 0 {
-			err := files.DownloadPostersForEntries(
-				yearStatsEntries,
-				config.TautulliConfig,
-				config.WrapperrCustomize.PosterCacheMaxAgeDays,
-			)
-			if err != nil {
-				log.Println("Warning: Year stats poster download encountered errors: " + err.Error())
-				// Don't return error - posters are optional
-			}
-		}
-	}
+	// Note: poster preloading (both user-specific and server-wide year stats) is
+	// handled centrally in routes/both.go via the background download queue, gated
+	// solely on EnablePosters. It is intentionally decoupled from caching here.
 
 	return wrapperr_reply, nil
 
