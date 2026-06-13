@@ -97,6 +97,16 @@ func main() {
 	}
 	log.Println("Flags parsed.")
 
+	// Initialize poster directories if posters are enabled
+	if config.WrapperrCustomize.EnablePosters {
+		log.Println("Initializing poster directories...")
+		err = files.InitializePosterDirectories(config)
+		if err != nil {
+			log.Println("Warning: Failed to initialize poster directories. Error: " + err.Error())
+			// Don't exit - posters are optional
+		}
+	}
+
 	// Alert what port is in use
 	log.Println("Starting Wrapperr on port " + strconv.Itoa(config.WrapperrPort) + ".")
 
@@ -145,6 +155,8 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			// usage pages
 			open.POST("/get/share-link", routes.ApiGetShareLink)
 			open.POST("/login/plex-auth", routes.ApiLoginPlexAuth)
+			open.GET("/get/poster/:serverHash/:filename", routes.ApiGetPoster)
+			open.POST("/download/poster", routes.ApiDownloadPoster)
 
 			// admin pages
 			open.POST("/login/admin", routes.ApiLogInAdmin)
@@ -182,6 +194,7 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			admin.POST("/get/users/:userId/statistics", routes.ApiGetUserStatistics)
 			admin.POST("/get/users/:userId/ignore", routes.ApiIgnoreUser)
 			admin.POST("/sync/users", routes.ApiSyncTautulliUsers)
+			admin.POST("/clean/poster-cache", routes.ApiCleanPosterCache)
 		}
 	}
 
