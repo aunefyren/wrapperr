@@ -1,6 +1,9 @@
 package routes
 
 import (
+	"bytes"
+	"encoding/base64"
+	"image/png"
 	"log"
 	"net/http"
 	"strconv"
@@ -13,6 +16,7 @@ import (
 	"github.com/aunefyren/wrapperr/utilities"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pquerna/otp/totp"
 )
 
 // API route used to retrieve the Wrapperr configuration file.
@@ -641,4 +645,151 @@ func ApiCleanPosterCache(context *gin.Context) {
 	ipString := utilities.GetOriginIPString(context)
 	log.Println("Poster cache cleaned." + ipString)
 	context.JSON(http.StatusOK, gin.H{"message": "Poster cache cleaned successfully"})
+}
+
+// ApiEnrollMFA starts admin MFA enrollment. It generates a new TOTP secret and a QR
+// code for the admin's authenticator app. The secret is NOT persisted here - the
+// admin must confirm it via ApiActivateMFA. Rejected if MFA is already active.
+func ApiEnrollMFA(context *gin.Context) {
+	_, mfaActive, err := files.GetAdminState()
+	if err != nil {
+		log.Println("Failed to load admin state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})
+		return
+	}
+
+	if mfaActive {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "MFA is already enabled. Disable it first to re-enroll."})
+		return
+	}
+
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		return
+	}
+
+	key, err := totp.Generate(totp.GenerateOpts{
+		Issuer:      "Wrapperr",
+		AccountName: adminConfig.AdminUsername,
+	})
+	if err != nil {
+		log.Println("Failed to generate MFA secret. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate MFA secret."})
+		return
+	}
+
+	// Render the otpauth URL as a QR code PNG and base64-encode it for inline display.
+	image, err := key.Image(200, 200)
+	if err != nil {
+		log.Println("Failed to render MFA QR code. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to render MFA QR code."})
+		return
+	}
+
+	var buffer bytes.Buffer
+	if err := png.Encode(&buffer, image); err != nil {
+		log.Println("Failed to encode MFA QR code. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to encode MFA QR code."})
+		return
+	}
+
+	reply := models.AdminMFAEnrollReply{
+		Secret:       key.Secret(),
+		OtpauthURL:   key.URL(),
+		QRCodeBase64: "data:image/png;base64," + base64.StdEncoding.EncodeToString(buffer.Bytes()),
+	}
+
+	ipString := utilities.GetOriginIPString(context)
+	log.Println("Generated new admin MFA enrollment secret." + ipString)
+	context.JSON(http.StatusOK, gin.H{"message": "MFA enrollment started.", "error": false, "data": reply})
+}
+
+// ApiActivateMFA validates a code against the supplied secret and, on success,
+// persists the secret to enable MFA.
+func ApiActivateMFA(context *gin.Context) {
+	_, mfaActive, err := files.GetAdminState()
+	if err != nil {
+		log.Println("Failed to load admin state. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin state."})
+		return
+	}
+
+	if mfaActive {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "MFA is already enabled."})
+		return
+	}
+
+	var request models.AdminMFAActivateRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		log.Println("Failed to parse request. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
+		return
+	}
+
+	if request.Secret == "" {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Missing MFA secret."})
+		return
+	}
+
+	if !totp.Validate(request.AdminMFACode, request.Secret) {
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid MFA code. Please try again."})
+		return
+	}
+
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		return
+	}
+
+	adminConfig.AdminMFASecret = request.Secret
+	if err := files.SaveAdminConfig(adminConfig); err != nil {
+		log.Println("Failed to save admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save admin configuration."})
+		return
+	}
+
+	ipString := utilities.GetOriginIPString(context)
+	log.Println("Admin MFA enabled." + ipString)
+	context.JSON(http.StatusOK, gin.H{"message": "MFA enabled.", "error": false})
+}
+
+// ApiDisableMFA clears the stored MFA secret after re-authenticating with the
+// admin password.
+func ApiDisableMFA(context *gin.Context) {
+	adminConfig, err := files.GetAdminConfig()
+	if err != nil {
+		log.Println("Failed to load Wrapperr admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load Wrapperr admin configuration."})
+		return
+	}
+
+	var request models.AdminMFADisableRequest
+	if err := context.ShouldBindJSON(&request); err != nil {
+		log.Println("Failed to parse request. Error: " + err.Error())
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Failed to parse request."})
+		return
+	}
+
+	// Re-authenticate with the admin password before disabling MFA.
+	if !utilities.ComparePasswords(adminConfig.AdminPassword, request.AdminPassword) {
+		ipString := utilities.GetOriginIPString(context)
+		log.Println("MFA disable failed. Incorrect password." + ipString)
+		context.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials."})
+		return
+	}
+
+	adminConfig.AdminMFASecret = ""
+	if err := files.SaveAdminConfig(adminConfig); err != nil {
+		log.Println("Failed to save admin configuration. Error: " + err.Error())
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save admin configuration."})
+		return
+	}
+
+	ipString := utilities.GetOriginIPString(context)
+	log.Println("Admin MFA disabled." + ipString)
+	context.JSON(http.StatusOK, gin.H{"message": "MFA disabled.", "error": false})
 }

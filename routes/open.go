@@ -258,8 +258,9 @@ func ApiLogInAdmin(context *gin.Context) {
 			if mfaActive {
 				mfaValid := totp.Validate(mfaCode, adminConfig.AdminMFASecret)
 				if !mfaValid {
-					log.Println("Admin login failed. Invalid MFA token.")
-					context.JSON(http.StatusUnauthorized, gin.H{"error": "Admin login failed."})
+					ipString := utilities.GetOriginIPString(context)
+					log.Println("Admin login failed. Invalid MFA token." + ipString)
+					context.JSON(http.StatusUnauthorized, gin.H{"error": "MFA code required or invalid."})
 					context.Abort()
 					return
 				}
