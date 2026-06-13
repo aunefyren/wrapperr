@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/aunefyren/wrapperr/models"
 
@@ -16,6 +17,17 @@ import (
 
 const wrapperr_version_parameter = "{{RELEASE_TAG}}"
 const minSecretKeySize = 32
+
+// The config is loaded from disk once and then served from memory. Gin handles
+// every request in its own goroutine, so the in-memory copy is guarded by a
+// RWMutex: reads take a read lock and receive an independent deep copy (so
+// callers can mutate freely), writes take the write lock and update memory and
+// disk together. This removes the per-request disk writes that previously
+// rewrote config.json on every GetConfig call.
+var (
+	configMutex sync.RWMutex
+	configCache *models.WrapperrConfig
+)
 
 var config_path, _ = filepath.Abs("./config/config.json")
 var default_config_path, _ = filepath.Abs("./files/configDefault.json")
@@ -286,21 +298,83 @@ func UpdatePrivateKey() (string, error) {
 	return config.PrivateKey, nil
 }
 
-// Saves the given config struct as config.json
+// Saves the given config struct as config.json and refreshes the in-memory copy.
+// Both happen under the write lock so concurrent readers never observe a
+// partially written file or a stale cache.
 func SaveConfig(config models.WrapperrConfig) (err error) {
-	err = nil
+	configMutex.Lock()
+	defer configMutex.Unlock()
+	return saveConfigLocked(config)
+}
 
+// saveConfigLocked persists the config and updates the cache. The caller must
+// already hold the write lock.
+func saveConfigLocked(config models.WrapperrConfig) error {
+	if err := writeConfigToDisk(config); err != nil {
+		return err
+	}
+
+	cached, err := deepCopyConfig(config)
+	if err != nil {
+		return err
+	}
+	configCache = &cached
+	return nil
+}
+
+// writeConfigToDisk atomically writes the config to config.json by writing to a
+// temporary file in the same directory and renaming it into place. os.Rename is
+// atomic on a single filesystem, so a reader either sees the old file or the new
+// file in full — never a truncated one.
+func writeConfigToDisk(config models.WrapperrConfig) error {
 	file, err := json.MarshalIndent(config, "", "	")
 	if err != nil {
 		return err
 	}
 
-	err = os.WriteFile(config_path, file, 0644)
+	dir := filepath.Dir(config_path)
+	tmp, err := os.CreateTemp(dir, "config-*.json.tmp")
 	if err != nil {
 		return err
 	}
+	tmpName := tmp.Name()
 
-	return nil
+	// Clean up the temp file if we fail before the rename succeeds.
+	defer func() {
+		if _, statErr := os.Stat(tmpName); statErr == nil {
+			os.Remove(tmpName)
+		}
+	}()
+
+	if _, err := tmp.Write(file); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+
+	return os.Rename(tmpName, config_path)
+}
+
+// deepCopyConfig returns an independent copy of the config so callers can mutate
+// the result without affecting the shared in-memory cache (and vice versa). The
+// config contains slices and nested structs, so a shallow copy would share
+// backing arrays; a JSON round-trip is the simplest fully independent copy.
+func deepCopyConfig(in models.WrapperrConfig) (models.WrapperrConfig, error) {
+	data, err := json.Marshal(in)
+	if err != nil {
+		return models.WrapperrConfig{}, err
+	}
+	var out models.WrapperrConfig
+	if err := json.Unmarshal(data, &out); err != nil {
+		return models.WrapperrConfig{}, err
+	}
+	return out, nil
 }
 
 // Creates empty config.json
@@ -340,7 +414,10 @@ func CreateConfigFile() error {
 	config.WrapperrCustomize.GetYearStatsLeaderboard = true
 	config.WrapperrCustomize.GetYearStatsLeaderboardNumbers = false
 
-	err := SaveConfig(config)
+	// Write straight to disk without touching the cache or lock: this is only
+	// reached from inside the locked loader (which holds the write lock and then
+	// re-reads and caches the file), so going through SaveConfig would deadlock.
+	err := writeConfigToDisk(config)
 	if err != nil {
 		return err
 	}
@@ -348,8 +425,48 @@ func CreateConfigFile() error {
 	return nil
 }
 
-// Read the config file and return the file as an object
-func GetConfig() (config models.WrapperrConfig, err error) {
+// Read the config and return it as an object. The config is loaded from disk
+// once and cached in memory; subsequent calls return an independent deep copy
+// of the cached config so callers can mutate it freely.
+func GetConfig() (models.WrapperrConfig, error) {
+	configMutex.RLock()
+	if configCache != nil {
+		defer configMutex.RUnlock()
+		return deepCopyConfig(*configCache)
+	}
+	configMutex.RUnlock()
+
+	// Cache is empty; take the write lock to load it.
+	configMutex.Lock()
+	defer configMutex.Unlock()
+
+	// Another goroutine may have loaded the cache while we waited for the lock.
+	if configCache == nil {
+		loaded, err := loadConfigFromDisk()
+		if err != nil {
+			return models.WrapperrConfig{}, err
+		}
+
+		// Persist the migrated/normalized form once. This runs under the write
+		// lock and only on first load, so there is no concurrency risk.
+		if err := writeConfigToDisk(loaded); err != nil {
+			return models.WrapperrConfig{}, err
+		}
+
+		cached, err := deepCopyConfig(loaded)
+		if err != nil {
+			return models.WrapperrConfig{}, err
+		}
+		configCache = &cached
+	}
+
+	return deepCopyConfig(*configCache)
+}
+
+// loadConfigFromDisk reads config.json, runs migrations, fills in missing values
+// from the default template and returns the normalized config. It does not touch
+// the cache or write the result; the caller is responsible for both.
+func loadConfigFromDisk() (config models.WrapperrConfig, err error) {
 	config = models.WrapperrConfig{}
 	err = nil
 
@@ -483,13 +600,7 @@ func GetConfig() (config models.WrapperrConfig, err error) {
 		return config, errors.New("Failed to verify non empty values.")
 	}
 
-	// Save new version of config json
-	err = SaveConfig(config)
-	if err != nil {
-		return config, err
-	}
-
-	// Return config object
+	// Return config object. Persisting and caching is handled by the caller.
 	return config, nil
 }
 
