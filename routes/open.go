@@ -154,7 +154,7 @@ func ApiCreateAdmin(context *gin.Context) {
 		// Hash new password
 		hash, err := utilities.HashAndSalt(admin_payload.AdminPassword)
 		if err != nil {
-			errors.New("Admin creation failed. Could not hash new password. Error: " + err.Error())
+			log.Println("Admin creation failed. Could not hash new password. Error: " + err.Error())
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash your password."})
 			context.Abort()
 			return
@@ -164,7 +164,7 @@ func ApiCreateAdmin(context *gin.Context) {
 		// Save new admin config
 		err = files.SaveAdminConfig(admin_payload)
 		if err != nil {
-			errors.New("Admin creation failed. Could not save configuration. Error: " + err.Error())
+			log.Println("Admin creation failed. Could not save configuration. Error: " + err.Error())
 			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save new admin."})
 			context.Abort()
 			return
