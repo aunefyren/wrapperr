@@ -10,20 +10,23 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        # build and publish in parallel: linux/386, linux/amd64, linux/arm64, windows/386, windows/amd64, darwin/amd64, darwin/arm64
+        # build and publish in parallel: linux/{386,amd64,arm64,arm}, windows/{386,amd64}
         goos: [linux, windows]
         goarch: ["386", amd64, arm64, arm]
+        # Windows builds are only shipped for x86; arm/arm64 are linux-only.
         exclude:
-          - goarch: arm64, arm
-            goos: windows
+          - goos: windows
+            goarch: arm64
+          - goos: windows
+            goarch: arm
     steps:
-    - uses: actions/checkout@v3
-    - uses: wangyoucao577/go-release-action@v1.40
+    - uses: actions/checkout@v4
+    - uses: wangyoucao577/go-release-action@v1.53
       with:
         github_token: ${{ secrets.GIT_HUB_TOKEN }}
         goos: ${{ matrix.goos }}
         goarch: ${{ matrix.goarch }}
-        goversion: "1.24.0"
+        goversion: "1.25.0"
         binary_name: "wrapperr"
         ldflags: "-s -w"
         extra_files: README.md config web CODE_OF_CONDUCT.md Dockerfile files
