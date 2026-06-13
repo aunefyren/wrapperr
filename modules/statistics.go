@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"math"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -286,7 +288,16 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 							UserID:                tautulli_data[j].UserID,
 							Year:                  year,
 							OriginallyAvailableAt: *tautulli_data[j].OriginallyAvailableAt,
+							GUID:                  tautulli_data[j].GUID,
 						}
+
+						// Capture Thumb field if available
+						if tautulli_data[j].Thumb != nil {
+							tautulli_entry.Thumb = *tautulli_data[j].Thumb
+						}
+
+						// Add server hash for multi-server poster support
+						tautulli_entry.TautulliServerHash = files.GetTautulliServerHash(config.TautulliConfig[q])
 
 						// Append to day data
 						wrapperr_day.Data = append(wrapperr_day.Data, tautulli_entry)
@@ -339,11 +350,194 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 	return wrapperr_data, complete_date_loop, nil
 }
 
+// calculateBirthDecadeGeneric performs the core birth decade calculation algorithm
+// that is shared between movies and shows. It applies availability bias correction
+// using logarithmic weighting and finds the nostalgia peak year.
+//
+// Parameters:
+//   - content: Array of watch history entries (movies or TV episodes)
+//   - referenceYear: The year to use as reference (typically the wrapped period end year)
+//
+// Returns the calculated values as individual components, or an error if insufficient data.
+func calculateBirthDecadeGeneric(
+	content []models.TautulliEntry,
+	referenceYear int,
+) (
+	nostalgiaPeakYear int,
+	estimatedBirthYear int,
+	estimatedAge int,
+	estimatedBirthDecade string,
+	totalWeightedMinutes int,
+	rawYearDistribution map[string]float64,
+	err error,
+) {
+	// Input validation
+	if len(content) < 5 {
+		return 0, 0, 0, "", 0, nil, errors.New("Not enough data for calculation")
+	}
+
+	// Step 1: Build year weights maps (both raw and corrected)
+	yearWeights := make(map[int]float64)    // Corrected weights for calculation
+	rawYearWeights := make(map[int]float64) // Raw weights for visualization
+	totalWeight := 0.0
+	rawTotalWeight := 0.0
+
+	for _, item := range content {
+		durationMinutes := float64(item.Duration) / 60.0
+		baseWeight := durationMinutes * float64(item.Plays)
+
+		// Store raw weight for visualization
+		rawYearWeights[item.Year] += baseWeight
+		rawTotalWeight += baseWeight
+
+		// Apply availability bias correction using logarithmic scaling
+		itemAge := referenceYear - item.Year
+		if itemAge < 0 {
+			itemAge = 0 // Handle future releases
+		}
+		if itemAge > 100 {
+			itemAge = 100 // Cap at 100 years
+		}
+
+		ageMultiplier := math.Log10(float64(itemAge + 1))
+		if ageMultiplier < 0.1 {
+			ageMultiplier = 0.1 // Minimum multiplier
+		}
+
+		adjustedWeight := baseWeight * ageMultiplier
+		yearWeights[item.Year] += adjustedWeight
+		totalWeight += adjustedWeight
+	}
+
+	// Step 2: Sort years for percentile calculation
+	years := make([]int, 0, len(yearWeights))
+	for year := range yearWeights {
+		years = append(years, year)
+	}
+	sort.Ints(years)
+
+	// Step 3: Find 50th percentile (nostalgia peak)
+	cumulativeWeight := 0.0
+	peakYear := years[0]
+
+	for _, year := range years {
+		cumulativeWeight += yearWeights[year]
+		if cumulativeWeight/totalWeight >= 0.50 {
+			peakYear = year
+			break
+		}
+	}
+
+	// Step 4: Calculate birth year (peak - 18 years) and age
+	birthYear := peakYear - 18
+	age := referenceYear - birthYear
+
+	// Step 5: Format decade string
+	decade := (birthYear / 10) * 10
+	var decadeString string
+
+	if birthYear < 1900 {
+		decadeString = "Early 20th century or earlier"
+	} else if birthYear >= 2020 {
+		decadeString = "2020s or later"
+	} else {
+		decadeString = fmt.Sprintf("%ds", decade)
+	}
+
+	// Step 6: Prepare raw year distribution for visualization
+	rawDist := make(map[string]float64)
+	for year, weight := range rawYearWeights {
+		percentage := (weight / rawTotalWeight) * 100.0
+		rawDist[fmt.Sprintf("%d", year)] = percentage
+	}
+
+	return peakYear, birthYear, age, decadeString, int(totalWeight), rawDist, nil
+}
+
+// CalculateMovieShowBirthDecade analyzes Movie viewing patterns to estimate a user's age based on nostalgia.
+// The algorithm applies logarithmic weighting based on movie age to reward choosing older,
+// less readily available content over new releases. This corrects for the bias that users
+// naturally tend to watch recent movies more on Plex. Also if a user goes out of their way
+// to watch old films, that should hold more weight.
+//
+// Returns a MovieBirthDecadeResult containing the estimated birth decade and nostalgia metrics.
+func CalculateMovieBirthDecade(movies []models.TautulliEntry, referenceYear int) models.MovieBirthDecadeResult {
+	// Validate minimum data requirement
+	if len(movies) < 5 {
+		return models.MovieBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: "Need at least 5 movies with valid years for prediction",
+		}
+	}
+
+	// Call generic calculation logic
+	peakYear, birthYear, age, decadeStr, weightedMins, rawDist, err := calculateBirthDecadeGeneric(
+		movies,
+		referenceYear,
+	)
+
+	if err != nil {
+		return models.MovieBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: err.Error(),
+		}
+	}
+
+	return models.MovieBirthDecadeResult{
+		NostalgiaPeakYear:    peakYear,
+		EstimatedBirthYear:   birthYear,
+		EstimatedAge:         age,
+		EstimatedBirthDecade: decadeStr,
+		TotalMoviesAnalyzed:  len(movies),
+		TotalWeightedMinutes: weightedMins,
+		RawYearDistribution:  rawDist,
+		Error:                false,
+	}
+}
+
+// CalculateShowBirthDecade analyzes TV show episode viewing patterns to estimate a user's age based on nostalgia.
+// It applies the same availability bias correction as movies, weighting episodes by their air date.
+// Returns a ShowBirthDecadeResult containing the estimated birth decade and nostalgia metrics.
+func CalculateShowBirthDecade(episodes []models.TautulliEntry, referenceYear int) models.ShowBirthDecadeResult {
+	// Validate minimum data requirement
+	if len(episodes) < 5 {
+		return models.ShowBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: "Need at least 5 episodes with valid years for prediction",
+		}
+	}
+
+	// Call generic calculation logic
+	peakYear, birthYear, age, decadeStr, weightedMins, rawDist, err := calculateBirthDecadeGeneric(
+		episodes,
+		referenceYear,
+	)
+
+	if err != nil {
+		return models.ShowBirthDecadeResult{
+			Error:        true,
+			ErrorMessage: err.Error(),
+		}
+	}
+
+	return models.ShowBirthDecadeResult{
+		NostalgiaPeakYear:    peakYear,
+		EstimatedBirthYear:   birthYear,
+		EstimatedAge:         age,
+		EstimatedBirthDecade: decadeStr,
+		TotalShowsAnalyzed:   len(episodes),
+		TotalWeightedMinutes: weightedMins,
+		RawYearDistribution:  rawDist,
+		Error:                false,
+	}
+}
+
 func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data []models.WrapperrDay, wrapperr_reply models.WrapperrStatisticsReply) (models.WrapperrStatisticsReply, error) {
 
 	end_loop_date := time.Unix(int64(config.WrappedEnd), 0)
 	start_loop_date := time.Unix(int64(config.WrappedStart), 0)
 	top_list_limit := config.WrapperrCustomize.StatsTopListLength
+	referenceYear := end_loop_date.Year()
 
 	var wrapperr_user_movie []models.TautulliEntry
 	var wrapperr_user_episode []models.TautulliEntry
@@ -405,8 +599,18 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// Look for episode within pre-defined array
 				for d := 0; d < len(wrapperr_user_episode); d++ {
+					// Use GUID as primary identifier (consistent across servers) to avoid issues with TBA titles
+					// Fall back to title-based matching if GUID is not available
+					episode_match := false
+					if wrapperr_user_episode[d].GUID != "" && wrapperr_data[i].Data[j].GUID != "" && !strings.HasPrefix(wrapperr_user_episode[d].GUID, "local://") && !strings.HasPrefix(wrapperr_data[i].Data[j].GUID, "local://") {
+						// Use GUID for reliable matching across servers
+						episode_match = wrapperr_user_episode[d].GUID == wrapperr_data[i].Data[j].GUID
+					} else {
+						// Fallback to original matching logic when GUID is not available
+						episode_match = ((wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_episode[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle
+					}
 
-					if ((wrapperr_user_episode[d].Year == wrapperr_data[i].Data[j].Year && wrapperr_data[i].Data[j].OriginallyAvailableAt == "") || wrapperr_user_episode[d].OriginallyAvailableAt == wrapperr_data[i].Data[j].OriginallyAvailableAt) && wrapperr_user_episode[d].Title == wrapperr_data[i].Data[j].Title && wrapperr_user_episode[d].ParentTitle == wrapperr_data[i].Data[j].ParentTitle && wrapperr_user_episode[d].GrandparentTitle == wrapperr_data[i].Data[j].GrandparentTitle {
+					if episode_match {
 						wrapperr_user_episode[d].Plays += 1
 						wrapperr_user_episode[d].Duration += wrapperr_data[i].Data[j].Duration
 						wrapperr_user_episode[d].PausedCounter += wrapperr_data[i].Data[j].PausedCounter
@@ -434,8 +638,14 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				}
 
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_user_show = append(wrapperr_user_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					wrapperr_user_show = append(wrapperr_user_show, showEntry)
 				}
 
 			}
@@ -552,7 +762,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:          1,
 						DurationMovies: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:  wrapperr_data[i].Data[j].PausedCounter,
-						User:           wrapperr_data[i].Data[j].FriendlyName,
+						User:           wrapperr_data[i].Data[j].User,
+						FriendlyName:   wrapperr_data[i].Data[j].FriendlyName,
 						UserID:         wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -580,8 +791,14 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 				// If show was not found, add it to array
 				if !show_found {
-					wrapperr_data[i].Data[j].Plays = 1
-					wrapperr_year_show = append(wrapperr_year_show, wrapperr_data[i].Data[j])
+					// Create show entry with proper RatingKey and Thumb for show poster
+					showEntry := wrapperr_data[i].Data[j]
+					showEntry.Plays = 1
+					// Use GrandparentRatingKey for show poster instead of episode/season rating key
+					showEntry.RatingKey = showEntry.GrandparentRatingKey
+					// Update thumb path to point to show instead of episode/season
+					showEntry.Thumb = fmt.Sprintf("/library/metadata/%d/thumb", showEntry.GrandparentRatingKey)
+					wrapperr_year_show = append(wrapperr_year_show, showEntry)
 				}
 
 				// Look for user within pre-defined array
@@ -602,7 +819,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:         1,
 						DurationShows: wrapperr_data[i].Data[j].Duration,
 						PausedCounter: wrapperr_data[i].Data[j].PausedCounter,
-						User:          wrapperr_data[i].Data[j].FriendlyName,
+						User:          wrapperr_data[i].Data[j].User,
+						FriendlyName:  wrapperr_data[i].Data[j].FriendlyName,
 						UserID:        wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -652,7 +870,8 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 						Plays:           1,
 						DurationArtists: wrapperr_data[i].Data[j].Duration,
 						PausedCounter:   wrapperr_data[i].Data[j].PausedCounter,
-						User:            wrapperr_data[i].Data[j].FriendlyName,
+						User:            wrapperr_data[i].Data[j].User,
+						FriendlyName:    wrapperr_data[i].Data[j].FriendlyName,
 						UserID:          wrapperr_data[i].Data[j].UserID,
 					}
 					wrapperr_year_user = append(wrapperr_year_user, user_entry)
@@ -696,6 +915,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieMostPaused.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
 
 		// Find average movie completion, duration sum and play sum
 		movie_completion_sum := 0
@@ -715,12 +937,34 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Plays = wrapperr_user_movie[0].Plays
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Title = wrapperr_user_movie[0].Title
 		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Year = wrapperr_user_movie[0].Year
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.Thumb = wrapperr_user_movie[0].Thumb
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.RatingKey = wrapperr_user_movie[0].RatingKey
+		wrapperr_reply.User.UserMovies.Data.UserMovieOldest.TautulliServerHash = wrapperr_user_movie[0].TautulliServerHash
+
+		if config.WrapperrCustomize.GetUserMovieStatsBirthDecade {
+			birthDecadeResult := CalculateMovieBirthDecade(wrapperr_user_movie, referenceYear)
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.NostalgiaPeakYear = birthDecadeResult.NostalgiaPeakYear
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthYear = birthDecadeResult.EstimatedBirthYear
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedAge = birthDecadeResult.EstimatedAge
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.EstimatedBirthDecade = birthDecadeResult.EstimatedBirthDecade
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalMoviesAnalyzed = birthDecadeResult.TotalMoviesAnalyzed
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.TotalWeightedMinutes = birthDecadeResult.TotalWeightedMinutes
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.RawYearDistribution = birthDecadeResult.RawYearDistribution
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = birthDecadeResult.Error
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = birthDecadeResult.ErrorMessage
+		} else {
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = true
+			wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = "Movie age is disabled in the settings."
+		}
 
 		wrapperr_reply.User.UserMovies.Message = "All movies processed."
 
 	} else {
 		wrapperr_reply.User.UserMovies.Data.MoviesDuration = []models.TautulliEntry{}
 		wrapperr_reply.User.UserMovies.Data.MoviesPlays = []models.TautulliEntry{}
+
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.Error = true
+		wrapperr_reply.User.UserMovies.Data.UserMovieBirthDecade.ErrorMessage = "No movies to analyze"
 
 		wrapperr_reply.User.UserMovies.Message = "No movies processed."
 	}
@@ -757,6 +1001,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.ParentTitle = wrapperr_user_episode[0].ParentTitle
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Plays = wrapperr_user_episode[0].Plays
 		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Title = wrapperr_user_episode[0].Title
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.Thumb = wrapperr_user_episode[0].Thumb
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.RatingKey = wrapperr_user_episode[0].GrandparentRatingKey
+		wrapperr_reply.User.UserShows.Data.EpisodeDurationLongest.TautulliServerHash = wrapperr_user_episode[0].TautulliServerHash
 
 		// Find duration sum and play sum
 		episode_duration_sum := 0
@@ -768,11 +1015,36 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 		// Find show buddy...
 
+		if config.WrapperrCustomize.GetUserShowStatsBirthDecade {
+			nostalgiaEpisodes := make([]models.TautulliEntry, 0, len(wrapperr_user_episode))
+			for _, ep := range wrapperr_user_episode {
+				if ep.Year != 0 {
+					nostalgiaEpisodes = append(nostalgiaEpisodes, ep)
+				}
+			}
+			showBirthDecadeResult := CalculateShowBirthDecade(nostalgiaEpisodes, referenceYear)
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.NostalgiaPeakYear = showBirthDecadeResult.NostalgiaPeakYear
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthYear = showBirthDecadeResult.EstimatedBirthYear
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedAge = showBirthDecadeResult.EstimatedAge
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.EstimatedBirthDecade = showBirthDecadeResult.EstimatedBirthDecade
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalShowsAnalyzed = showBirthDecadeResult.TotalShowsAnalyzed
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.TotalWeightedMinutes = showBirthDecadeResult.TotalWeightedMinutes
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.RawYearDistribution = showBirthDecadeResult.RawYearDistribution
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = showBirthDecadeResult.Error
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = showBirthDecadeResult.ErrorMessage
+		} else {
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = true
+			wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = "Show age is disabled in the settings."
+		}
+
 		wrapperr_reply.User.UserShows.Message = "All shows processed."
 
 	} else {
 		wrapperr_reply.User.UserShows.Data.ShowsDuration = []models.TautulliEntry{}
 		wrapperr_reply.User.UserShows.Data.ShowsPlays = []models.TautulliEntry{}
+
+		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.Error = true
+		wrapperr_reply.User.UserShows.Data.UserShowBirthDecade.ErrorMessage = "No shows to analyze"
 
 		wrapperr_reply.User.UserShows.Message = "No shows processed."
 	}
@@ -1031,48 +1303,56 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		for d := 0; d < len(wrapperr_year_user); d++ {
 			wrapperr_year_user[d].Duration = wrapperr_year_user[d].DurationMovies + wrapperr_year_user[d].DurationShows + wrapperr_year_user[d].DurationArtists
 
-			if config.WrapperrCustomize.ObfuscateOtherUsers {
+			currentUserID := wrapperr_year_user[d].UserID
 
-				// Declare variables
-				var newName string
-				currentUserID := wrapperr_year_user[d].UserID
+			// Handle username display based on config setting
+			// Only modify other users, not the current user
+			if currentUserID != user_id {
+				switch config.WrapperrCustomize.ObfuscateOtherUsers {
+				case "plex_username":
+					// Use Plex username (User field) - already set, just ensure FriendlyName matches
+					wrapperr_year_user[d].FriendlyName = wrapperr_year_user[d].User
+				case "friendly_name":
+					// Use Tautulli friendly name - already set in FriendlyName, just ensure User matches
+					wrapperr_year_user[d].User = wrapperr_year_user[d].FriendlyName
+				case "obfuscate":
+					// Obfuscate with random names
+					var newName string
 
-				// Give new name
-				if currentUserID == 0 {
-					newName = "Managed user"
-				} else {
-					// Generate random name
-					newNameGen := nameGenerator.Generate()
+					// Give new name
+					if currentUserID == 0 {
+						newName = "Managed user"
+					} else {
+						// Generate random name
+						newNameGen := nameGenerator.Generate()
 
-					// Try to improve random name
-					newNameGenArray := strings.Split(newNameGen, "-")
-					newNamePartOne := newNameGenArray[0]
-					newNamePartTwo := newNameGenArray[1]
-					newName = strings.Title(newNamePartOne) + " " + strings.Title(newNamePartTwo)
-				}
-
-				// Create obfucasted struct type
-				obfuscatedUser := obfuscatedUser{
-					userID:  wrapperr_year_user[d].UserID,
-					newName: newName,
-				}
-
-				// Verify user is not already in catalog
-				userIDFound := false
-				for o := 0; o < len(obfuscateCatalog); o++ {
-					if obfuscateCatalog[o].userID == currentUserID {
-						userIDFound = true
-						break
+						// Try to improve random name
+						newNameGenArray := strings.Split(newNameGen, "-")
+						newNamePartOne := newNameGenArray[0]
+						newNamePartTwo := newNameGenArray[1]
+						newName = strings.Title(newNamePartOne) + " " + strings.Title(newNamePartTwo)
 					}
-				}
 
-				// If not found, push to catalog
-				if !userIDFound {
-					obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
-				}
+					// Create obfuscated struct type
+					obfuscatedUser := obfuscatedUser{
+						userID:  wrapperr_year_user[d].UserID,
+						newName: newName,
+					}
 
-				// Obfuscate user in dataset if it is not themself
-				if currentUserID != user_id {
+					// Verify user is not already in catalog
+					userIDFound := false
+					for o := 0; o < len(obfuscateCatalog); o++ {
+						if obfuscateCatalog[o].userID == currentUserID {
+							userIDFound = true
+							break
+						}
+					}
+
+					// If not found, push to catalog
+					if !userIDFound {
+						obfuscateCatalog = append(obfuscateCatalog, obfuscatedUser)
+					}
+
 					wrapperr_year_user[d].FriendlyName = newName
 					wrapperr_year_user[d].User = newName
 					wrapperr_year_user[d].UserID = 0
@@ -1139,7 +1419,7 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 			wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
 		} else {
 
-			err, buddy_name, buddy_id, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
+			err, buddy_friendly_name, buddy_plex_username, buddy_id, buddy_found, buddy_duration := GetUserShowBuddy(config, wrapperr_reply.User.UserShows.Data.ShowsDuration[0], user_id, wrapperr_data)
 
 			var show_buddy models.WrapperrShowBuddy
 
@@ -1150,9 +1430,15 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 				show_buddy.Error = true
 			} else {
 
-				// Obfuscate username of buddy if enabled
-				if config.WrapperrCustomize.ObfuscateOtherUsers {
-					// Verify user is not already in catalog of users to maintain name consistancy
+				// Determine which name to use based on config setting
+				var buddy_name string
+				switch config.WrapperrCustomize.ObfuscateOtherUsers {
+				case "plex_username":
+					buddy_name = buddy_plex_username
+				case "friendly_name":
+					buddy_name = buddy_friendly_name
+				case "obfuscate":
+					// Verify user is not already in catalog of users to maintain name consistency
 					userIDFound := false
 					userNameFound := ""
 					for o := 0; o < len(obfuscateCatalog); o++ {
@@ -1173,6 +1459,9 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 
 					// Remove buddy id
 					buddy_id = 0
+				default:
+					// Default to friendly name for backwards compatibility
+					buddy_name = buddy_friendly_name
 				}
 
 				show_buddy.Message = "Show buddy retrieved."
@@ -1194,14 +1483,19 @@ func WrapperrLoopData(user_id int, config models.WrapperrConfig, wrapperr_data [
 		wrapperr_reply.User.UserShows.Data.ShowBuddy.Error = true
 	}
 
+	// Note: poster preloading (both user-specific and server-wide year stats) is
+	// handled centrally in routes/both.go via the background download queue, gated
+	// solely on EnablePosters. It is intentionally decoupled from caching here.
+
 	return wrapperr_reply, nil
 
 }
 
-func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, int, bool, int) {
+func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntry, user_id int, wrapperr_data []models.WrapperrDay) (error, string, string, int, bool, int) {
 
 	var top_show_users []models.WrapperrYearUserEntry
-	var top_show_buddy_name = "Something went wrong."
+	var top_show_buddy_friendly_name = "Something went wrong."
+	var top_show_buddy_plex_username = "Something went wrong."
 	var top_show_buddy_id = 0
 	var top_show_buddy_duration = 0
 	var top_show_buddy_found = false
@@ -1243,6 +1537,7 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 						Plays:        1,
 						Duration:     wrapperr_data[i].Data[j].Duration,
 						FriendlyName: wrapperr_data[i].Data[j].FriendlyName,
+						User:         wrapperr_data[i].Data[j].User,
 						UserID:       wrapperr_data[i].Data[j].UserID,
 					}
 					top_show_users = append(top_show_users, user_entry)
@@ -1255,7 +1550,7 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 	}
 
 	if len(top_show_users) < 2 {
-		return nil, "None", 0, false, 0
+		return nil, "None", "None", 0, false, 0
 	}
 
 	sortutil.DescByField(top_show_users, "Duration")
@@ -1273,7 +1568,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 	for index, user := range top_show_users {
 
 		if user.UserID != user_id && len(top_show_users) == 2 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1282,7 +1578,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 		}
 
 		if user.UserID != user_id && index == user_index-1 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1291,7 +1588,8 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 		}
 
 		if user.UserID != user_id && index == user_index+1 {
-			top_show_buddy_name = user.FriendlyName
+			top_show_buddy_friendly_name = user.FriendlyName
+			top_show_buddy_plex_username = user.User
 			top_show_buddy_id = user.UserID
 			top_show_buddy_duration = user.Duration
 			top_show_buddy_found = true
@@ -1301,6 +1599,6 @@ func GetUserShowBuddy(config models.WrapperrConfig, top_show models.TautulliEntr
 
 	}
 
-	return error_bool, top_show_buddy_name, top_show_buddy_id, top_show_buddy_found, top_show_buddy_duration
+	return error_bool, top_show_buddy_friendly_name, top_show_buddy_plex_username, top_show_buddy_id, top_show_buddy_found, top_show_buddy_duration
 
 }

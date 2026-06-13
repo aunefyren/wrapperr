@@ -45,7 +45,7 @@ function get_stats() {
                 document.getElementById("plex_signout_button").style.opacity = '1';
                 document.getElementById('results_error').innerHTML = result.error;
 
-            } else {    
+            } else {
                 results = result;
                 load_page(results);
             }
@@ -59,6 +59,87 @@ function get_stats() {
 
     loading_icon.style.display = "inline";
 }
+
+// --- Poster lazy-loading helpers ---------------------------------------------
+// Posters are downloaded by the backend in the background, so a freshly requested
+// poster may 404 on first paint. posterImgTag() emits an <img> wired to
+// handlePosterError(), which asks the backend to fetch the poster, retries a few
+// times, then applies the element's fallback (hide / hide parent / illustration).
+
+// posterImgTag builds an <img> HTML string for a cached poster.
+// opts: { className, style, alt, fallback } where fallback is "hide",
+// "hide-parent", or a URL to an illustration to swap in on final failure.
+function posterImgTag(serverHash, ratingKey, thumbPath, opts) {
+    opts = opts || {};
+    var url = api_url + "get/poster/" + serverHash + "/" + ratingKey + ".jpg";
+    var attrs = "";
+    attrs += " class='" + (opts.className || "") + "'";
+    attrs += " alt='" + (opts.alt || "Poster") + "'";
+    if (opts.style) { attrs += " style='" + opts.style + "'"; }
+    attrs += " data-poster-hash='" + serverHash + "'";
+    attrs += " data-poster-key='" + ratingKey + "'";
+    attrs += " data-poster-thumb='" + encodeURIComponent(thumbPath || "") + "'";
+    attrs += " data-poster-fallback='" + (opts.fallback || "hide") + "'";
+    attrs += " data-poster-retry='0'";
+    return "<img src='" + url + "'" + attrs + " onerror='handlePosterError(this)' />";
+}
+
+// requestPosterDownload asks the backend to fetch a missing poster (best effort).
+function requestPosterDownload(serverHash, ratingKey, thumbPath) {
+    if (!thumbPath) { return; }
+    try {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("post", api_url + "download/poster");
+        xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        if (typeof functions !== "undefined" && functions.plex_auth && typeof cookie !== "undefined") {
+            xhttp.setRequestHeader("Authorization", cookie);
+        }
+        xhttp.send(JSON.stringify({
+            server_hash: serverHash,
+            rating_key: parseInt(ratingKey, 10),
+            thumb_path: thumbPath
+        }));
+    } catch (e) { /* best effort, ignore */ }
+}
+
+var POSTER_MAX_RETRIES = 4;
+
+// handlePosterError retries a failed poster load, then applies its fallback.
+function handlePosterError(img) {
+    img.onerror = null; // prevent error loops while we manage retries
+    var serverHash = img.getAttribute("data-poster-hash");
+    var ratingKey = img.getAttribute("data-poster-key");
+    var thumbPath = decodeURIComponent(img.getAttribute("data-poster-thumb") || "");
+    var fallback = img.getAttribute("data-poster-fallback") || "hide";
+    var attempts = parseInt(img.getAttribute("data-poster-retry") || "0", 10);
+
+    if (attempts === 0) {
+        // First failure: trigger a background download before retrying.
+        requestPosterDownload(serverHash, ratingKey, thumbPath);
+    }
+
+    if (attempts < POSTER_MAX_RETRIES) {
+        img.setAttribute("data-poster-retry", attempts + 1);
+        setTimeout(function() {
+            img.onerror = function() { handlePosterError(img); };
+            img.src = api_url + "get/poster/" + serverHash + "/" + ratingKey + ".jpg?r=" + (attempts + 1);
+        }, 1200 * (attempts + 1));
+        return;
+    }
+
+    // Out of retries: apply fallback.
+    if (fallback === "hide-parent" && img.parentElement) {
+        img.parentElement.style.display = "none";
+    } else if (fallback === "hide") {
+        img.style.display = "none";
+    } else {
+        // Treat fallback as an illustration URL.
+        img.classList.remove("special-poster");
+        img.style.width = "15em";
+        img.src = fallback;
+    }
+}
+// -----------------------------------------------------------------------------
 
 function load_page(data){
 
@@ -213,6 +294,12 @@ function load_movies() {
                         text += you_spent(results.user.user_movies.data.movie_duration, 'movies', functions);
                     text += "</div>";
 
+                    if(functions.get_user_movie_stats_birth_decade) {
+                        text += "<div class='boks2'>";
+                            text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += "</div>";
+                    }
+
                 text += "</div>";
 
             text += "</div>";
@@ -249,6 +336,12 @@ function load_movies() {
                     text += "<div class='boks2'>";
                         text += paused_movie(results.user.user_movies.data.user_movie_most_paused, true, functions);
                     text += "</div>";
+
+                    if(functions.get_user_movie_stats_birth_decade && !results.user.user_movies.data.user_movie_birth_decade.error) {
+                        text += "<div class='boks2'>";
+                            text += movie_birth_decade_card(results.user.user_movies.data.user_movie_birth_decade, functions);
+                        text += "</div>";
+                    }
 
                 text += "</div>";
 
@@ -328,6 +421,12 @@ function load_shows() {
                         text += you_spent(results.user.user_shows.data.show_duration, 'shows', functions);
                     text += "</div>";
 
+                    if(functions.get_user_show_stats_birth_decade) {
+                        text += "<div class='boks2'>";
+                            text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                        text += "</div>";
+                    }
+
                 text += "</div>";
 
             text += "</div>";
@@ -366,6 +465,12 @@ function load_shows() {
 						text += load_longest_episode(results.user.user_shows.data.episode_duration_longest, functions);
 					text += "</div>";
 				}
+
+                if(functions.get_user_show_stats_birth_decade) {
+                    text += "<div class='boks2'>";
+                        text += show_birth_decade_card(results.user.user_shows.data.user_show_birth_decade, functions);
+                    text += "</div>";
+                }
 
             text += "</div>";
         text += "</div>";
@@ -530,6 +635,17 @@ function oldest_movie(array, functions_data) {
             html += '<br>';
             html += '<br>';
 
+            // Add poster
+            if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                    className: "special-poster", alt: "Movie Poster",
+                    style: "margin: 1em auto; display: block;", fallback: "assets/img/old-man.svg"
+                });
+            } else {
+                // Fallback to original illustration
+                html += '<img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
+            }
+
             if(array.year < 1950) {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle_pre_1950);
             } else if(array.year < 1975) {
@@ -539,8 +655,6 @@ function oldest_movie(array, functions_data) {
             } else {
                 html += ReplaceStandardStrings(functions_data.get_user_movie_stats_oldest_subtitle);
             }
-
-            html += '<br><img src="assets/img/old-man.svg" style="margin: auto; display: block; width: 15em;">';
         html += "</div>";
     html += "</div>";
 
@@ -606,6 +720,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title.replaceAll('{movie_title}', '<b>' + array.title + '</b>' + ' (' + array.year + ')'));
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                            className: "special-poster", alt: "Movie Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "hide"
+                        });
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             } else {
@@ -613,6 +736,15 @@ function paused_movie(array, single, functions_data) {
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_title_one);
                     html += "<br>";
                     html += "<br>";
+
+                    // Add poster
+                    if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                        html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                            className: "special-poster", alt: "Movie Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "hide"
+                        });
+                    }
+
                     html += ReplaceStandardStrings(functions_data.get_user_movie_stats_pause_subtitle_one.replaceAll('{pause_duration}', pause_time));
                 html += "</div>";
             }
@@ -637,13 +769,36 @@ function load_showbuddy(buddy_object, top_show, functions_data) {
             if(!buddy_object.error) {
                 if(!buddy_object.buddy_found) {
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title_none.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>'));
-                    html += '<br><img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;"><br>';
+                    html += '<br>';
+
+                    // Add show poster if available
+                    if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
+                        html += posterImgTag(top_show.tautulli_server_hash, top_show.rating_key, top_show.thumb, {
+                            className: "special-poster", alt: "Show Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "assets/img/quest.svg"
+                        });
+                    } else {
+                        html += '<img src="assets/img/quest.svg" style="margin: auto; display: block; width: 15em;">';
+                    }
+
+                    html += '<br>';
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle_none);
                 } else {
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_title.replaceAll('{top_show_title}', '<b>' + top_show.grandparent_title + '</b>').replaceAll('{buddy_username}', buddy_object.buddy_name));
+                    html += '<br>';
+
+                    // Add show poster if available
+                    if(functions_data.enable_posters && top_show.thumb && top_show.rating_key && top_show.tautulli_server_hash) {
+                        html += posterImgTag(top_show.tautulli_server_hash, top_show.rating_key, top_show.thumb, {
+                            className: "special-poster", alt: "Show Poster",
+                            style: "margin: 1em auto; display: block;", fallback: "assets/img/social-event.svg"
+                        });
+                    } else {
+                        html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
+                    }
+
                     var combined = parseInt(top_show.duration) + parseInt(buddy_object.buddy_duration);
                     var combined_2 = seconds_to_time(combined);
-                    html += '<img src="assets/img/social-event.svg" style="margin: auto; display: block; width: 15em;">';
                     html += ReplaceStandardStrings(functions_data.get_user_show_stats_buddy_subtitle.replaceAll('{buddy_duration_sum}', combined_2).replaceAll('{top_show_title}', top_show.grandparent_title));
                 }
             }
@@ -660,9 +815,225 @@ function load_longest_episode(array, functions_data) {
         html += "<div class='stats'>";
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_title.replaceAll('{show_episode}', '<b>' + array.title + '</b>').replaceAll('{show_title}', array.grandparent_title));
 			html += '<br><br>';
+
+            // Add show poster if available
+            if(functions_data.enable_posters && array.thumb && array.rating_key && array.tautulli_server_hash) {
+                html += posterImgTag(array.tautulli_server_hash, array.rating_key, array.thumb, {
+                    className: "special-poster", alt: "Show Poster",
+                    style: "margin: 1em auto; display: block;", fallback: "hide"
+                });
+                html += '<br>';
+            }
+
             html += ReplaceStandardStrings(functions_data.get_user_show_stats_most_played_subtitle.replaceAll('{episode_play_sum}', play_plays(array.plays)).replaceAll('{episode_duration_sum}', seconds_to_time(array.duration, false)));
         html += "</div>";
     html += "</div>";
+
+    return html;
+}
+
+/**
+ * Renders a birth decade age prediction card with media-specific text strings.
+ * @param {Object} birthDecadeData - The birth decade calculation results
+ * @param {Object} configStrings - Config strings object containing media-specific text
+ * @param {string} mediaType - Either 'movie' or 'show'
+ * @returns {string} HTML string for the card
+ */
+function renderBirthDecadeCard(birthDecadeData, configStrings, mediaType) {
+    var html = "";
+
+    // Build config key prefix based on media type
+    var prefix = 'get_user_' + mediaType + '_stats_birth_decade_';
+
+    html += "<div class='status' id='list3' style='padding:1em;min-width:15em;'>";
+        html += "<div class='stats'>";
+
+        if(!birthDecadeData.error) {
+            var birth_year = birthDecadeData.estimated_birth_year;
+            var age = birthDecadeData.estimated_age;
+            var birth_decade = birthDecadeData.estimated_birth_decade;
+            var peak_year = birthDecadeData.nostalgia_peak_year;
+
+            if(birth_year >= 2010) {
+                // Recent/future birth year case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title_recent']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                        .replaceAll('{peak_year}', peak_year)
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle_recent']
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else if(birth_year < 1920) {
+                // Ancient birth year case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title_ancient']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle_ancient']
+                        .replaceAll('{peak_year}', peak_year)
+                );
+            } else {
+                // Normal case
+                html += "<b>" + ReplaceStandardStrings(
+                    configStrings[prefix + 'title']
+                        .replaceAll('{age}', '<span style="font-size:1.2em;">' + age + '</span>')
+                ) + "</b>";
+                html += '<br><br>';
+                html += ReplaceStandardStrings(
+                    configStrings[prefix + 'subtitle']
+                        .replaceAll('{birth_decade}', '<b>' + birth_decade + '</b>')
+                );
+            }
+
+            // Add visualization chart if we have year distribution data
+            if(birthDecadeData.raw_year_distribution && Object.keys(birthDecadeData.raw_year_distribution).length > 0) {
+                html += '<br><div style="margin: 2em auto; max-width: 600px;">';
+                var chartTitle = configStrings[prefix + 'chart_title'];
+                var chartLegend = configStrings[prefix + 'chart_legend'];
+                html += renderNostalgiaChart(birthDecadeData, chartTitle, chartLegend);
+                html += '</div>';
+            }
+
+        } else {
+            // Error case
+            html += "<b>" + ReplaceStandardStrings(configStrings[prefix + 'title_error']) + "</b>";
+            html += '<br><br>';
+            html += ReplaceStandardStrings(configStrings[prefix + 'subtitle_error']);
+        }
+
+        html += "</div>";
+    html += "</div>";
+
+    return html;
+}
+
+/**
+ * Renders the movie birth decade age prediction card
+ */
+function movie_birth_decade_card(birth_decade_data, functions_data) {
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'movie');
+}
+
+/**
+ * Renders the TV show birth decade age prediction card
+ */
+function show_birth_decade_card(birth_decade_data, functions_data) {
+    return renderBirthDecadeCard(birth_decade_data, functions_data, 'show');
+}
+
+function renderNostalgiaChart(birth_decade_data, chartTitle, chartLegend) {
+    var html = "";
+    var yearDist = birth_decade_data.raw_year_distribution;
+
+    // Convert to array and sort by year
+    var dataYears = Object.keys(yearDist).map(function(year) {
+        return {
+            year: parseInt(year),
+            percentage: yearDist[year]
+        };
+    }).sort(function(a, b) {
+        return a.year - b.year;
+    });
+
+    if(dataYears.length === 0) return "";
+
+    var minYear = dataYears[0].year;
+    var maxYear = dataYears[dataYears.length - 1].year;
+
+    // Fill in all intermediate years with 0% if no data
+    var years = [];
+    for(var y = minYear; y <= maxYear; y++) {
+        var existingData = dataYears.find(function(item) { return item.year === y; });
+        if(existingData) {
+            years.push(existingData);
+        } else {
+            years.push({ year: y, percentage: 0 });
+        }
+    }
+
+    // Find max percentage for scaling
+    var maxPercentage = Math.max.apply(Math, years.map(function(y) { return y.percentage; }));
+
+    // Get peak year for highlighting
+    var peakYear = birth_decade_data.nostalgia_peak_year;
+
+    html += '<div style="text-align: center; margin-bottom: 0.5em; font-size: 0.9em; opacity: 0.8;">' + chartTitle + '</div>';
+
+    // Compact histogram container
+    html += '<div style="position: relative; background: rgba(0,0,0,0.2); padding: 1em; padding-bottom: 1.5em; border-radius: 8px; height: 120px;">';
+
+    // Create histogram bars
+    html += '<div style="display: flex; align-items: flex-end; height: 100%; gap: 1px; position: relative;">';
+
+    for(var i = 0; i < years.length; i++) {
+        var year = years[i].year;
+        var percentage = years[i].percentage;
+
+        // Use logarithmic scale for visualization of raw watch data
+        var barHeight;
+        if(percentage === 0) {
+            barHeight = 2; // Small visible bar for no data
+        } else {
+            // Log scale: log(x+1) to compress large values and show small values
+            var logMax = Math.log(maxPercentage + 1);
+            var logValue = Math.log(percentage + 1);
+            barHeight = (logValue / logMax) * 100;
+        }
+
+        // Determine bar color based on position
+        var barColor = 'rgba(100, 150, 200, 0.7)';
+        var highlightColor = 'rgba(100, 150, 200, 1)';
+
+        if(percentage === 0) {
+            // Gray out bars with no data
+            barColor = 'rgba(80, 80, 80, 0.3)';
+            highlightColor = 'rgba(100, 100, 100, 0.5)';
+        } else if(year === peakYear) {
+            barColor = 'rgba(255, 200, 50, 0.8)';
+            highlightColor = 'rgba(255, 200, 50, 1)';
+        }
+
+        html += '<div style="flex: 1; height: ' + barHeight + '%; background: ' + barColor + '; border-radius: 2px 2px 0 0; cursor: pointer; transition: all 0.2s ease; position: relative;" ';
+        html += 'onmouseover="this.style.background=\'' + highlightColor + '\'; this.style.transform=\'scaleY(1.1)\'; this.querySelector(\'.tooltip\').style.display=\'block\';" ';
+        html += 'onmouseout="this.style.background=\'' + barColor + '\'; this.style.transform=\'scaleY(1)\'; this.querySelector(\'.tooltip\').style.display=\'none\';">';
+
+        // Tooltip
+        html += '<div class="tooltip" style="display: none; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.9); color: white; padding: 6px 10px; border-radius: 6px; white-space: nowrap; font-size: 0.8em; margin-bottom: 5px; z-index: 1000; pointer-events: none;">';
+        html += '<div style="font-weight: bold;">' + year + '</div>';
+        if(percentage > 0) {
+            html += '<div style="font-size: 0.9em; opacity: 0.9;">' + percentage.toFixed(1) + '%</div>';
+        } else {
+            html += '<div style="font-size: 0.9em; opacity: 0.6; font-style: italic;">No data</div>';
+        }
+        // Add triangle pointer
+        html += '<div style="position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid rgba(0,0,0,0.9);"></div>';
+        html += '</div>';
+
+        html += '</div>';
+    }
+
+    html += '</div>';
+
+    // X-axis with year labels
+    html += '<div style="display: flex; justify-content: space-between; margin-top: 8px; font-size: 0.7em; opacity: 0.6;">';
+    html += '<div>' + minYear + '</div>';
+    if(maxYear - minYear > 10) {
+        html += '<div>' + Math.floor((minYear + maxYear) / 2) + '</div>';
+    }
+    html += '<div>' + maxYear + '</div>';
+    html += '</div>';
+
+    html += '</div>';
+
+    // Legend
+    html += '<div style="margin-top: 0.8em; font-size: 0.7em; opacity: 0.7; text-align: center;">';
+    html += '<span style="color: rgba(255, 200, 50, 1);">● ' + chartLegend + '</span>';
+    html += '</div>';
 
     return html;
 }
@@ -720,9 +1091,19 @@ function top_list(array, title, music, show, year, div_id) {
             html += "<div class='stats-list'>";
                 for(i = 0; (i < array.length); i++) {
                     html += "<div class='item'>";
+
                         html += "<div class='number'>";
                             html += i+1 + ". ";
                         html += "</div>";
+
+                        // Add poster thumbnail if enabled (skip music - posters are not downloaded for music)
+                        if(!music && functions.enable_posters && array[i].thumb && array[i].rating_key && array[i].tautulli_server_hash) {
+                            html += "<div class='poster-thumbnail'>";
+                                html += posterImgTag(array[i].tautulli_server_hash, array[i].rating_key, array[i].thumb, {
+                                    alt: "Poster", fallback: "hide-parent"
+                                });
+                            html += "</div>";
+                        }
 
                         html += "<div class='movie_name'>";
 							if(music === "track" || music === "album") {
@@ -1255,3 +1636,4 @@ $(window).scroll(function() {
     return string
 
   }
+

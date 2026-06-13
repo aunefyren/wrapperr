@@ -4,10 +4,13 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"os"
+	"regexp"
 	"strings"
 	"time"
 
 	"github.com/aunefyren/wrapperr/files"
+	"github.com/aunefyren/wrapperr/middlewares"
 	"github.com/aunefyren/wrapperr/models"
 	"github.com/aunefyren/wrapperr/modules"
 	"github.com/aunefyren/wrapperr/utilities"
@@ -15,6 +18,17 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+
+// validThumbPath restricts poster thumb paths to Tautulli's metadata image form,
+// preventing the download endpoint from being used to proxy arbitrary URLs.
+var validThumbPath = regexp.MustCompile(`^/library/metadata/\d+/thumb(/\d+)?$`)
+
+// validServerHash and validPosterFilename are strict allowlists for the poster
+// serve route. They constrain the user-provided path segments to characters that
+// cannot express a directory traversal (no "/", "\", "." beyond the extension),
+// closing the path-injection surface before the values reach the filesystem.
+var validServerHash = regexp.MustCompile(`^[a-f0-9]{16}$`)
+var validPosterFilename = regexp.MustCompile(`^[0-9]+\.jpg$`)
 
 // API route which retrieves the Wrapperr version and some minor details (application name, Plex-Auth...).
 func ApiGetWrapperrVersion(context *gin.Context) {
@@ -504,4 +518,121 @@ func ApiLoginPlexAuth(context *gin.Context) {
 
 	context.JSON(http.StatusCreated, string_reply)
 	return
+}
+
+// ApiGetPoster serves cached poster images
+func ApiGetPoster(context *gin.Context) {
+	serverHash := context.Param("serverHash")
+	filename := context.Param("filename")
+
+	// Strictly validate inputs against an allowlist before they are used to build a
+	// filesystem path. The character classes forbid path separators and traversal
+	// sequences, so the values cannot escape the posters directory.
+	if !validServerHash.MatchString(serverHash) || !validPosterFilename.MatchString(filename) {
+		ipString := utilities.GetOriginIPString(context)
+		log.Printf("[Posters] Blocked invalid poster request: hash=%q file=%q %s", serverHash, filename, ipString)
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid poster request"})
+		return
+	}
+
+	// Get poster path with security validation
+	posterPath, err := files.GetPosterPath(serverHash, filename)
+	if err != nil {
+		ipString := utilities.GetOriginIPString(context)
+		log.Printf("[Posters] Blocked invalid path request: %s %s", err.Error(), ipString)
+		context.JSON(http.StatusForbidden, gin.H{"error": "Invalid path"})
+		return
+	}
+
+	// Check if file exists
+	if _, err := os.Stat(posterPath); os.IsNotExist(err) {
+		context.JSON(http.StatusNotFound, gin.H{"error": "Poster not found"})
+		return
+	}
+
+	// Let browsers cache served posters to avoid repeated requests for the same art.
+	context.Header("Cache-Control", "public, max-age=86400")
+
+	// Serve the file
+	context.File(posterPath)
+}
+
+// ApiDownloadPoster handles on-demand poster downloads (lazy loading)
+func ApiDownloadPoster(context *gin.Context) {
+	type PosterRequest struct {
+		ServerHash string `json:"server_hash"`
+		RatingKey  int    `json:"rating_key"`
+		ThumbPath  string `json:"thumb_path"`
+	}
+
+	var request PosterRequest
+	if err := context.BindJSON(&request); err != nil {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})
+		return
+	}
+
+	// Load config
+	config, err := files.GetConfig()
+	if err != nil {
+		context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load config"})
+		return
+	}
+
+	// Check if posters are enabled
+	if !config.WrapperrCustomize.EnablePosters {
+		context.JSON(http.StatusForbidden, gin.H{"error": "Posters are disabled"})
+		return
+	}
+
+	// When Plex-Auth is enabled, require a valid session before triggering a
+	// server-side download to Tautulli (mirrors the statistics endpoint).
+	if config.PlexAuth {
+		adminConfig, err := files.GetAdminConfig()
+		if err != nil {
+			log.Println("Failed to load admin configuration. Error: " + err.Error())
+			context.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to load admin configuration."})
+			return
+		}
+
+		authorizationHeader := context.GetHeader("Authorization")
+		_, _, err = middlewares.AuthGetPayloadFromAuthorization(authorizationHeader, config, adminConfig)
+		if err != nil {
+			ipString := utilities.GetOriginIPString(context)
+			log.Println("Failed to authorize poster download request. Error: " + err.Error() + ipString)
+			context.JSON(http.StatusUnauthorized, gin.H{"error": "Failed to authorize request."})
+			return
+		}
+	}
+
+	// Validate the thumb path so this endpoint cannot be used to make Wrapperr
+	// request arbitrary URLs from Tautulli using its API key (SSRF protection).
+	if !validThumbPath.MatchString(request.ThumbPath) {
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid thumb path"})
+		return
+	}
+
+	// Find matching Tautulli config
+	var matchedConfig *models.TautulliConfig
+	for _, tautulliConfig := range config.TautulliConfig {
+		if files.GetTautulliServerHash(tautulliConfig) == request.ServerHash {
+			matchedConfig = &tautulliConfig
+			break
+		}
+	}
+
+	if matchedConfig == nil {
+		context.JSON(http.StatusNotFound, gin.H{"error": "Server not found"})
+		return
+	}
+
+	// Queue the download through the bounded background worker pool (deduplicated,
+	// concurrency-limited) rather than spawning an unbounded goroutine per request.
+	files.EnqueuePoster(*matchedConfig, files.PosterReference{
+		ServerHash: request.ServerHash,
+		RatingKey:  request.RatingKey,
+		ThumbPath:  request.ThumbPath,
+	}, config.WrapperrCustomize.PosterCacheMaxAgeDays)
+
+	// Return success immediately (download happens in background)
+	context.JSON(http.StatusAccepted, gin.H{"message": "Poster download queued"})
 }

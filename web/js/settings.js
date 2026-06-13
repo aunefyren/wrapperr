@@ -164,9 +164,14 @@ function loadAdminPage() {
     html += '<hr>';
     html += '</div>';
 
-    html += '<div class="form-group newline" title="Clear the cache now to include the newest settings.">';
+    html += '<div class="form-group" title="Clear the cache now to include the newest settings.">';
     html += '<label for="clear_cache">Clear cache now:<br>';
     html += '<input type="checkbox" class="form-control" id="clear_cache" checked /></label>';
+    html += '</div>';
+
+    html += '<div class="form-group" title="Delete all cached posters. They will be re-downloaded when needed.">';
+    html += '<label for="clear_poster_cache">Clear photo cache now:<br>';
+    html += '<input type="checkbox" class="form-control" id="clear_poster_cache" checked /></label>';
     html += '</div>';
 
     html += '<div class="form-group newline">';
@@ -203,6 +208,7 @@ function set_wrapperr_settings_call() {
     create_share_links = document.getElementById('create_share_links').checked;
     timezone = document.getElementById('timezone').value;
     clear_cache = document.getElementById('clear_cache').checked;
+    clear_poster_cache = document.getElementById('clear_poster_cache').checked;
     winter_theme = document.getElementById('winter_theme').checked;
     wrapped_dynamic = document.getElementById('wrapped_dynamic').checked;
     wrapped_dynamic_days = document.getElementById('wrapped_dynamic_days').value;
@@ -260,6 +266,7 @@ function set_wrapperr_settings_call() {
     
     wrapperr_settings_form = {
         "clear_cache" : clear_cache,
+        "clear_poster_cache" : clear_poster_cache,
         "data_type" : "wrapperr_data",
         "tautulli_config" : [],
         "wrapperr_customize" : {},

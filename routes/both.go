@@ -309,6 +309,19 @@ func ApiWrapperGetStatistics(context *gin.Context) {
 		return
 	}
 
+	// Queue poster downloads (both user-specific and server-wide year stats) so they
+	// are fetched in the background. Non-blocking: the statistics response returns
+	// immediately and the frontend lazy-loads posters as they become available.
+	if config.WrapperrCustomize.EnablePosters {
+		posterRefs := files.ExtractUserPosterReferences(wrapperrReply)
+		posterRefs = append(posterRefs, files.ExtractYearPosterReferences(wrapperrReply)...)
+
+		if len(posterRefs) > 0 {
+			files.EnqueuePosters(posterRefs, config.TautulliConfig, config.WrapperrCustomize.PosterCacheMaxAgeDays)
+			log.Printf("[Posters] Queued %d poster downloads for user %s", len(posterRefs), userName)
+		}
+	}
+
 	userhistoryEntry := models.WrapperrHistoryEntry{
 		Date: time.Now(),
 		IP:   context.ClientIP(),

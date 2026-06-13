@@ -178,6 +178,8 @@ function get_config(cookie) {
                 stats_outro_title = result.data.wrapperr_customize.stats_outro_title;
                 stats_outro_subtitle = result.data.wrapperr_customize.stats_outro_subtitle;
                 stats_top_list_length = result.data.wrapperr_customize.stats_top_list_length;
+                enable_posters = result.data.wrapperr_customize.enable_posters || false;
+                poster_cache_max_age_days = result.data.wrapperr_customize.poster_cache_max_age_days || 30;
                 obfuscate_other_users = result.data.wrapperr_customize.obfuscate_other_users;
 
                 get_user_movie_stats = result.data.wrapperr_customize.get_user_movie_stats;
@@ -205,6 +207,17 @@ function get_config(cookie) {
                 get_user_movie_stats_oldest_subtitle_pre_1975 = result.data.wrapperr_customize.get_user_movie_stats_oldest_subtitle_pre_1975;
                 get_user_movie_stats_oldest_subtitle_pre_2000 = result.data.wrapperr_customize.get_user_movie_stats_oldest_subtitle_pre_2000;
                 get_user_movie_stats_spent_title = result.data.wrapperr_customize.get_user_movie_stats_spent_title;
+                get_user_movie_stats_birth_decade = result.data.wrapperr_customize.get_user_movie_stats_birth_decade;
+                get_user_movie_stats_birth_decade_title = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_title;
+                get_user_movie_stats_birth_decade_subtitle = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_subtitle;
+                get_user_movie_stats_birth_decade_title_recent = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_title_recent;
+                get_user_movie_stats_birth_decade_subtitle_recent = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_subtitle_recent;
+                get_user_movie_stats_birth_decade_title_ancient = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_title_ancient;
+                get_user_movie_stats_birth_decade_subtitle_ancient = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_subtitle_ancient;
+                get_user_movie_stats_birth_decade_title_error = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_title_error;
+                get_user_movie_stats_birth_decade_subtitle_error = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_subtitle_error;
+                get_user_movie_stats_birth_decade_chart_title = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_chart_title;
+                get_user_movie_stats_birth_decade_chart_legend = result.data.wrapperr_customize.get_user_movie_stats_birth_decade_chart_legend;
 
                 get_user_show_stats = result.data.wrapperr_customize.get_user_show_stats;
                 get_user_show_stats_buddy = result.data.wrapperr_customize.get_user_show_stats_buddy;
@@ -224,7 +237,18 @@ function get_config(cookie) {
                 get_user_show_stats_buddy_subtitle = result.data.wrapperr_customize.get_user_show_stats_buddy_subtitle;
                 get_user_show_stats_buddy_title_none = result.data.wrapperr_customize.get_user_show_stats_buddy_title_none;
                 get_user_show_stats_buddy_subtitle_none = result.data.wrapperr_customize.get_user_show_stats_buddy_subtitle_none;
-                
+                get_user_show_stats_birth_decade = result.data.wrapperr_customize.get_user_show_stats_birth_decade;
+                get_user_show_stats_birth_decade_title = result.data.wrapperr_customize.get_user_show_stats_birth_decade_title;
+                get_user_show_stats_birth_decade_subtitle = result.data.wrapperr_customize.get_user_show_stats_birth_decade_subtitle;
+                get_user_show_stats_birth_decade_title_recent = result.data.wrapperr_customize.get_user_show_stats_birth_decade_title_recent;
+                get_user_show_stats_birth_decade_subtitle_recent = result.data.wrapperr_customize.get_user_show_stats_birth_decade_subtitle_recent;
+                get_user_show_stats_birth_decade_title_ancient = result.data.wrapperr_customize.get_user_show_stats_birth_decade_title_ancient;
+                get_user_show_stats_birth_decade_subtitle_ancient = result.data.wrapperr_customize.get_user_show_stats_birth_decade_subtitle_ancient;
+                get_user_show_stats_birth_decade_title_error = result.data.wrapperr_customize.get_user_show_stats_birth_decade_title_error;
+                get_user_show_stats_birth_decade_subtitle_error = result.data.wrapperr_customize.get_user_show_stats_birth_decade_subtitle_error;
+                get_user_show_stats_birth_decade_chart_title = result.data.wrapperr_customize.get_user_show_stats_birth_decade_chart_title;
+                get_user_show_stats_birth_decade_chart_legend = result.data.wrapperr_customize.get_user_show_stats_birth_decade_chart_legend;
+
                 get_user_music_stats = result.data.wrapperr_customize.get_user_music_stats;
                 get_user_music_stats_title = result.data.wrapperr_customize.get_user_music_stats_title;
                 get_user_music_stats_subtitle = result.data.wrapperr_customize.get_user_music_stats_subtitle;

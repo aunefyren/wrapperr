@@ -80,7 +80,10 @@ type TautulliEntry struct {
 	UserID                int    `json:"user_id"`
 	Year                  int    `json:"year"`
 	OriginallyAvailableAt string `json:"originally_available_at"`
+	Thumb                 string `json:"thumb"`
+	TautulliServerHash    string `json:"tautulli_server_hash"`
 	Plays                 int    `json:"plays"`
+	GUID                  string `json:"guid"`
 }
 
 type TautulliGetUsersReply struct {
