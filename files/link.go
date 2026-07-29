@@ -16,6 +16,30 @@ import (
 
 var link_path, _ = filepath.Abs("./config/links")
 
+// Build the on-disk path for a link file. Link file names are always either a
+// user ID or a UUID, so anything able to express a directory traversal is
+// rejected before it reaches the filesystem.
+func buildLinkPath(fileName string) (string, error) {
+	if fileName == "" ||
+		strings.Contains(fileName, "/") ||
+		strings.Contains(fileName, "\\") ||
+		strings.Contains(fileName, "..") {
+		log.Println("Rejected share link file name containing path separators.")
+		return "", errors.New("Invalid share link.")
+	}
+
+	share_link_path := filepath.Join(link_path, fileName+".json")
+
+	// Guard against the joined path landing outside the link directory. The
+	// trailing separator matters: without it "./config/linksevil" would pass.
+	if !strings.HasPrefix(share_link_path, link_path+string(os.PathSeparator)) {
+		log.Println("Rejected share link file name resolving outside the link directory.")
+		return "", errors.New("Invalid share link.")
+	}
+
+	return share_link_path, nil
+}
+
 // Save new link object to the correct path
 func SaveLink(link_object *models.WrapperrShareLink, plexAuth bool) error {
 
@@ -30,11 +54,16 @@ func SaveLink(link_object *models.WrapperrShareLink, plexAuth bool) error {
 		return err
 	}
 
-	var link_object_path string
+	var fileName string
 	if plexAuth {
-		link_object_path, _ = filepath.Abs(link_path + "/" + strconv.Itoa(link_object.UserID) + ".json")
+		fileName = strconv.Itoa(link_object.UserID)
 	} else {
-		link_object_path, _ = filepath.Abs(link_path + "/" + link_object.Hash + ".json")
+		fileName = link_object.Hash
+	}
+
+	link_object_path, err := buildLinkPath(fileName)
+	if err != nil {
+		return err
 	}
 
 	err = ioutil.WriteFile(link_object_path, file, 0644)
@@ -73,7 +102,7 @@ func CheckLinkDir() error {
 }
 
 func DeleteLink(fileName string) error {
-	linkpath, err := filepath.Abs(link_path + "/" + fileName + ".json")
+	linkpath, err := buildLinkPath(fileName)
 	if err != nil {
 		log.Println("Failed to create path. Error: " + err.Error())
 		return errors.New("Failed to create path.")
@@ -96,7 +125,7 @@ func GetLink(fileName string) (*models.WrapperrShareLink, error) {
 
 	link_object := models.WrapperrShareLink{}
 
-	share_link_path, err := filepath.Abs(link_path + "/" + fileName + ".json")
+	share_link_path, err := buildLinkPath(fileName)
 	if err != nil {
 		return nil, err
 	}
@@ -143,11 +172,13 @@ func CleanOldShareableLinks() {
 				linkObject, err := GetLink(fileNameParts[0])
 				if err != nil {
 					log.Println("Failed to load " + item.Name() + ". Error: " + err.Error())
+					continue
 				}
 				now := time.Now()
 				linkTime, err := time.Parse("2006-01-02", linkObject.Date)
 				if err != nil {
 					log.Println("Failed to parse " + item.Name() + " datetime. Error: " + err.Error())
+					continue
 				}
 				linkTime = linkTime.Add(7 * 24 * time.Hour)
 				if linkTime.Before(now) {
