@@ -9,27 +9,62 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/aunefyren/wrapperr/files"
 	"github.com/aunefyren/wrapperr/models"
 	"github.com/aunefyren/wrapperr/utilities"
 )
 
+// Client used for all Tautulli API calls. Redirects are not followed, so a
+// Tautulli host cannot bounce the request (and the API key that goes with it)
+// on to a server the administrator did not configure.
+var tautulliClient = &http.Client{
+	Timeout: 30 * time.Second,
+	CheckRedirect: func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
+	},
+}
+
+// Builds the URL for a Tautulli API command. Query parameters are escaped by
+// net/url rather than concatenated, so no parameter value can inject additional
+// parameters or alter the request target.
+func buildTautulliAPIURL(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, command string, extraParameters url.Values) (string, error) {
+
+	baseURLString, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
+	if err != nil {
+		return "", err
+	}
+
+	baseURL, err := url.Parse(baseURLString)
+	if err != nil {
+		return "", errors.New("Failed to parse Tautulli connection URL.")
+	}
+
+	apiURL := baseURL.JoinPath("api", "v2")
+
+	parameters := url.Values{
+		"apikey": {TautulliApiKey},
+		"cmd":    {command},
+	}
+	for key, values := range extraParameters {
+		parameters[key] = values
+	}
+	apiURL.RawQuery = parameters.Encode()
+
+	return apiURL.String(), nil
+}
+
 func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string) (bool, error) {
 
-	urlString, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
+	urlString, err := buildTautulliAPIURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot, TautulliApiKey, "status", nil)
 	if err != nil {
 		errString := strings.Replace(err.Error(), TautulliApiKey, "REDACTED", -1)
 		log.Println("Failed to build Tautulli connection URL. Error: " + errString)
 		return false, errors.New("Failed to build Tautulli connection URL.")
 	}
 
-	urlString = urlString + "api/v2/" + "?apikey=" + TautulliApiKey + "&cmd=status"
-
-	params := url.Values{}
-	payload := strings.NewReader(params.Encode())
-
-	req, err := http.NewRequest("GET", urlString, payload)
+	req, err := http.NewRequest("GET", urlString, nil)
 	if err != nil {
 		errString := strings.Replace(err.Error(), TautulliApiKey, "REDACTED", -1)
 		log.Println("Failed to reach Tautulli server. Error: " + errString)
@@ -38,7 +73,7 @@ func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps b
 
 	req.Header.Add("Accept", "application/json")
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := tautulliClient.Do(req)
 	if err != nil {
 		errString := strings.Replace(err.Error(), TautulliApiKey, "REDACTED", -1)
 		log.Println("Failed to reach Tautulli server. Error: " + errString)
@@ -126,18 +161,13 @@ func TautulliGetUsers(TautulliPort int, TautulliIP string, TautulliHttps bool, T
 	usersReply = models.TautulliGetUsersReply{}
 	err = nil
 
-	url_string, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
+	url_string, err := buildTautulliAPIURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot, TautulliApiKey, "get_users", nil)
 	if err != nil {
 		log.Println("Failed to build Tautulli connection URL. Error: " + err.Error())
 		return usersReply, errors.New("Failed to build Tautulli connection URL.")
 	}
 
-	url_string = url_string + "api/v2/" + "?apikey=" + TautulliApiKey + "&cmd=get_users"
-
-	params := url.Values{}
-	payload := strings.NewReader(params.Encode())
-
-	req, err := http.NewRequest("GET", url_string, payload)
+	req, err := http.NewRequest("GET", url_string, nil)
 	if err != nil {
 		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return usersReply, errors.New("Failed to reach Tautulli server.")
@@ -145,7 +175,7 @@ func TautulliGetUsers(TautulliPort int, TautulliIP string, TautulliHttps bool, T
 
 	req.Header.Add("Accept", "application/json")
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := tautulliClient.Do(req)
 	if err != nil {
 		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return usersReply, errors.New("Failed to reach Tautulli server.")
@@ -167,20 +197,27 @@ func TautulliGetUsers(TautulliPort int, TautulliIP string, TautulliHttps bool, T
 	return usersReply, err
 }
 
-func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, TautulliLength int, Libraries string, Grouping string, StartDate string) ([]models.TautulliHistoryItem, error) {
+func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHttps bool, TautulliRoot string, TautulliApiKey string, TautulliLength int, SectionID string, Grouping string, StartDate string) ([]models.TautulliHistoryItem, error) {
 
-	url_string, err := utilities.BuildURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot)
+	parameters := url.Values{
+		"order_column":     {"date"},
+		"order_dir":        {"desc"},
+		"include_activity": {"0"},
+		"grouping":         {Grouping},
+		"length":           {strconv.Itoa(TautulliLength)},
+		"start_date":       {StartDate},
+	}
+	if SectionID != "" {
+		parameters.Set("section_id", SectionID)
+	}
+
+	url_string, err := buildTautulliAPIURL(TautulliPort, TautulliIP, TautulliHttps, TautulliRoot, TautulliApiKey, "get_history", parameters)
 	if err != nil {
 		log.Println("Failed to build Tautulli connection URL. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to build Tautulli connection URL.")
 	}
 
-	url_string = url_string + "api/v2/" + "?apikey=" + TautulliApiKey + "&cmd=get_history&order_column=date&order_dir=desc&include_activity=0" + Libraries + "&grouping=" + Grouping + "&length=" + strconv.Itoa(TautulliLength) + "&start_date=" + StartDate
-
-	params := url.Values{}
-	payload := strings.NewReader(params.Encode())
-
-	req, err := http.NewRequest("GET", url_string, payload)
+	req, err := http.NewRequest("GET", url_string, nil)
 	if err != nil {
 		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to reach Tautulli server.")
@@ -188,7 +225,7 @@ func TautulliDownloadStatistics(TautulliPort int, TautulliIP string, TautulliHtt
 
 	req.Header.Add("Accept", "application/json")
 
-	res, err := http.DefaultClient.Do(req)
+	res, err := tautulliClient.Do(req)
 	if err != nil {
 		log.Println("Failed to reach Tautulli server. Error: " + err.Error())
 		return []models.TautulliHistoryItem{}, errors.New("Failed to reach Tautulli server.")

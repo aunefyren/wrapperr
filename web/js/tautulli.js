@@ -388,5 +388,7 @@ function test_tautulli_connection(tautulli_id) {
     };
     xhttp.withCredentials = true;
     xhttp.open("post", api_url + 'get/tautulli-connection');
+    xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhttp.setRequestHeader("Authorization", cookie);
     xhttp.send(config_data);
 }
