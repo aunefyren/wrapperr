@@ -150,7 +150,6 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 			open.POST("/get/admin-state", routes.ApiGetAdminState)
 			open.POST("/get/functions", routes.ApiGetFunctions)
 			open.POST("/get/config-state", routes.ApiWrapperrConfigured)
-			open.POST("/get/tautulli-connection", routes.ApiGetTautulliConncection)
 
 			// usage pages
 			open.POST("/get/share-link", routes.ApiGetShareLink)
@@ -183,6 +182,7 @@ func initRouter(config models.WrapperrConfig) *gin.Engine {
 		admin := api.Group("").Use(middlewares.AuthMiddleware(true))
 		{
 			admin.POST("/validate/admin", routes.ApiValidateAdmin)
+			admin.POST("/get/tautulli-connection", routes.ApiGetTautulliConncection)
 			admin.POST("/get/config", routes.ApiGetConfig)
 			admin.POST("/set/config", routes.ApiSetConfig)
 			admin.POST("/update/admin", routes.ApiUpdateAdmin)

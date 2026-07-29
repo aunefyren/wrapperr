@@ -52,21 +52,24 @@ func TautulliTestConnection(TautulliPort int, TautulliIP string, TautulliHttps b
 		log.Println("Failed to read Tautulli server response. Error: " + errString)
 		return false, errors.New("Failed to read Tautulli response. Error: " + errString)
 	} else if res.StatusCode != 200 {
-		errString := "Tautulli didn't respond with status code 200, got: " + res.Status + " instead."
+		// Do not reflect the upstream response body back to the caller; it could
+		// disclose the contents of internal-only services. Log it server-side only.
 		reply := string(body)
 		replyString := strings.Replace(reply, TautulliApiKey, "REDACTED", -1)
-		log.Println("Failed to connect to Tautulli server. \n\nReply: " + replyString + ". +n\nError: " + errString)
-		return false, errors.New("Failed to connect to Tautulli server. \n\nReply: " + replyString + ". \n\nError: " + errString)
+		log.Println("Failed to connect to Tautulli server. Got status code: " + res.Status + ". \n\nReply: " + replyString)
+		return false, errors.New("Failed to connect to Tautulli server. It responded with status code: " + res.Status + ".")
 	}
 
 	var body_reply models.TautulliStatusReply
 	err = json.Unmarshal(body, &body_reply)
 	if err != nil {
+		// Do not reflect the upstream response body back to the caller; it could
+		// disclose the contents of internal-only services. Log it server-side only.
 		errString := strings.Replace(err.Error(), TautulliApiKey, "REDACTED", -1)
 		reply := string(body)
 		replyString := strings.Replace(reply, TautulliApiKey, "REDACTED", -1)
-		log.Println("Failed to parse Tautulli server response. \n\nReply: " + replyString + ". +n\nError: " + errString)
-		return false, errors.New("Failed to parse Tautulli server response. \n\nReply: " + replyString + ". \n\nError: " + errString)
+		log.Println("Failed to parse Tautulli server response. \n\nReply: " + replyString + ". \n\nError: " + errString)
+		return false, errors.New("Failed to parse Tautulli server response. The server did not return a valid Tautulli response.")
 	}
 
 	var tautulli_status bool = false
