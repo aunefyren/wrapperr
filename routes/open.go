@@ -30,6 +30,12 @@ var validThumbPath = regexp.MustCompile(`^/library/metadata/\d+/thumb(/\d+)?$`)
 var validServerHash = regexp.MustCompile(`^[a-f0-9]{16}$`)
 var validPosterFilename = regexp.MustCompile(`^[0-9]+\.jpg$`)
 
+// validLinkUserID and validLinkUUID constrain the share link file name taken
+// from the (unauthenticated) share link request. Links are saved as either a
+// user ID or a UUID, so nothing else should ever reach the filesystem.
+var validLinkUserID = regexp.MustCompile(`^[0-9]+$`)
+var validLinkUUID = regexp.MustCompile(`^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`)
+
 // API route which retrieves the Wrapperr version and some minor details (application name, Plex-Auth...).
 func ApiGetWrapperrVersion(context *gin.Context) {
 	configBool, err := files.GetConfigState()
@@ -397,6 +403,18 @@ func ApiGetShareLink(context *gin.Context) {
 		}
 
 		fileName = hash
+	}
+
+	if config.PlexAuth && !validLinkUserID.MatchString(fileName) {
+		log.Println("Share link request contained an invalid user ID.")
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid shared link."})
+		context.Abort()
+		return
+	} else if !config.PlexAuth && !validLinkUUID.MatchString(fileName) {
+		log.Println("Share link request contained an invalid hash.")
+		context.JSON(http.StatusBadRequest, gin.H{"error": "Invalid shared link."})
+		context.Abort()
+		return
 	}
 
 	share_link_object, err := files.GetLink(fileName)
