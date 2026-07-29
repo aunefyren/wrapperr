@@ -193,15 +193,10 @@ func WrapperrDownloadDays(ID int, wrapperr_data []models.WrapperrDay, loop_inter
 
 			// Loop through selected libraries for Tautulli API calls
 			for library_loop := 0; library_loop < len(libraries); library_loop++ {
-				var library_str string = ""
 				var grouping string = ""
 
 				// If no libraries are selected do not specify one in API call to Tautulli
-				if libraries[library_loop] == "" {
-					library_str = ""
-				} else {
-					library_str = "&section_id=" + strings.TrimSpace(libraries[library_loop])
-				}
+				library_str := strings.TrimSpace(libraries[library_loop])
 
 				// Create string for selecting grouping feature in API call
 				if config.TautulliConfig[q].TautulliGrouping {

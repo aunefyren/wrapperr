@@ -6,7 +6,9 @@ import (
 	"fmt"
 	"log"
 	"math/big"
+	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -104,38 +106,53 @@ func GetOriginIPString(context *gin.Context) (stringReply string) {
 
 func BuildURL(port int, domain_ip string, https bool, url_base string) (string, error) {
 
-	var url string = ""
+	host := strings.TrimSpace(domain_ip)
+	host = strings.TrimPrefix(host, "http://")
+	host = strings.TrimPrefix(host, "https://")
+	host = strings.Trim(host, "/")
 
-	if https {
-		url = url + "https://"
-	} else {
-		url = url + "http://"
+	// The host must be a bare host name or IP literal. Without this check a value
+	// such as "example.com?" or "example.com#" re-points the request at another
+	// server, and any credential appended to the query string later would be sent
+	// along to it.
+	if host == "" || strings.ContainsAny(host, "/?#@\\ \t") {
+		return "", errors.New("Invalid host.")
 	}
 
-	domain_ip = strings.TrimPrefix(domain_ip, "http://")
-	domain_ip = strings.TrimPrefix(domain_ip, "https://")
+	if port < 1 || port > 65535 {
+		return "", errors.New("Invalid port.")
+	}
 
-	url = url + domain_ip
+	scheme := "http"
+	if https {
+		scheme = "https"
+	}
 
-	if !(https && port == 443) && !(!https && port == 80) {
-		url = url + ":" + strconv.Itoa(port)
+	// net.JoinHostPort brackets IPv6 literals for us.
+	urlObject := url.URL{
+		Scheme: scheme,
+		Host:   net.JoinHostPort(host, strconv.Itoa(port)),
+	}
+
+	// Omit the port when it is the default one for the scheme
+	if (https && port == 443) || (!https && port == 80) {
+		urlObject.Host = host
 	}
 
 	if url_base != "" {
-
-		url_base = strings.TrimPrefix(url_base, "/")
-		url_base = strings.TrimSuffix(url_base, "/")
-
-		url = url + "/" + url_base + "/"
-
-	} else {
-
-		url = strings.TrimPrefix(url, "/")
-		url = url + "/"
-
+		urlObject = *urlObject.JoinPath(strings.Trim(url_base, "/"))
 	}
 
-	return url, nil
+	urlString := urlObject.String() + "/"
+
+	// Re-parse as a final guard against anything that is still malformed
+	parsedURL, err := url.Parse(urlString)
+	if err != nil || parsedURL.Hostname() == "" || parsedURL.User != nil ||
+		parsedURL.RawQuery != "" || parsedURL.Fragment != "" {
+		return "", errors.New("Invalid URL.")
+	}
+
+	return urlString, nil
 }
 
 func PrintASCII() {

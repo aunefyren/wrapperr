@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -95,19 +96,38 @@ func DownloadPoster(tautulliConfig models.TautulliConfig, thumbPath string, rati
 		return "", fmt.Errorf("failed to build URL: %w", err)
 	}
 
+	baseURL, err := url.Parse(urlString)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse URL: %w", err)
+	}
+
 	// Tautulli pms_image_proxy endpoint
 	// Reference: https://github.com/Tautulli/Tautulli/wiki/Tautulli-API-Reference#pms_image_proxy
-	posterURL := fmt.Sprintf("%sapi/v2/?apikey=%s&cmd=pms_image_proxy&img=%s&width=300&height=450",
-		urlString, tautulliConfig.TautulliApiKey, thumbPath)
+	// Parameters are escaped by net/url so no value can inject additional
+	// parameters or alter the request target.
+	posterURL := baseURL.JoinPath("api", "v2")
+	posterURL.RawQuery = url.Values{
+		"apikey": {tautulliConfig.TautulliApiKey},
+		"cmd":    {"pms_image_proxy"},
+		"img":    {thumbPath},
+		"width":  {"300"},
+		"height": {"450"},
+	}.Encode()
 
 	// Create HTTP request
-	req, err := http.NewRequest("GET", posterURL, nil)
+	req, err := http.NewRequest("GET", posterURL.String(), nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 
-	// Execute request with timeout
-	client := &http.Client{Timeout: 30 * time.Second}
+	// Execute request with timeout. Redirects are not followed, so the Tautulli
+	// host cannot bounce the request (and the API key with it) elsewhere.
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("failed to download poster: %w", err)
